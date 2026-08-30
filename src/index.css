@@ -91,3 +91,50 @@ body,
     transform: translate(0, -50%) scale(1);
   }
 }
+
+/* ------------------------------------------------------------
+   DARK MODE — MEMORY CARDS
+   The MemoryCard component uses inline light-mode backgrounds,
+   so these scoped rules deliberately override only the memory
+   cards when C·FLOW's dark theme class is active.
+------------------------------------------------------------ */
+.cflow-dark [data-memory] {
+  background: #30343A !important;
+  color: #F1EEE8 !important;
+  border-color: #15181C !important;
+  box-shadow: 4px 4px 0 #121519 !important;
+  -webkit-text-fill-color: #F1EEE8;
+}
+
+/* Keep the type label quieter than the variable/value. */
+.cflow-dark [data-memory] > div:first-of-type {
+  color: #AEB4BB !important;
+  -webkit-text-fill-color: #AEB4BB;
+}
+
+/* Active execution/memory update: muted warm pastel, not neon. */
+.cflow-dark [data-memory][style] {
+  color: #F4F0E8 !important;
+}
+
+.cflow-dark [data-memory] span,
+.cflow-dark [data-memory] div {
+  -webkit-text-fill-color: inherit;
+}
+
+/* The active card gets a soft, readable focus treatment. */
+.cflow-dark [data-memory]:has(.animate\[memoryUpdateIn_0\.35s_ease-out\]) {
+  background: #D2B878 !important;
+  color: #20242A !important;
+  border-color: #17191C !important;
+  box-shadow: 7px 7px 0 #111418 !important;
+}
+
+.cflow-dark [data-memory]:has(.animate\[memoryUpdateIn_0\.35s_ease-out\]) > div:first-of-type {
+  color: #5D5544 !important;
+}
+
+.cflow-dark [data-memory]:has(.animate\[memoryUpdateIn_0\.35s_ease-out\]) span,
+.cflow-dark [data-memory]:has(.animate\[memoryUpdateIn_0\.35s_ease-out\]) div {
+  -webkit-text-fill-color: inherit;
+}
