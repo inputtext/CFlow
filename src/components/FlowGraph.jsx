@@ -1,142 +1,551 @@
-import { useEffect, useRef } from "react";
-import gsap from "gsap";
+function FlowNode({
+  id,
+  label,
+  type,
+  active,
+  conditionResult,
+}) {
+  const background =
+    type === "condition"
+      ? "bg-[#FFE3A3]"
+      : type === "exit"
+        ? "bg-[#FFD6E7]"
+        : "bg-white";
 
-const nodes = [
-  {
-    id: "condition",
-    label: "i <= 10 ?",
-    type: "condition",
-  },
-  {
-    id: "sum",
-    label: "sum += evenNum",
-    type: "operation",
-  },
-  {
-    id: "evenNum",
-    label: "evenNum += 2",
-    type: "operation",
-  },
-  {
-    id: "increment",
-    label: "i++",
-    type: "operation",
-  },
-  {
-    id: "exit",
-    label: "EXIT",
-    type: "exit",
-  },
-];
+  const isCondition = type === "condition";
 
-function FlowNode({ node, active }) {
-  const styles = {
-    condition: "bg-[#FFE3A3]",
-    operation: "bg-white",
-    exit: "bg-[#FFD6E7]",
-  };
+  const conditionState =
+    isCondition && active
+      ? conditionResult === true
+        ? "true"
+        : conditionResult === false
+          ? "false"
+          : "checking"
+      : "idle";
 
   return (
     <div
-      data-flow-node={node.id}
+      data-flow-node={id}
       className={`
-        relative z-10
-        min-w-[210px]
-        px-6 py-4
-        border-2 border-[#171717]
-        shadow-[4px_4px_0_#171717]
-        font-mono font-bold
+        absolute
+        z-10
+
+        w-[220px]
+        max-w-[220px]
+
+        -translate-x-1/2
+
+        border-2
+        border-[#171717]
+
+        px-6
+        py-4
+
         text-center
-        transition-all duration-300
-        ${styles[node.type]}
+        font-mono
+        font-bold
+
+        ${background}
+
+        shadow-[4px_4px_0_#171717]
+
+        transition-all
+        duration-300
+        ease-out
+
         ${
           active
-            ? "scale-[1.04] shadow-[7px_7px_0_#171717]"
+            ? `
+              translate-y-[-2px]
+              scale-[1.035]
+              shadow-[6px_6px_0_#171717]
+            `
+            : ""
+        }
+
+        ${
+          conditionState === "true"
+            ? `
+              ring-2
+              ring-[#171717]
+              ring-offset-2
+              ring-offset-[#E8DFFF]
+            `
+            : ""
+        }
+
+        ${
+          conditionState === "false"
+            ? `
+              ring-2
+              ring-[#171717]
+              ring-offset-2
+              ring-offset-[#E8DFFF]
+            `
             : ""
         }
       `}
     >
-      {node.label}
+      {/* ======================================================
+          NODE LABEL
+      ====================================================== */}
+
+      <span
+        className={`
+          transition-all
+          duration-300
+
+          ${active ? "opacity-100" : "opacity-90"}
+
+          ${
+            active
+              ? "tracking-[0.01em]"
+              : ""
+          }
+        `}
+      >
+        {label}
+      </span>
+
+      {/* ======================================================
+          CONDITION RESULT
+      ====================================================== */}
+
+      {isCondition && active && (
+        <div
+          className="
+            mt-2
+            flex
+            items-center
+            justify-center
+            gap-2
+            animate-[conditionResultIn_0.3s_ease-out]
+          "
+        >
+          {conditionState === "checking" && (
+            <>
+              <span
+                className="
+                  h-2
+                  w-2
+                  rounded-full
+                  border
+                  border-[#171717]
+                  bg-[#171717]
+                  animate-[conditionChecking_0.8s_ease-in-out_infinite]
+                "
+              />
+
+              <span
+                className="
+                  text-[9px]
+                  uppercase
+                  tracking-[0.18em]
+                  opacity-65
+                "
+              >
+                evaluating
+              </span>
+            </>
+          )}
+
+          {conditionState === "true" && (
+            <>
+              <span className="text-sm leading-none">
+                ✓
+              </span>
+
+              <span
+                className="
+                  text-[10px]
+                  uppercase
+                  tracking-[0.18em]
+                "
+              >
+                TRUE
+              </span>
+            </>
+          )}
+
+          {conditionState === "false" && (
+            <>
+              <span className="text-sm leading-none">
+                ×
+              </span>
+
+              <span
+                className="
+                  text-[10px]
+                  uppercase
+                  tracking-[0.18em]
+                "
+              >
+                FALSE
+              </span>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* ======================================================
+          ACTIVE NODE PULSE
+      ====================================================== */}
+
+      {active && (
+        <span
+          className="
+            pointer-events-none
+            absolute
+            inset-0
+            border-2
+            border-[#171717]
+            animate-[nodePulse_1.2s_ease-out]
+          "
+        />
+      )}
+
+      {/* ======================================================
+          CONDITION STATE MARKER
+      ====================================================== */}
+
+      {isCondition &&
+        active &&
+        conditionResult !== null && (
+          <span
+            className="
+              pointer-events-none
+              absolute
+              -right-[7px]
+              -top-[7px]
+
+              flex
+              h-4
+              w-4
+
+              items-center
+              justify-center
+
+              border-2
+              border-[#171717]
+              bg-[#FFF9F0]
+
+              font-mono
+              text-[9px]
+              font-black
+
+              animate-[conditionBadgeIn_0.3s_ease-out]
+            "
+          >
+            {conditionResult ? "T" : "F"}
+          </span>
+        )}
     </div>
   );
 }
 
-export default function FlowGraph({ activeNode }) {
-  const pulseRef = useRef(null);
 
-  /*
-   * Animate the execution pulse whenever
-   * the active node changes.
-   */
-  useEffect(() => {
-    const pulse = pulseRef.current;
+/* ============================================================
+   CONNECTION
+============================================================ */
 
-    if (!pulse || !activeNode) return;
+function FlowPath({
+  d,
+  active = false,
+  loop = false,
+  conditionPath = false,
+}) {
+  return (
+    <>
+      {/* ======================================================
+          BASE PATH
+      ====================================================== */}
 
-    const node = document.querySelector(
-      `[data-flow-node="${activeNode}"]`
-    );
+      <path
+        d={d}
+        fill="none"
+        stroke="#171717"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        markerEnd="url(#cflow-arrow)"
+        className="
+          transition-opacity
+          duration-300
+        "
+        opacity={active ? "1" : "0.8"}
+      />
 
-    if (!node) return;
+      {/* ======================================================
+          ACTIVE EXECUTION PATH
+      ====================================================== */}
 
-    const parent = pulse.parentElement;
+      {active && (
+        <>
+          <path
+            d={d}
+            fill="none"
+            stroke="#FFE3A3"
+            strokeWidth="8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeDasharray="12 18"
+            markerEnd="url(#cflow-arrow-active)"
+            className="
+              opacity-90
+              animate-[flowTravel_0.8s_linear_infinite]
+            "
+          />
 
-    if (!parent) return;
+          <path
+            d={d}
+            fill="none"
+            stroke="#171717"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeDasharray="7 15"
+            className="
+              animate-[flowTravelDark_0.8s_linear_infinite]
+            "
+          />
 
-    const parentRect = parent.getBoundingClientRect();
-    const nodeRect = node.getBoundingClientRect();
+          {!loop && (
+            <circle
+              r="5"
+              fill="#171717"
+              className="
+                animate-[flowDot_0.8s_ease-in-out_infinite]
+              "
+            >
+              <animateMotion
+                dur="0.9s"
+                repeatCount="indefinite"
+                path={d}
+              />
+            </circle>
+          )}
 
-    const x =
-      nodeRect.left -
-      parentRect.left +
-      nodeRect.width / 2;
+          {loop && (
+            <circle
+              r="4"
+              fill="#171717"
+              className="
+                animate-[loopDot_1.1s_ease-in-out_infinite]
+              "
+            >
+              <animateMotion
+                dur="1.1s"
+                repeatCount="indefinite"
+                path={d}
+              />
+            </circle>
+          )}
+        </>
+      )}
 
-    const y =
-      nodeRect.top -
-      parentRect.top +
-      nodeRect.height / 2;
+      {/* ======================================================
+          CONDITION PATH INDICATOR
+      ====================================================== */}
 
-    gsap.killTweensOf(pulse);
+      {active && conditionPath && (
+        <circle
+          r="3"
+          fill="#171717"
+          className="
+            animate-[conditionPathPulse_0.8s_ease-in-out_infinite]
+          "
+        >
+          <animateMotion
+            dur="0.9s"
+            repeatCount="indefinite"
+            path={d}
+          />
+        </circle>
+      )}
+    </>
+  );
+}
 
-    gsap.fromTo(
-      pulse,
-      {
-        x: x,
-        y: y - 14,
-        scale: 0.4,
-        opacity: 0,
-      },
-      {
-        x: x,
-        y: y,
-        scale: 1,
-        opacity: 1,
-        duration: 0.35,
-        ease: "power3.out",
-        onComplete: () => {
-          gsap.to(pulse, {
-            scale: 1.8,
-            opacity: 0,
-            duration: 0.25,
-            ease: "power2.out",
-          });
-        },
-      }
-    );
-  }, [activeNode]);
+
+/* ============================================================
+   FLOW GRAPH
+============================================================ */
+
+export default function FlowGraph({
+  activeNode,
+  activeEdge,
+  conditionResult = null,
+}) {
+  const conditionIsActive =
+    activeNode === "condition";
+
+  const trueIsActive =
+    conditionIsActive &&
+    conditionResult === true;
+
+  const falseIsActive =
+    conditionIsActive &&
+    conditionResult === false;
 
   return (
-    <div className="relative min-h-[720px] w-full">
+    <div
+      className="
+        relative
 
-      {/* SVG CONNECTION LAYER */}
+        h-[620px]
+        min-h-[620px]
+
+        w-full
+        min-w-[760px]
+
+        overflow-visible
+      "
+    >
+      {/* ======================================================
+          NODES
+      ====================================================== */}
+
+      {/* INITIALIZE */}
+
+      <div
+        className="
+          absolute
+          left-1/2
+          top-[24px]
+          -translate-x-1/2
+        "
+      >
+        <FlowNode
+          id="initialize"
+          label="INITIALIZE"
+          type="operation"
+          active={activeNode === "initialize"}
+          conditionResult={conditionResult}
+        />
+      </div>
+
+
+      {/* CONDITION */}
+
+      <div
+        className="
+          absolute
+          left-1/2
+          top-[125px]
+          -translate-x-1/2
+        "
+      >
+        <FlowNode
+          id="condition"
+          label="i <= 10 ?"
+          type="condition"
+          active={activeNode === "condition"}
+          conditionResult={conditionResult}
+        />
+      </div>
+
+
+      {/* SUM */}
+
+      <div
+        className="
+          absolute
+          left-1/2
+          top-[230px]
+          -translate-x-1/2
+        "
+      >
+        <FlowNode
+          id="sum"
+          label="sum += evenNum"
+          type="operation"
+          active={activeNode === "sum"}
+          conditionResult={conditionResult}
+        />
+      </div>
+
+
+      {/* EVEN NUM */}
+
+      <div
+        className="
+          absolute
+          left-1/2
+          top-[335px]
+          -translate-x-1/2
+        "
+      >
+        <FlowNode
+          id="evenNum"
+          label="evenNum += 2"
+          type="operation"
+          active={activeNode === "evenNum"}
+          conditionResult={conditionResult}
+        />
+      </div>
+
+
+      {/* INCREMENT */}
+
+      <div
+        className="
+          absolute
+          left-1/2
+          top-[440px]
+          -translate-x-1/2
+        "
+      >
+        <FlowNode
+          id="increment"
+          label="i++"
+          type="operation"
+          active={activeNode === "increment"}
+          conditionResult={conditionResult}
+        />
+      </div>
+
+
+      {/* EXIT */}
+
+      <div
+        className="
+          absolute
+          left-[82%]
+          top-[500px]
+          -translate-x-1/2
+        "
+      >
+        <FlowNode
+          id="exit"
+          label="EXIT"
+          type="exit"
+          active={activeNode === "exit"}
+          conditionResult={conditionResult}
+        />
+      </div>
+
+
+      {/* ======================================================
+          CONNECTIONS
+      ====================================================== */}
+
       <svg
-        className="pointer-events-none absolute inset-0 z-0 h-full w-full"
-        viewBox="0 0 600 720"
+        className="
+          pointer-events-none
+          absolute
+          inset-0
+          h-full
+          w-full
+        "
+        viewBox="0 0 1000 620"
         preserveAspectRatio="none"
       >
         <defs>
+
+          {/* NORMAL ARROW */}
+
           <marker
-            id="flow-arrow"
+            id="cflow-arrow"
             markerWidth="10"
             markerHeight="10"
             refX="8"
@@ -148,158 +557,464 @@ export default function FlowGraph({ activeNode }) {
               fill="#171717"
             />
           </marker>
+
+
+          {/* ACTIVE ARROW */}
+
+          <marker
+            id="cflow-arrow-active"
+            markerWidth="10"
+            markerHeight="10"
+            refX="8"
+            refY="4"
+            orient="auto"
+          >
+            <path
+              d="M0,0 L8,4 L0,8 Z"
+              fill="#171717"
+            />
+          </marker>
+
         </defs>
 
-        {/* CONDITION → SUM */}
-        <path
-          d="
-            M 300 105
-            L 300 185
-          "
-          fill="none"
-          stroke="#171717"
-          strokeWidth="3"
-          markerEnd="url(#flow-arrow)"
+
+        {/* ====================================================
+            INITIALIZE → CONDITION
+        ==================================================== */}
+
+        <FlowPath
+          d="M500 89 L500 125"
+          active={
+            activeEdge ===
+            "initializeToCondition"
+          }
         />
 
-        {/* SUM → EVEN NUM */}
-        <path
-          d="
-            M 300 265
-            L 300 345
-          "
-          fill="none"
-          stroke="#171717"
-          strokeWidth="3"
-          markerEnd="url(#flow-arrow)"
+
+        {/* ====================================================
+            CONDITION → SUM
+            TRUE
+        ==================================================== */}
+
+        <FlowPath
+          d="M500 190 L500 230"
+          active={
+            activeEdge ===
+            "conditionToSum"
+          }
+          conditionPath
         />
 
-        {/* EVEN NUM → I++ */}
-        <path
-          d="
-            M 300 425
-            L 300 505
-          "
-          fill="none"
-          stroke="#171717"
-          strokeWidth="3"
-          markerEnd="url(#flow-arrow)"
+
+        {/* ====================================================
+            SUM → EVEN NUM
+        ==================================================== */}
+
+        <FlowPath
+          d="M500 295 L500 335"
+          active={
+            activeEdge ===
+            "sumToEven"
+          }
         />
 
-        {/* LOOP BACK */}
-        <path
-          d="
-            M 405 545
-            C 535 545,
-              545 145,
-              405 145
-          "
-          fill="none"
-          stroke="#171717"
-          strokeWidth="3"
-          strokeLinecap="round"
-          markerEnd="url(#flow-arrow)"
+
+        {/* ====================================================
+            EVEN NUM → i++
+        ==================================================== */}
+
+        <FlowPath
+          d="M500 400 L500 440"
+          active={
+            activeEdge ===
+            "evenToIncrement"
+          }
         />
 
-        {/* FALSE → EXIT */}
-        <path
+
+        {/* ====================================================
+            i++ → CONDITION
+            LOOP BACK
+        ==================================================== */}
+
+        <FlowPath
           d="
-            M 300 105
-            C 160 105,
-              120 600,
-              220 650
+            M610 472
+            C760 472 820 400 820 310
+            C820 210 750 157 610 157
           "
-          fill="none"
-          stroke="#171717"
-          strokeWidth="2"
-          strokeDasharray="7 7"
-          markerEnd="url(#flow-arrow)"
+          active={
+            activeEdge ===
+            "incrementToCondition"
+          }
+          loop
         />
 
-        <text
-          x="485"
-          y="350"
-          fontFamily="monospace"
-          fontSize="12"
-          fontWeight="700"
-          fill="#171717"
-          transform="rotate(-82 485 350)"
-        >
-          LOOP
-        </text>
 
-        <text
-          x="145"
-          y="430"
-          fontFamily="monospace"
-          fontSize="12"
-          fontWeight="700"
-          fill="#171717"
-          transform="rotate(-72 145 430)"
-        >
-          FALSE
-        </text>
+        {/* ====================================================
+            CONDITION → EXIT
+            FALSE
+        ==================================================== */}
+
+        <FlowPath
+          d="
+            M610 157
+            C680 157 760 200 760 280
+            L760 532
+            L710 532
+          "
+          active={
+            activeEdge ===
+            "conditionToExit"
+          }
+          conditionPath
+        />
+
       </svg>
 
 
-      {/* NODE LAYER */}
-      <div className="relative z-10 flex min-h-[720px] flex-col items-center pt-8">
+      {/* ======================================================
+          TRUE LABEL
+      ====================================================== */}
 
-        <FlowNode
-          node={nodes[0]}
-          active={activeNode === "condition"}
-        />
-
-        <div className="h-20" />
-
-        <FlowNode
-          node={nodes[1]}
-          active={activeNode === "sum"}
-        />
-
-        <div className="h-20" />
-
-        <FlowNode
-          node={nodes[2]}
-          active={activeNode === "evenNum"}
-        />
-
-        <div className="h-20" />
-
-        <FlowNode
-          node={nodes[3]}
-          active={activeNode === "increment"}
-        />
-
-        <div className="mt-20">
-          <FlowNode
-            node={nodes[4]}
-            active={activeNode === "exit"}
-          />
-        </div>
-
-      </div>
-
-
-      {/* EXECUTION PULSE */}
-      <div
-        ref={pulseRef}
-        className="
-          pointer-events-none
+      <span
+        className={`
           absolute
-          left-0
-          top-0
-          z-20
-          h-3
-          w-3
-          -translate-x-1/2
-          -translate-y-1/2
-          rounded-full
-          bg-[#171717]
-          opacity-0
-        "
-      />
+          left-[calc(50%+125px)]
+          top-[192px]
 
+          font-mono
+          text-[10px]
+          font-bold
+
+          transition-all
+          duration-300
+
+          ${
+            trueIsActive
+              ? `
+                translate-x-1
+                font-black
+                opacity-100
+              `
+              : "opacity-65"
+          }
+        `}
+      >
+        TRUE
+      </span>
+
+
+      {/* ======================================================
+          FALSE LABEL
+      ====================================================== */}
+
+      <span
+        className={`
+          absolute
+          left-[68%]
+          top-[142px]
+
+          font-mono
+          text-[10px]
+          font-bold
+
+          transition-all
+          duration-300
+
+          ${
+            falseIsActive
+              ? `
+                translate-x-1
+                font-black
+                opacity-100
+              `
+              : "opacity-65"
+          }
+        `}
+      >
+        FALSE
+      </span>
+
+
+      {/* ======================================================
+          LOOP BACK LABEL
+      ====================================================== */}
+
+      <span
+        className={`
+          absolute
+          right-[2%]
+          top-[37%]
+
+          rotate-[-78deg]
+
+          font-mono
+          text-[10px]
+          font-bold
+
+          transition-all
+          duration-300
+
+          ${
+            activeEdge ===
+            "incrementToCondition"
+              ? `
+                font-black
+                opacity-100
+                animate-[loopLabelPulse_1s_ease-in-out_infinite]
+              `
+              : "opacity-70"
+          }
+        `}
+      >
+        LOOP BACK
+      </span>
+
+
+      {/* ======================================================
+          CONDITION STATUS
+      ====================================================== */}
+
+      {conditionIsActive &&
+        conditionResult !== null && (
+          <div
+            className="
+              absolute
+              left-1/2
+              top-[205px]
+              -translate-x-1/2
+
+              font-mono
+              text-[9px]
+              font-black
+              uppercase
+              tracking-[0.16em]
+              opacity-60
+
+              animate-[conditionStatusIn_0.3s_ease-out]
+            "
+          >
+            {conditionResult
+              ? "condition passed"
+              : "condition failed"}
+          </div>
+        )}
+
+
+      {/* ======================================================
+          ANIMATION KEYFRAMES
+      ====================================================== */}
+
+      <style>
+        {`
+
+          @keyframes nodePulse {
+
+            0% {
+              opacity: 0;
+              transform: scale(1);
+            }
+
+            35% {
+              opacity: 1;
+              transform: scale(1.02);
+            }
+
+            100% {
+              opacity: 0;
+              transform: scale(1.08);
+            }
+
+          }
+
+
+          @keyframes flowTravel {
+
+            from {
+              stroke-dashoffset: 30;
+            }
+
+            to {
+              stroke-dashoffset: 0;
+            }
+
+          }
+
+
+          @keyframes flowTravelDark {
+
+            from {
+              stroke-dashoffset: 22;
+            }
+
+            to {
+              stroke-dashoffset: 0;
+            }
+
+          }
+
+
+          @keyframes flowDot {
+
+            0% {
+              opacity: 0;
+              transform: scale(0.7);
+            }
+
+            30% {
+              opacity: 1;
+              transform: scale(1);
+            }
+
+            70% {
+              opacity: 1;
+              transform: scale(1);
+            }
+
+            100% {
+              opacity: 0;
+              transform: scale(0.7);
+            }
+
+          }
+
+
+          @keyframes loopDot {
+
+            0% {
+              opacity: 0;
+              transform: scale(0.65);
+            }
+
+            20% {
+              opacity: 1;
+              transform: scale(1);
+            }
+
+            80% {
+              opacity: 1;
+              transform: scale(1);
+            }
+
+            100% {
+              opacity: 0;
+              transform: scale(0.65);
+            }
+
+          }
+
+
+          @keyframes loopLabelPulse {
+
+            0% {
+              opacity: 0.7;
+            }
+
+            50% {
+              opacity: 1;
+            }
+
+            100% {
+              opacity: 0.7;
+            }
+
+          }
+
+
+          @keyframes conditionResultIn {
+
+            0% {
+              opacity: 0;
+              transform: translateY(-3px);
+            }
+
+            100% {
+              opacity: 1;
+              transform: translateY(0);
+            }
+
+          }
+
+
+          @keyframes conditionChecking {
+
+            0% {
+              opacity: 0.35;
+              transform: scale(0.8);
+            }
+
+            50% {
+              opacity: 1;
+              transform: scale(1.15);
+            }
+
+            100% {
+              opacity: 0.35;
+              transform: scale(0.8);
+            }
+
+          }
+
+
+          @keyframes conditionBadgeIn {
+
+            0% {
+              opacity: 0;
+              transform: scale(0.65);
+            }
+
+            70% {
+              opacity: 1;
+              transform: scale(1.08);
+            }
+
+            100% {
+              opacity: 1;
+              transform: scale(1);
+            }
+
+          }
+
+
+          @keyframes conditionPathPulse {
+
+            0% {
+              opacity: 0.2;
+              transform: scale(0.75);
+            }
+
+            50% {
+              opacity: 1;
+              transform: scale(1);
+            }
+
+            100% {
+              opacity: 0.2;
+              transform: scale(0.75);
+            }
+
+          }
+
+
+          @keyframes conditionStatusIn {
+
+            from {
+              opacity: 0;
+              transform:
+                translate(-50%, -3px);
+            }
+
+            to {
+              opacity: 0.6;
+              transform:
+                translate(-50%, 0);
+            }
+
+          }
+
+        `}
+      </style>
     </div>
   );
 }
