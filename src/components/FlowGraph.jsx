@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 const NODE_W = 240;
 const NODE_H = 78;
@@ -246,6 +246,8 @@ export default function FlowGraph({
   activeEdge = null,
   conditionResult = null,
 }) {
+  const scrollRef = useRef(null);
+
   const fallbackNodes = [
     { id: "start", label: "START", type: "start" },
     { id: "exit", label: "EXIT", type: "exit" },
@@ -260,8 +262,42 @@ export default function FlowGraph({
   const graphHeight = Math.max(620, TOP_Y + graphNodes.length * GAP_Y + 70);
   const activeEdgeId = typeof activeEdge === "string" ? activeEdge : activeEdge?.id;
 
+  useEffect(() => {
+    if (!activeNode || !scrollRef.current) return;
+
+    const frame = requestAnimationFrame(() => {
+      const container = scrollRef.current;
+      const element = container?.querySelector(`[data-flow-node="${CSS.escape(String(activeNode))}"]`);
+
+      if (!container || !element) return;
+
+      const nodeTop = element.offsetTop;
+      const nodeBottom = nodeTop + element.offsetHeight;
+      const visibleTop = container.scrollTop;
+      const visibleBottom = visibleTop + container.clientHeight;
+
+      // Keep the current viewport stable while the active node is already visible.
+      if (nodeTop >= visibleTop + 18 && nodeBottom <= visibleBottom - 18) return;
+
+      // When the active node leaves the viewport, bring it near the center.
+      const targetTop = nodeTop - Math.max(0, (container.clientHeight - element.offsetHeight) / 2);
+      const maxScroll = Math.max(0, container.scrollHeight - container.clientHeight);
+
+      container.scrollTo({
+        top: Math.min(maxScroll, Math.max(0, targetTop)),
+        behavior: "smooth",
+      });
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [activeNode, graphHeight]);
+
   return (
-    <div className="relative h-full w-full min-w-0 overflow-auto rounded-[18px] bg-[#FFF9F0]" style={{ minHeight: graphHeight }}>
+    <div
+      ref={scrollRef}
+      className="relative h-full w-full min-w-0 overflow-auto rounded-[18px] bg-[#FFF9F0]"
+      style={{ minHeight: graphHeight }}
+    >
       <div className="relative w-full" style={{ height: graphHeight, minWidth: 620 }}>
         <svg
           className="pointer-events-none absolute inset-0 h-full w-full"
