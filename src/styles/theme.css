@@ -1,0 +1,265 @@
+/* ============================================================
+   C·FLOW THEME SYSTEM
+   Dark mode is deliberately charcoal/grey rather than pitch black.
+============================================================ */
+
+.cflow-dark {
+  --cflow-bg: #202225;
+  --cflow-surface: #292c30;
+  --cflow-card: #32353a;
+  --cflow-card-soft: #383c42;
+  --cflow-ink: #ece9e2;
+  --cflow-muted: #a7a9ad;
+  --cflow-border: #111214;
+  --cflow-code: #2d3a43;
+  --cflow-flow: #34313f;
+  --cflow-memory: #2e3c35;
+  --cflow-exec: #5b4d32;
+  --cflow-special: #513944;
+  --cflow-white: #e6e4df;
+}
+
+/* App shell + global surfaces */
+.cflow-dark,
+.cflow-dark header,
+.cflow-dark footer,
+.cflow-dark main,
+.cflow-dark section {
+  color: var(--cflow-ink) !important;
+}
+
+.cflow-dark,
+.cflow-dark header {
+  background: var(--cflow-bg) !important;
+}
+
+.cflow-dark footer {
+  background: #25282c !important;
+}
+
+.cflow-dark section {
+  border-color: var(--cflow-border) !important;
+}
+
+/* Existing palette translated to the soothing dark palette. */
+.cflow-dark [class*="bg-\\[\\#FFF9F0\\]"] { background: var(--cflow-bg) !important; }
+.cflow-dark [class*="bg-\\[\\#DDF4FF\\]"] { background: var(--cflow-code) !important; }
+.cflow-dark [class*="bg-\\[\\#E8DFFF\\]"] { background: var(--cflow-flow) !important; }
+.cflow-dark [class*="bg-\\[\\#DFF7E8\\]"] { background: var(--cflow-memory) !important; }
+.cflow-dark [class*="bg-\\[\\#FFE3A3\\]"] { background: var(--cflow-exec) !important; }
+.cflow-dark [class*="bg-\\[\\#FFD6E7\\]"] { background: var(--cflow-special) !important; }
+.cflow-dark [class*="bg-white"] { background: var(--cflow-card) !important; }
+.cflow-dark [class*="text-\\[\\#171717\\]"] { color: var(--cflow-ink) !important; }
+.cflow-dark [class*="text-white"] { color: #f5f3ee !important; }
+.cflow-dark [class*="border-\\[\\#171717\\]"] { border-color: var(--cflow-border) !important; }
+
+/* Shadows keep the C·FLOW hard-edged identity, but use a soft charcoal keyline. */
+.cflow-dark [class*="shadow-"] {
+  --tw-shadow-color: #111214 !important;
+}
+
+/* Code editor */
+.cflow-dark textarea {
+  color: var(--cflow-ink) !important;
+  caret-color: #f0c96b;
+  background: transparent !important;
+}
+
+.cflow-dark ::selection {
+  background: #5b4d32 !important;
+  color: #f5f3ee !important;
+}
+
+/* Flow graph nodes use these semantic classes instead of changing graph data. */
+.cflow-dark .cflow-flow-node {
+  color: var(--cflow-ink) !important;
+  border-color: var(--cflow-border) !important;
+  box-shadow: 4px 4px 0 var(--cflow-border) !important;
+}
+
+.cflow-dark .cflow-flow-node--start { background: #343638 !important; }
+.cflow-dark .cflow-flow-node--operation { background: #32353a !important; }
+.cflow-dark .cflow-flow-node--condition { background: #5b4d32 !important; }
+.cflow-dark .cflow-flow-node--output { background: #314038 !important; }
+.cflow-dark .cflow-flow-node--exit { background: #513944 !important; }
+
+/* Scrollbars */
+.cflow-dark ::-webkit-scrollbar-track {
+  background: #25282c !important;
+  border-left-color: #111214 !important;
+}
+
+.cflow-dark ::-webkit-scrollbar-thumb {
+  background: #5b5e64 !important;
+  border-color: #25282c !important;
+}
+
+.cflow-dark ::-webkit-scrollbar-thumb:hover {
+  background: #777b82 !important;
+}
+
+/* ============================================================
+   THEME TOGGLE
+============================================================ */
+
+.cflow-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 42px;
+  padding: 5px 9px 5px 6px;
+  border: 2px solid #171717;
+  background: #fff9f0;
+  color: #171717;
+  box-shadow: 3px 3px 0 #171717;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .12em;
+  transition: transform 180ms ease, box-shadow 180ms ease, background 300ms ease;
+}
+
+.cflow-theme-toggle:hover {
+  transform: translateY(-1px);
+  box-shadow: 4px 4px 0 #171717;
+}
+
+.cflow-theme-toggle:active {
+  transform: translateY(1px);
+  box-shadow: 2px 2px 0 #171717;
+}
+
+.cflow-theme-toggle:focus-visible {
+  outline: 3px solid #b7a3e5;
+  outline-offset: 3px;
+}
+
+.cflow-theme-toggle-track {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 42px;
+  height: 24px;
+  padding: 3px;
+  border: 2px solid currentColor;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #e8dfcf;
+}
+
+.cflow-theme-toggle-icon {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 15px;
+  height: 15px;
+  place-items: center;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.cflow-theme-toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #171717;
+  transition: transform 420ms cubic-bezier(.22,1,.36,1), background 300ms ease;
+}
+
+.cflow-dark .cflow-theme-toggle {
+  border-color: #111214;
+  background: #32353a;
+  color: #ece9e2;
+  box-shadow: 3px 3px 0 #111214;
+}
+
+.cflow-dark .cflow-theme-toggle-track {
+  background: #202225;
+}
+
+.cflow-dark .cflow-theme-toggle-thumb {
+  transform: translateX(18px);
+  background: #ece9e2;
+}
+
+/* ============================================================
+   THEME TRANSITION CURTAIN
+============================================================ */
+
+.cflow-theme-curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: auto;
+}
+
+.cflow-theme-curtain__panel {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 50%;
+  background: #17191c;
+  transition: transform 620ms cubic-bezier(.76,0,.24,1);
+  will-change: transform;
+}
+
+.cflow-theme-curtain__panel--top {
+  top: 0;
+  transform: translateY(0);
+  border-bottom: 2px solid #0d0e10;
+}
+
+.cflow-theme-curtain__panel--bottom {
+  bottom: 0;
+  transform: translateY(0);
+  border-top: 2px solid #0d0e10;
+}
+
+.cflow-theme-curtain.is-opening .cflow-theme-curtain__panel--top {
+  transform: translateY(-100%);
+}
+
+.cflow-theme-curtain.is-opening .cflow-theme-curtain__panel--bottom {
+  transform: translateY(100%);
+}
+
+.cflow-theme-curtain__mark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: #ece9e2;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .32em;
+  white-space: nowrap;
+  opacity: 0;
+  animation: cflowCurtainMarkIn 320ms ease-out forwards;
+}
+
+.cflow-theme-curtain.is-opening .cflow-theme-curtain__mark {
+  animation: cflowCurtainMarkOut 280ms ease-in forwards;
+}
+
+@keyframes cflowCurtainMarkIn {
+  from { opacity: 0; letter-spacing: .48em; }
+  to { opacity: .85; letter-spacing: .32em; }
+}
+
+@keyframes cflowCurtainMarkOut {
+  from { opacity: .85; }
+  to { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cflow-theme-curtain__panel,
+  .cflow-theme-toggle,
+  .cflow-theme-toggle-thumb {
+    transition-duration: 1ms !important;
+  }
+}
