@@ -19,7 +19,6 @@
   --cflow-white: #e6e4df;
 }
 
-/* App shell + global surfaces */
 .cflow-dark,
 .cflow-dark header,
 .cflow-dark footer,
@@ -41,7 +40,6 @@
   border-color: var(--cflow-border) !important;
 }
 
-/* Existing palette translated to the soothing dark palette. */
 .cflow-dark [class*="bg-\\[\\#FFF9F0\\]"] { background: var(--cflow-bg) !important; }
 .cflow-dark [class*="bg-\\[\\#DDF4FF\\]"] { background: var(--cflow-code) !important; }
 .cflow-dark [class*="bg-\\[\\#E8DFFF\\]"] { background: var(--cflow-flow) !important; }
@@ -53,12 +51,10 @@
 .cflow-dark [class*="text-white"] { color: #f5f3ee !important; }
 .cflow-dark [class*="border-\\[\\#171717\\]"] { border-color: var(--cflow-border) !important; }
 
-/* Shadows keep the C·FLOW hard-edged identity, but use a soft charcoal keyline. */
 .cflow-dark [class*="shadow-"] {
   --tw-shadow-color: #111214 !important;
 }
 
-/* Code editor */
 .cflow-dark textarea {
   color: var(--cflow-ink) !important;
   caret-color: #f0c96b;
@@ -70,7 +66,6 @@
   color: #f5f3ee !important;
 }
 
-/* Flow graph nodes use these semantic classes instead of changing graph data. */
 .cflow-dark .cflow-flow-node {
   color: var(--cflow-ink) !important;
   border-color: var(--cflow-border) !important;
@@ -82,6 +77,48 @@
 .cflow-dark .cflow-flow-node--condition { background: #5b4d32 !important; }
 .cflow-dark .cflow-flow-node--output { background: #314038 !important; }
 .cflow-dark .cflow-flow-node--exit { background: #513944 !important; }
+
+/* SVG edges and labels */
+.cflow-dark .cflow-flow-node ~ svg path[stroke="#171717"] {
+  stroke: #b5b7ba !important;
+}
+
+.cflow-dark svg path[stroke="#171717"] {
+  stroke: #b5b7ba !important;
+}
+
+.cflow-dark svg path[stroke="#FFE3A3"] {
+  stroke: #d8b968 !important;
+}
+
+.cflow-dark svg path[fill="#171717"] {
+  fill: #b5b7ba !important;
+}
+
+.cflow-dark svg rect {
+  fill: #292c30 !important;
+  stroke: #b5b7ba !important;
+}
+
+.cflow-dark svg text {
+  fill: #ece9e2 !important;
+}
+
+.cflow-dark [class*="ring-offset-"] {
+  --tw-ring-offset-color: #202225 !important;
+}
+
+.cflow-dark .cflow-theme-toggle,
+.cflow-dark .cflow-theme-toggle * {
+  color: inherit;
+}
+
+.cflow-dark .cflow-theme-toggle {
+  border-color: #111214;
+  background: #32353a;
+  color: #ece9e2;
+  box-shadow: 3px 3px 0 #111214;
+}
 
 /* Scrollbars */
 .cflow-dark ::-webkit-scrollbar-track {
@@ -103,6 +140,10 @@
 ============================================================ */
 
 .cflow-theme-toggle {
+  position: fixed;
+  top: 16px;
+  right: 20px;
+  z-index: 10000;
   display: inline-flex;
   align-items: center;
   gap: 9px;
@@ -168,13 +209,6 @@
   border-radius: 50%;
   background: #171717;
   transition: transform 420ms cubic-bezier(.22,1,.36,1), background 300ms ease;
-}
-
-.cflow-dark .cflow-theme-toggle {
-  border-color: #111214;
-  background: #32353a;
-  color: #ece9e2;
-  box-shadow: 3px 3px 0 #111214;
 }
 
 .cflow-dark .cflow-theme-toggle-track {
@@ -254,6 +288,13 @@
 @keyframes cflowCurtainMarkOut {
   from { opacity: .85; }
   to { opacity: 0; }
+}
+
+@media (max-width: 900px) {
+  .cflow-theme-toggle {
+    top: 10px;
+    right: 12px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
