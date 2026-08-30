@@ -75,7 +75,7 @@ function NodeBox({ node, position, active, conditionResult }) {
   return (
     <div
       data-flow-node={node.id}
-      className={`absolute z-10 flex items-center justify-center border-2 border-[#171717] px-4 text-center font-mono font-bold transition-all duration-300 ${
+      className={`cflow-flow-node cflow-flow-node--${type} absolute z-10 flex items-center justify-center border-2 border-[#171717] px-4 text-center font-mono font-bold transition-all duration-300 ${
         type === "start" || type === "exit" ? "rounded-[32px]" : "rounded-[16px]"
       } ${active ? "shadow-[6px_6px_0_#171717]" : "shadow-[4px_4px_0_#171717]"}`}
       style={{
@@ -138,7 +138,6 @@ function findMergeNode(edges, yesId, noId) {
   const yesReachable = reachableFrom(yesId, edges);
   const noReachable = reachableFrom(noId, edges);
 
-  // Prefer the first common node reached by both branches.
   for (const edge of edges) {
     if (yesReachable.has(edge.from) && noReachable.has(edge.from)) {
       return edge.from;
@@ -157,7 +156,6 @@ function makeLayout(nodes, edges) {
   const index = new Map(nodes.map((node, i) => [node.id, i]));
   const lanes = new Map(nodes.map((node) => [node.id, 0]));
 
-  // Give each IF branch a real visual lane until its branches meet again.
   for (const condition of nodes) {
     if (typeOf(condition) !== "condition") continue;
     if (["for", "while", "do", "loop"].includes(condition.controlType)) continue;
@@ -192,8 +190,6 @@ function makeLayout(nodes, edges) {
     }
   }
 
-  // Keep loop bodies in the central lane. The loop edge itself is routed
-  // around the right side, so the body remains easy to read.
   nodes.forEach((node) => {
     if (["for", "while", "do", "loop"].includes(node.controlType)) {
       lanes.set(node.id, 0);
