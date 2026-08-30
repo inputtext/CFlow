@@ -1,25 +1,26 @@
 /* ============================================================
-   C·FLOW THEME SYSTEM
-   Dark mode is deliberately charcoal/grey rather than pitch black.
+   C·FLOW DARK THEME
+   Charcoal / graphite — intentionally not pitch black.
 ============================================================ */
 
 .cflow-dark {
-  --cflow-bg: #202225;
-  --cflow-surface: #292c30;
-  --cflow-card: #32353a;
-  --cflow-card-soft: #383c42;
-  --cflow-ink: #ece9e2;
-  --cflow-muted: #a7a9ad;
-  --cflow-border: #111214;
+  --cflow-bg: #202326;
+  --cflow-surface: #282c30;
+  --cflow-card: #30343a;
+  --cflow-card-soft: #383d44;
+  --cflow-ink: #eeeae2;
+  --cflow-muted: #aeb1b5;
+  --cflow-border: #111315;
   --cflow-code: #2d3a43;
-  --cflow-flow: #34313f;
-  --cflow-memory: #2e3c35;
-  --cflow-exec: #5b4d32;
+  --cflow-flow: #37333f;
+  --cflow-memory: #304039;
+  --cflow-exec: #5b4d31;
   --cflow-special: #513944;
-  --cflow-white: #e6e4df;
 }
 
+/* App shell */
 .cflow-dark,
+.cflow-dark > div,
 .cflow-dark header,
 .cflow-dark footer,
 .cflow-dark main,
@@ -27,34 +28,39 @@
   color: var(--cflow-ink) !important;
 }
 
-.cflow-dark,
-.cflow-dark header {
-  background: var(--cflow-bg) !important;
+.cflow-dark > div,
+.cflow-dark header,
+.cflow-dark main {
+  background-color: var(--cflow-bg) !important;
 }
 
 .cflow-dark footer {
-  background: #25282c !important;
+  background-color: #25292d !important;
 }
 
-.cflow-dark section {
-  border-color: var(--cflow-border) !important;
-}
+/* Translate the existing pastel-brutalist palette into graphite equivalents. */
+.cflow-dark [class*="bg-[#FFF9F0]"] { background-color: var(--cflow-bg) !important; }
+.cflow-dark [class*="bg-[#DDF4FF]"] { background-color: var(--cflow-code) !important; }
+.cflow-dark [class*="bg-[#E8DFFF]"] { background-color: var(--cflow-flow) !important; }
+.cflow-dark [class*="bg-[#DFF7E8]"] { background-color: var(--cflow-memory) !important; }
+.cflow-dark [class*="bg-[#FFE3A3]"] { background-color: var(--cflow-exec) !important; }
+.cflow-dark [class*="bg-[#FFD6E7]"] { background-color: var(--cflow-special) !important; }
+.cflow-dark [class*="bg-white"] { background-color: var(--cflow-card) !important; }
 
-.cflow-dark [class*="bg-\\[\\#FFF9F0\\]"] { background: var(--cflow-bg) !important; }
-.cflow-dark [class*="bg-\\[\\#DDF4FF\\]"] { background: var(--cflow-code) !important; }
-.cflow-dark [class*="bg-\\[\\#E8DFFF\\]"] { background: var(--cflow-flow) !important; }
-.cflow-dark [class*="bg-\\[\\#DFF7E8\\]"] { background: var(--cflow-memory) !important; }
-.cflow-dark [class*="bg-\\[\\#FFE3A3\\]"] { background: var(--cflow-exec) !important; }
-.cflow-dark [class*="bg-\\[\\#FFD6E7\\]"] { background: var(--cflow-special) !important; }
-.cflow-dark [class*="bg-white"] { background: var(--cflow-card) !important; }
-.cflow-dark [class*="text-\\[\\#171717\\]"] { color: var(--cflow-ink) !important; }
-.cflow-dark [class*="text-white"] { color: #f5f3ee !important; }
-.cflow-dark [class*="border-\\[\\#171717\\]"] { border-color: var(--cflow-border) !important; }
+.cflow-dark [class*="text-[#171717]"] { color: var(--cflow-ink) !important; }
+.cflow-dark [class*="text-white"] { color: #f4f1eb !important; }
+.cflow-dark [class*="border-[#171717]"] { border-color: var(--cflow-border) !important; }
 
+/* Shadows retain the signature hard edge. */
 .cflow-dark [class*="shadow-"] {
-  --tw-shadow-color: #111214 !important;
+  --tw-shadow-color: #111315 !important;
 }
 
+.cflow-dark [class*="ring-offset-"] {
+  --tw-ring-offset-color: var(--cflow-bg) !important;
+}
+
+/* Code editor */
 .cflow-dark textarea {
   color: var(--cflow-ink) !important;
   caret-color: #f0c96b;
@@ -62,77 +68,57 @@
 }
 
 .cflow-dark ::selection {
-  background: #5b4d32 !important;
-  color: #f5f3ee !important;
+  background: #5b4d31 !important;
+  color: #f7f4ee !important;
 }
 
-.cflow-dark .cflow-flow-node {
+/* Flow graph uses inline colors, so these overrides intentionally use !important. */
+.cflow-dark [data-flow-node] {
   color: var(--cflow-ink) !important;
   border-color: var(--cflow-border) !important;
   box-shadow: 4px 4px 0 var(--cflow-border) !important;
 }
 
-.cflow-dark .cflow-flow-node--start { background: #343638 !important; }
-.cflow-dark .cflow-flow-node--operation { background: #32353a !important; }
-.cflow-dark .cflow-flow-node--condition { background: #5b4d32 !important; }
-.cflow-dark .cflow-flow-node--output { background: #314038 !important; }
-.cflow-dark .cflow-flow-node--exit { background: #513944 !important; }
-
-/* SVG edges and labels */
-.cflow-dark .cflow-flow-node ~ svg path[stroke="#171717"] {
-  stroke: #b5b7ba !important;
-}
+.cflow-dark [data-flow-node][style*="#FFF9F0"] { background: #34383d !important; }
+.cflow-dark [data-flow-node][style*="#FFFFFF"] { background: #30343a !important; }
+.cflow-dark [data-flow-node][style*="#FFE3A3"] { background: #5b4d31 !important; }
+.cflow-dark [data-flow-node][style*="#DDF4EA"] { background: #314039 !important; }
+.cflow-dark [data-flow-node][style*="#FFD6E7"] { background: #513944 !important; }
 
 .cflow-dark svg path[stroke="#171717"] {
-  stroke: #b5b7ba !important;
+  stroke: #aeb2b7 !important;
 }
 
 .cflow-dark svg path[stroke="#FFE3A3"] {
-  stroke: #d8b968 !important;
+  stroke: #d5b667 !important;
 }
 
 .cflow-dark svg path[fill="#171717"] {
-  fill: #b5b7ba !important;
+  fill: #aeb2b7 !important;
 }
 
 .cflow-dark svg rect {
-  fill: #292c30 !important;
-  stroke: #b5b7ba !important;
+  fill: #292d32 !important;
+  stroke: #aeb2b7 !important;
 }
 
 .cflow-dark svg text {
-  fill: #ece9e2 !important;
-}
-
-.cflow-dark [class*="ring-offset-"] {
-  --tw-ring-offset-color: #202225 !important;
-}
-
-.cflow-dark .cflow-theme-toggle,
-.cflow-dark .cflow-theme-toggle * {
-  color: inherit;
-}
-
-.cflow-dark .cflow-theme-toggle {
-  border-color: #111214;
-  background: #32353a;
-  color: #ece9e2;
-  box-shadow: 3px 3px 0 #111214;
+  fill: #eeeae2 !important;
 }
 
 /* Scrollbars */
 .cflow-dark ::-webkit-scrollbar-track {
-  background: #25282c !important;
-  border-left-color: #111214 !important;
+  background: #25292d !important;
+  border-left-color: #111315 !important;
 }
 
 .cflow-dark ::-webkit-scrollbar-thumb {
-  background: #5b5e64 !important;
-  border-color: #25282c !important;
+  background: #5c6067 !important;
+  border-color: #25292d !important;
 }
 
 .cflow-dark ::-webkit-scrollbar-thumb:hover {
-  background: #777b82 !important;
+  background: #7b7f86 !important;
 }
 
 /* ============================================================
@@ -143,7 +129,7 @@
   position: fixed;
   top: 16px;
   right: 20px;
-  z-index: 10000;
+  z-index: 10001;
   display: inline-flex;
   align-items: center;
   gap: 9px;
@@ -157,7 +143,7 @@
   font-size: 10px;
   font-weight: 900;
   letter-spacing: .12em;
-  transition: transform 180ms ease, box-shadow 180ms ease, background 300ms ease;
+  transition: transform 180ms ease, box-shadow 180ms ease, background 260ms ease;
 }
 
 .cflow-theme-toggle:hover {
@@ -168,6 +154,10 @@
 .cflow-theme-toggle:active {
   transform: translateY(1px);
   box-shadow: 2px 2px 0 #171717;
+}
+
+.cflow-theme-toggle:disabled {
+  cursor: wait;
 }
 
 .cflow-theme-toggle:focus-visible {
@@ -208,27 +198,38 @@
   height: 14px;
   border-radius: 50%;
   background: #171717;
-  transition: transform 420ms cubic-bezier(.22,1,.36,1), background 300ms ease;
+  transition: transform 480ms cubic-bezier(.22,1,.36,1), background 260ms ease;
+}
+
+.cflow-dark .cflow-theme-toggle {
+  border-color: #111315;
+  background: #30343a;
+  color: #eeeae2;
+  box-shadow: 3px 3px 0 #111315;
 }
 
 .cflow-dark .cflow-theme-toggle-track {
-  background: #202225;
+  background: #202326;
 }
 
 .cflow-dark .cflow-theme-toggle-thumb {
   transform: translateX(18px);
-  background: #ece9e2;
+  background: #eeeae2;
 }
 
 /* ============================================================
-   THEME TRANSITION CURTAIN
+   THEATRICAL CURTAIN
+   The curtains enter from outside the viewport, meet slowly,
+   hold for a beat, then reveal the newly selected theme.
 ============================================================ */
 
 .cflow-theme-curtain {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: 10000;
+  overflow: hidden;
   pointer-events: auto;
+  background: #7b2938;
 }
 
 .cflow-theme-curtain__panel {
@@ -236,21 +237,56 @@
   left: 0;
   width: 100%;
   height: 50%;
-  background: #17191c;
-  transition: transform 620ms cubic-bezier(.76,0,.24,1);
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #641f2e 0,
+      #641f2e 5%,
+      #8a3041 9%,
+      #6b2231 14%,
+      #96384a 19%,
+      #681f2e 25%,
+      #822c3c 31%,
+      #5f1d2b 38%,
+      #8b3041 45%,
+      #661f2e 52%,
+      #8c3041 60%,
+      #601d2b 68%,
+      #8c3041 76%,
+      #641e2d 84%,
+      #913346 92%,
+      #641f2e 100%
+    );
+  box-shadow: inset 0 -14px 24px rgba(0,0,0,.18), inset 0 8px 16px rgba(255,255,255,.05);
   will-change: transform;
 }
 
 .cflow-theme-curtain__panel--top {
   top: 0;
-  transform: translateY(0);
-  border-bottom: 2px solid #0d0e10;
+  transform: translateY(-100%);
+  border-bottom: 5px solid #451521;
 }
 
 .cflow-theme-curtain__panel--bottom {
   bottom: 0;
+  transform: translateY(100%);
+  border-top: 5px solid #451521;
+}
+
+.cflow-theme-curtain.is-closing .cflow-theme-curtain__panel,
+.cflow-theme-curtain.is-opening .cflow-theme-curtain__panel,
+.cflow-theme-curtain.is-closed .cflow-theme-curtain__panel {
+  transition: transform 1250ms cubic-bezier(.77,0,.18,1);
+}
+
+.cflow-theme-curtain.is-closing .cflow-theme-curtain__panel--top,
+.cflow-theme-curtain.is-closed .cflow-theme-curtain__panel--top {
   transform: translateY(0);
-  border-top: 2px solid #0d0e10;
+}
+
+.cflow-theme-curtain.is-closing .cflow-theme-curtain__panel--bottom,
+.cflow-theme-curtain.is-closed .cflow-theme-curtain__panel--bottom {
+  transform: translateY(0);
 }
 
 .cflow-theme-curtain.is-opening .cflow-theme-curtain__panel--top {
@@ -266,27 +302,29 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  color: #ece9e2;
+  z-index: 2;
+  color: #fff4ed;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 12px;
   font-weight: 900;
-  letter-spacing: .32em;
+  letter-spacing: .34em;
   white-space: nowrap;
+  text-shadow: 2px 2px 0 rgba(0,0,0,.35);
   opacity: 0;
-  animation: cflowCurtainMarkIn 320ms ease-out forwards;
+  animation: cflowCurtainMarkIn 520ms ease-out 420ms forwards;
 }
 
 .cflow-theme-curtain.is-opening .cflow-theme-curtain__mark {
-  animation: cflowCurtainMarkOut 280ms ease-in forwards;
+  animation: cflowCurtainMarkOut 360ms ease-in forwards;
 }
 
 @keyframes cflowCurtainMarkIn {
-  from { opacity: 0; letter-spacing: .48em; }
-  to { opacity: .85; letter-spacing: .32em; }
+  from { opacity: 0; transform: translate(-50%, -46%) scale(.94); }
+  to { opacity: .9; transform: translate(-50%, -50%) scale(1); }
 }
 
 @keyframes cflowCurtainMarkOut {
-  from { opacity: .85; }
+  from { opacity: .9; }
   to { opacity: 0; }
 }
 
@@ -302,5 +340,6 @@
   .cflow-theme-toggle,
   .cflow-theme-toggle-thumb {
     transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
   }
 }
