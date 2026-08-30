@@ -1,10 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 const STORAGE_KEY = "cflow-theme";
 const DARK_CLASS = "cflow-dark";
-const CLOSE_MS = 1250;
-const HOLD_MS = 420;
-const OPEN_MS = 1050;
 
 function readStoredTheme() {
   try {
@@ -23,72 +20,55 @@ function applyTheme(dark) {
 
 export default function ThemeToggle() {
   const [dark, setDark] = useState(readStoredTheme);
-  const [curtain, setCurtain] = useState(null);
-  const busyRef = useRef(false);
-  const timersRef = useRef([]);
+  const [transition, setTransition] = useState(null);
 
   useEffect(() => {
-    // Persisted theme is applied on refresh without replaying the curtain.
+    // Apply the saved theme on refresh. No transition screen is shown on load.
     applyTheme(dark);
-
-    return () => {
-      timersRef.current.forEach((timer) => window.clearTimeout(timer));
-    };
   }, [dark]);
 
-  const toggle = () => {
-    if (busyRef.current) return;
+  const finishThemeChange = () => {
+    if (transition !== "closing") return;
 
-    busyRef.current = true;
     const nextDark = !dark;
 
-    // Mount off-screen first. The next frame starts the actual slow pull.
-    setCurtain("prepare");
+    try {
+      window.localStorage.setItem(
+        STORAGE_KEY,
+        nextDark ? "dark" : "light",
+      );
+    } catch {
+      // Theme still works for the current session if storage is unavailable.
+    }
 
-    const startClose = window.requestAnimationFrame(() => {
-      setCurtain("closing");
-    });
-
-    const changeTheme = window.setTimeout(() => {
-      setDark(nextDark);
-
-      try {
-        window.localStorage.setItem(
-          STORAGE_KEY,
-          nextDark ? "dark" : "light",
-        );
-      } catch {
-        // Keep the selected theme for this session if storage is unavailable.
-      }
-
-      applyTheme(nextDark);
-
-      const openTimer = window.setTimeout(() => {
-        setCurtain("opening");
-
-        const cleanupTimer = window.setTimeout(() => {
-          setCurtain(null);
-          busyRef.current = false;
-        }, OPEN_MS);
-
-        timersRef.current.push(cleanupTimer);
-      }, HOLD_MS);
-
-      timersRef.current.push(openTimer);
-    }, CLOSE_MS + 40);
-
-    timersRef.current.push(changeTheme);
-
-    // requestAnimationFrame IDs are not timeout IDs, so cancel it separately on unmount.
-    timersRef.current.push(startClose);
+    // Change the actual UI only while it is completely covered.
+    setDark(nextDark);
+    applyTheme(nextDark);
+    setTransition("opening");
   };
+
+  const finishOpening = () => {
+    if (transition === "opening") {
+      setTransition(null);
+    }
+  };
+
+  const toggle = () => {
+    if (transition) return;
+
+    // The overlay starts above the viewport. CSS animation then drops it
+    // down over the whole UI before the theme changes.
+    setTransition("closing");
+  };
+
+  const targetDark = !dark;
 
   return (
     <>
       <button
         type="button"
         onClick={toggle}
-        disabled={Boolean(curtain)}
+        disabled={Boolean(transition)}
         aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
         aria-pressed={dark}
         className="cflow-theme-toggle"
@@ -104,15 +84,21 @@ export default function ThemeToggle() {
         </span>
       </button>
 
-      {curtain && (
+      {transition && (
         <div
-          className={`cflow-theme-curtain is-${curtain}`}
+          className={`cflow-theme-curtain is-${transition} ${
+            targetDark ? "is-target-dark" : "is-target-light"
+          }`}
+          onAnimationEnd={
+            transition === "closing"
+              ? finishThemeChange
+              : finishOpening
+          }
           aria-hidden="true"
         >
-          <div className="cflow-theme-curtain__panel cflow-theme-curtain__panel--top" />
-          <div className="cflow-theme-curtain__panel cflow-theme-curtain__panel--bottom" />
+          <div className="cflow-theme-curtain__screen" />
           <div className="cflow-theme-curtain__mark">
-            C·FLOW&nbsp;&nbsp;/&nbsp;&nbsp;{dark ? "LIGHT" : "DARK"}
+            C·FLOW&nbsp;&nbsp;/&nbsp;&nbsp;{targetDark ? "DARK" : "LIGHT"}
           </div>
         </div>
       )}
