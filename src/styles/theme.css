@@ -18,7 +18,6 @@
   --cflow-special: #513944;
 }
 
-/* App shell */
 .cflow-dark,
 .cflow-dark > div,
 .cflow-dark header,
@@ -38,7 +37,25 @@
   background-color: #25292d !important;
 }
 
-/* Translate the existing pastel-brutalist palette into graphite equivalents. */
+.cflow-dark section {
+  border-color: var(--cflow-border) !important;
+}
+
+/* Robust semantic overrides for the existing C·FLOW three-column workspace. */
+.cflow-dark main > section:nth-child(1) { background-color: var(--cflow-code) !important; }
+.cflow-dark main > section:nth-child(2) { background-color: var(--cflow-flow) !important; }
+.cflow-dark main > section:nth-child(3) { background-color: var(--cflow-memory) !important; }
+
+.cflow-dark main > section:nth-child(1) > div,
+.cflow-dark main > section:nth-child(1) > div > div,
+.cflow-dark main > section:nth-child(1) > div > div > div { background-color: var(--cflow-code) !important; }
+
+.cflow-dark main > section:nth-child(2) > div:nth-child(2),
+.cflow-dark main > section:nth-child(2) > div:nth-child(2) > div { background-color: var(--cflow-flow) !important; }
+
+.cflow-dark main > section:nth-child(3) > div:nth-child(2) { background-color: var(--cflow-memory) !important; }
+
+/* Existing pastel classes, retained for the language-selection screen and nested UI. */
 .cflow-dark [class*="bg-[#FFF9F0]"] { background-color: var(--cflow-bg) !important; }
 .cflow-dark [class*="bg-[#DDF4FF]"] { background-color: var(--cflow-code) !important; }
 .cflow-dark [class*="bg-[#E8DFFF]"] { background-color: var(--cflow-flow) !important; }
@@ -47,20 +64,15 @@
 .cflow-dark [class*="bg-[#FFD6E7]"] { background-color: var(--cflow-special) !important; }
 .cflow-dark [class*="bg-white"] { background-color: var(--cflow-card) !important; }
 
+.cflow-dark [data-memory] { background-color: var(--cflow-card) !important; }
+
 .cflow-dark [class*="text-[#171717]"] { color: var(--cflow-ink) !important; }
 .cflow-dark [class*="text-white"] { color: #f4f1eb !important; }
 .cflow-dark [class*="border-[#171717]"] { border-color: var(--cflow-border) !important; }
 
-/* Shadows retain the signature hard edge. */
-.cflow-dark [class*="shadow-"] {
-  --tw-shadow-color: #111315 !important;
-}
+.cflow-dark [class*="shadow-"] { --tw-shadow-color: #111315 !important; }
+.cflow-dark [class*="ring-offset-"] { --tw-ring-offset-color: var(--cflow-bg) !important; }
 
-.cflow-dark [class*="ring-offset-"] {
-  --tw-ring-offset-color: var(--cflow-bg) !important;
-}
-
-/* Code editor */
 .cflow-dark textarea {
   color: var(--cflow-ink) !important;
   caret-color: #f0c96b;
@@ -72,7 +84,7 @@
   color: #f7f4ee !important;
 }
 
-/* Flow graph uses inline colors, so these overrides intentionally use !important. */
+/* Flow graph: nodes use inline styles, therefore the dark replacements are important. */
 .cflow-dark [data-flow-node] {
   color: var(--cflow-ink) !important;
   border-color: var(--cflow-border) !important;
@@ -85,41 +97,22 @@
 .cflow-dark [data-flow-node][style*="#DDF4EA"] { background: #314039 !important; }
 .cflow-dark [data-flow-node][style*="#FFD6E7"] { background: #513944 !important; }
 
-.cflow-dark svg path[stroke="#171717"] {
-  stroke: #aeb2b7 !important;
-}
-
-.cflow-dark svg path[stroke="#FFE3A3"] {
-  stroke: #d5b667 !important;
-}
-
-.cflow-dark svg path[fill="#171717"] {
-  fill: #aeb2b7 !important;
-}
-
-.cflow-dark svg rect {
-  fill: #292d32 !important;
-  stroke: #aeb2b7 !important;
-}
-
-.cflow-dark svg text {
-  fill: #eeeae2 !important;
-}
+.cflow-dark svg path[stroke="#171717"] { stroke: #aeb2b7 !important; }
+.cflow-dark svg path[stroke="#FFE3A3"] { stroke: #d5b667 !important; }
+.cflow-dark svg path[fill="#171717"] { fill: #aeb2b7 !important; }
+.cflow-dark svg rect { fill: #292d32 !important; stroke: #aeb2b7 !important; }
+.cflow-dark svg text { fill: #eeeae2 !important; }
 
 /* Scrollbars */
 .cflow-dark ::-webkit-scrollbar-track {
   background: #25292d !important;
   border-left-color: #111315 !important;
 }
-
 .cflow-dark ::-webkit-scrollbar-thumb {
   background: #5c6067 !important;
   border-color: #25292d !important;
 }
-
-.cflow-dark ::-webkit-scrollbar-thumb:hover {
-  background: #7b7f86 !important;
-}
+.cflow-dark ::-webkit-scrollbar-thumb:hover { background: #7b7f86 !important; }
 
 /* ============================================================
    THEME TOGGLE
@@ -145,25 +138,10 @@
   letter-spacing: .12em;
   transition: transform 180ms ease, box-shadow 180ms ease, background 260ms ease;
 }
-
-.cflow-theme-toggle:hover {
-  transform: translateY(-1px);
-  box-shadow: 4px 4px 0 #171717;
-}
-
-.cflow-theme-toggle:active {
-  transform: translateY(1px);
-  box-shadow: 2px 2px 0 #171717;
-}
-
-.cflow-theme-toggle:disabled {
-  cursor: wait;
-}
-
-.cflow-theme-toggle:focus-visible {
-  outline: 3px solid #b7a3e5;
-  outline-offset: 3px;
-}
+.cflow-theme-toggle:hover { transform: translateY(-1px); box-shadow: 4px 4px 0 #171717; }
+.cflow-theme-toggle:active { transform: translateY(1px); box-shadow: 2px 2px 0 #171717; }
+.cflow-theme-toggle:disabled { cursor: wait; }
+.cflow-theme-toggle:focus-visible { outline: 3px solid #b7a3e5; outline-offset: 3px; }
 
 .cflow-theme-toggle-track {
   position: relative;
@@ -178,18 +156,7 @@
   overflow: hidden;
   background: #e8dfcf;
 }
-
-.cflow-theme-toggle-icon {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  width: 15px;
-  height: 15px;
-  place-items: center;
-  font-size: 11px;
-  line-height: 1;
-}
-
+.cflow-theme-toggle-icon { position: relative; z-index: 1; display: grid; width: 15px; height: 15px; place-items: center; font-size: 11px; line-height: 1; }
 .cflow-theme-toggle-thumb {
   position: absolute;
   top: 3px;
@@ -200,27 +167,12 @@
   background: #171717;
   transition: transform 480ms cubic-bezier(.22,1,.36,1), background 260ms ease;
 }
-
-.cflow-dark .cflow-theme-toggle {
-  border-color: #111315;
-  background: #30343a;
-  color: #eeeae2;
-  box-shadow: 3px 3px 0 #111315;
-}
-
-.cflow-dark .cflow-theme-toggle-track {
-  background: #202326;
-}
-
-.cflow-dark .cflow-theme-toggle-thumb {
-  transform: translateX(18px);
-  background: #eeeae2;
-}
+.cflow-dark .cflow-theme-toggle { border-color: #111315; background: #30343a; color: #eeeae2; box-shadow: 3px 3px 0 #111315; }
+.cflow-dark .cflow-theme-toggle-track { background: #202326; }
+.cflow-dark .cflow-theme-toggle-thumb { transform: translateX(18px); background: #eeeae2; }
 
 /* ============================================================
-   THEATRICAL CURTAIN
-   The curtains enter from outside the viewport, meet slowly,
-   hold for a beat, then reveal the newly selected theme.
+   THEATRICAL RED CURTAIN
 ============================================================ */
 
 .cflow-theme-curtain {
@@ -229,80 +181,43 @@
   z-index: 10000;
   overflow: hidden;
   pointer-events: auto;
-  background: #7b2938;
+  background: #6f2434;
 }
-
 .cflow-theme-curtain__panel {
   position: absolute;
   left: 0;
   width: 100%;
   height: 50%;
-  background:
-    repeating-linear-gradient(
-      90deg,
-      #641f2e 0,
-      #641f2e 5%,
-      #8a3041 9%,
-      #6b2231 14%,
-      #96384a 19%,
-      #681f2e 25%,
-      #822c3c 31%,
-      #5f1d2b 38%,
-      #8b3041 45%,
-      #661f2e 52%,
-      #8c3041 60%,
-      #601d2b 68%,
-      #8c3041 76%,
-      #641e2d 84%,
-      #913346 92%,
-      #641f2e 100%
-    );
-  box-shadow: inset 0 -14px 24px rgba(0,0,0,.18), inset 0 8px 16px rgba(255,255,255,.05);
+  background: repeating-linear-gradient(90deg,
+    #5a1c2a 0, #5a1c2a 5%,
+    #843044 9%, #651f2f 14%,
+    #96394d 19%, #611d2d 25%,
+    #7f2b3d 31%, #581a29 38%,
+    #8c3043 45%, #601c2c 52%,
+    #8e3144 60%, #5a1b2a 68%,
+    #8a2f42 76%, #5c1c2b 84%,
+    #923346 92%, #5a1c2a 100%);
+  box-shadow: inset 0 -16px 26px rgba(0,0,0,.20), inset 0 8px 16px rgba(255,255,255,.05);
   will-change: transform;
 }
+.cflow-theme-curtain__panel--top { top: 0; transform: translateY(-100%); border-bottom: 5px solid #42131f; }
+.cflow-theme-curtain__panel--bottom { bottom: 0; transform: translateY(100%); border-top: 5px solid #42131f; }
 
-.cflow-theme-curtain__panel--top {
-  top: 0;
-  transform: translateY(-100%);
-  border-bottom: 5px solid #451521;
-}
-
-.cflow-theme-curtain__panel--bottom {
-  bottom: 0;
-  transform: translateY(100%);
-  border-top: 5px solid #451521;
-}
-
+/* Prepare is deliberately transition-free so the browser paints the off-screen start position. */
+.cflow-theme-curtain.is-prepare .cflow-theme-curtain__panel { transition: none !important; }
 .cflow-theme-curtain.is-closing .cflow-theme-curtain__panel,
-.cflow-theme-curtain.is-opening .cflow-theme-curtain__panel,
-.cflow-theme-curtain.is-closed .cflow-theme-curtain__panel {
-  transition: transform 1250ms cubic-bezier(.77,0,.18,1);
-}
-
-.cflow-theme-curtain.is-closing .cflow-theme-curtain__panel--top,
-.cflow-theme-curtain.is-closed .cflow-theme-curtain__panel--top {
-  transform: translateY(0);
-}
-
-.cflow-theme-curtain.is-closing .cflow-theme-curtain__panel--bottom,
-.cflow-theme-curtain.is-closed .cflow-theme-curtain__panel--bottom {
-  transform: translateY(0);
-}
-
-.cflow-theme-curtain.is-opening .cflow-theme-curtain__panel--top {
-  transform: translateY(-100%);
-}
-
-.cflow-theme-curtain.is-opening .cflow-theme-curtain__panel--bottom {
-  transform: translateY(100%);
-}
+.cflow-theme-curtain.is-opening .cflow-theme-curtain__panel { transition: transform 1250ms cubic-bezier(.77,0,.18,1); }
+.cflow-theme-curtain.is-closing .cflow-theme-curtain__panel--top { transform: translateY(0); }
+.cflow-theme-curtain.is-closing .cflow-theme-curtain__panel--bottom { transform: translateY(0); }
+.cflow-theme-curtain.is-opening .cflow-theme-curtain__panel--top { transform: translateY(-100%); }
+.cflow-theme-curtain.is-opening .cflow-theme-curtain__panel--bottom { transform: translateY(100%); }
 
 .cflow-theme-curtain__mark {
   position: absolute;
   left: 50%;
   top: 50%;
-  transform: translate(-50%, -50%);
   z-index: 2;
+  transform: translate(-50%, -50%);
   color: #fff4ed;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 12px;
@@ -311,35 +226,20 @@
   white-space: nowrap;
   text-shadow: 2px 2px 0 rgba(0,0,0,.35);
   opacity: 0;
-  animation: cflowCurtainMarkIn 520ms ease-out 420ms forwards;
+  animation: cflowCurtainMarkIn 520ms ease-out 520ms forwards;
 }
-
-.cflow-theme-curtain.is-opening .cflow-theme-curtain__mark {
-  animation: cflowCurtainMarkOut 360ms ease-in forwards;
-}
-
+.cflow-theme-curtain.is-opening .cflow-theme-curtain__mark { animation: cflowCurtainMarkOut 360ms ease-in forwards; }
 @keyframes cflowCurtainMarkIn {
   from { opacity: 0; transform: translate(-50%, -46%) scale(.94); }
   to { opacity: .9; transform: translate(-50%, -50%) scale(1); }
 }
-
-@keyframes cflowCurtainMarkOut {
-  from { opacity: .9; }
-  to { opacity: 0; }
-}
+@keyframes cflowCurtainMarkOut { from { opacity: .9; } to { opacity: 0; } }
 
 @media (max-width: 900px) {
-  .cflow-theme-toggle {
-    top: 10px;
-    right: 12px;
-  }
+  .cflow-theme-toggle { top: 10px; right: 12px; }
 }
-
 @media (prefers-reduced-motion: reduce) {
   .cflow-theme-curtain__panel,
   .cflow-theme-toggle,
-  .cflow-theme-toggle-thumb {
-    transition-duration: 1ms !important;
-    animation-duration: 1ms !important;
-  }
+  .cflow-theme-toggle-thumb { transition-duration: 1ms !important; animation-duration: 1ms !important; }
 }
