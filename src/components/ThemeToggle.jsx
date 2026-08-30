@@ -28,7 +28,7 @@ export default function ThemeToggle() {
   const timersRef = useRef([]);
 
   useEffect(() => {
-    // Apply the saved theme immediately on mount. No curtain is shown on refresh.
+    // Persisted theme is applied on refresh without replaying the curtain.
     applyTheme(dark);
 
     return () => {
@@ -42,12 +42,12 @@ export default function ThemeToggle() {
     busyRef.current = true;
     const nextDark = !dark;
 
-    // Start with both curtains off-screen, then pull them into the center.
-    setCurtain("closing");
+    // Mount off-screen first. The next frame starts the actual slow pull.
+    setCurtain("prepare");
 
-    const settleClose = window.setTimeout(() => {
-      setCurtain("closed");
-    }, 40);
+    const startClose = window.requestAnimationFrame(() => {
+      setCurtain("closing");
+    });
 
     const changeTheme = window.setTimeout(() => {
       setDark(nextDark);
@@ -58,12 +58,11 @@ export default function ThemeToggle() {
           nextDark ? "dark" : "light",
         );
       } catch {
-        // Theme still works for this session if storage is unavailable.
+        // Keep the selected theme for this session if storage is unavailable.
       }
 
       applyTheme(nextDark);
 
-      // Give the covered screen a deliberate beat before revealing it.
       const openTimer = window.setTimeout(() => {
         setCurtain("opening");
 
@@ -78,10 +77,11 @@ export default function ThemeToggle() {
       timersRef.current.push(openTimer);
     }, CLOSE_MS + 40);
 
-    timersRef.current.push(settleClose, changeTheme);
-  };
+    timersRef.current.push(changeTheme);
 
-  const curtainLabel = nextLabel(dark);
+    // requestAnimationFrame IDs are not timeout IDs, so cancel it separately on unmount.
+    timersRef.current.push(startClose);
+  };
 
   return (
     <>
@@ -112,14 +112,10 @@ export default function ThemeToggle() {
           <div className="cflow-theme-curtain__panel cflow-theme-curtain__panel--top" />
           <div className="cflow-theme-curtain__panel cflow-theme-curtain__panel--bottom" />
           <div className="cflow-theme-curtain__mark">
-            C·FLOW&nbsp;&nbsp;/&nbsp;&nbsp;{curtainLabel}
+            C·FLOW&nbsp;&nbsp;/&nbsp;&nbsp;{dark ? "LIGHT" : "DARK"}
           </div>
         </div>
       )}
     </>
   );
-}
-
-function nextLabel(dark) {
-  return dark ? "LIGHT" : "DARK";
 }
