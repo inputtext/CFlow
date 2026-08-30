@@ -1,272 +1,40 @@
-/* ============================================================
-   C·FLOW DARK THEME
-   Charcoal / graphite — intentionally not pitch black.
-============================================================ */
-
+/* C·FLOW DARK THEME — soft graphite + muted pastel panels */
 .cflow-dark {
-  --cflow-bg: #202326;
-  --cflow-surface: #282c30;
-  --cflow-card: #30343a;
-  --cflow-card-soft: #383d44;
-  --cflow-ink: #eeeae2;
-  --cflow-muted: #aeb1b5;
-  --cflow-border: #111315;
-  --cflow-code: #2d3a43;
-  --cflow-flow: #37333f;
-  --cflow-memory: #304039;
-  --cflow-exec: #5b4d31;
-  --cflow-special: #513944;
+  --cflow-bg:#202326; --cflow-surface:#292d31; --cflow-card:#34383d; --cflow-card-soft:#3c4147;
+  --cflow-ink:#f1eee8; --cflow-muted:#b8bbc0; --cflow-border:#111315;
+  --cflow-code:#3b4850; --cflow-flow:#46404f; --cflow-memory:#3c4b45;
+  --cflow-exec:#62543a; --cflow-special:#5a414b;
 }
-
-.cflow-dark,
-.cflow-dark > div,
-.cflow-dark header,
-.cflow-dark footer,
-.cflow-dark main,
-.cflow-dark section {
-  color: var(--cflow-ink) !important;
-}
-
-.cflow-dark > div,
-.cflow-dark header,
-.cflow-dark main {
-  background-color: var(--cflow-bg) !important;
-}
-
-.cflow-dark footer {
-  background-color: #25292d !important;
-}
-
-.cflow-dark section {
-  border-color: var(--cflow-border) !important;
-}
-
-.cflow-dark main > section:nth-child(1) { background-color: var(--cflow-code) !important; }
-.cflow-dark main > section:nth-child(2) { background-color: var(--cflow-flow) !important; }
-.cflow-dark main > section:nth-child(3) { background-color: var(--cflow-memory) !important; }
-
-.cflow-dark main > section:nth-child(1) > div,
-.cflow-dark main > section:nth-child(1) > div > div,
-.cflow-dark main > section:nth-child(1) > div > div > div { background-color: var(--cflow-code) !important; }
-
-.cflow-dark main > section:nth-child(2) > div:nth-child(2),
-.cflow-dark main > section:nth-child(2) > div:nth-child(2) > div { background-color: var(--cflow-flow) !important; }
-
-.cflow-dark main > section:nth-child(3) > div:nth-child(2) { background-color: var(--cflow-memory) !important; }
-
-.cflow-dark [class*="bg-[#FFF9F0]"] { background-color: var(--cflow-bg) !important; }
-.cflow-dark [class*="bg-[#DDF4FF]"] { background-color: var(--cflow-code) !important; }
-.cflow-dark [class*="bg-[#E8DFFF]"] { background-color: var(--cflow-flow) !important; }
-.cflow-dark [class*="bg-[#DFF7E8]"] { background-color: var(--cflow-memory) !important; }
-.cflow-dark [class*="bg-[#FFE3A3]"] { background-color: var(--cflow-exec) !important; }
-.cflow-dark [class*="bg-[#FFD6E7]"] { background-color: var(--cflow-special) !important; }
-.cflow-dark [class*="bg-white"] { background-color: var(--cflow-card) !important; }
-.cflow-dark [data-memory] { background-color: var(--cflow-card) !important; }
-.cflow-dark [class*="text-[#171717]"] { color: var(--cflow-ink) !important; }
-.cflow-dark [class*="text-white"] { color: #f4f1eb !important; }
-.cflow-dark [class*="border-[#171717]"] { border-color: var(--cflow-border) !important; }
-.cflow-dark [class*="shadow-"] { --tw-shadow-color: #111315 !important; }
-.cflow-dark [class*="ring-offset-"] { --tw-ring-offset-color: var(--cflow-bg) !important; }
-
-.cflow-dark textarea {
-  color: var(--cflow-ink) !important;
-  caret-color: #f0c96b;
-  background: transparent !important;
-}
-
-.cflow-dark ::selection {
-  background: #5b4d31 !important;
-  color: #f7f4ee !important;
-}
-
-.cflow-dark [data-flow-node] {
-  color: var(--cflow-ink) !important;
-  border-color: var(--cflow-border) !important;
-  box-shadow: 4px 4px 0 var(--cflow-border) !important;
-}
-
-.cflow-dark [data-flow-node][style*="#FFF9F0"] { background: #34383d !important; }
-.cflow-dark [data-flow-node][style*="#FFFFFF"] { background: #30343a !important; }
-.cflow-dark [data-flow-node][style*="#FFE3A3"] { background: #5b4d31 !important; }
-.cflow-dark [data-flow-node][style*="#DDF4EA"] { background: #314039 !important; }
-.cflow-dark [data-flow-node][style*="#FFD6E7"] { background: #513944 !important; }
-
-.cflow-dark svg path[stroke="#171717"] { stroke: #aeb2b7 !important; }
-.cflow-dark svg path[stroke="#FFE3A3"] { stroke: #d5b667 !important; }
-.cflow-dark svg path[fill="#171717"] { fill: #aeb2b7 !important; }
-.cflow-dark svg rect { fill: #292d32 !important; stroke: #aeb2b7 !important; }
-.cflow-dark svg text { fill: #eeeae2 !important; }
-
-.cflow-dark ::-webkit-scrollbar-track {
-  background: #25292d !important;
-  border-left-color: #111315 !important;
-}
-.cflow-dark ::-webkit-scrollbar-thumb {
-  background: #5c6067 !important;
-  border-color: #25292d !important;
-}
-.cflow-dark ::-webkit-scrollbar-thumb:hover { background: #7b7f86 !important; }
-
-/* ============================================================
-   THEME TOGGLE
-============================================================ */
-
-.cflow-theme-toggle {
-  position: fixed;
-  top: 16px;
-  right: 20px;
-  z-index: 10001;
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  min-height: 42px;
-  padding: 5px 9px 5px 6px;
-  border: 2px solid #171717;
-  background: #fff9f0;
-  color: #171717;
-  box-shadow: 3px 3px 0 #171717;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: .12em;
-  transition: transform 180ms ease, box-shadow 180ms ease, background 260ms ease;
-}
-.cflow-theme-toggle:hover { transform: translateY(-1px); box-shadow: 4px 4px 0 #171717; }
-.cflow-theme-toggle:active { transform: translateY(1px); box-shadow: 2px 2px 0 #171717; }
-.cflow-theme-toggle:disabled { cursor: wait; }
-.cflow-theme-toggle:focus-visible { outline: 3px solid #b7a3e5; outline-offset: 3px; }
-
-.cflow-theme-toggle-track {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 42px;
-  height: 24px;
-  padding: 3px;
-  border: 2px solid currentColor;
-  border-radius: 999px;
-  overflow: hidden;
-  background: #e8dfcf;
-}
-.cflow-theme-toggle-icon { position: relative; z-index: 1; display: grid; width: 15px; height: 15px; place-items: center; font-size: 11px; line-height: 1; }
-.cflow-theme-toggle-thumb {
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #171717;
-  transition: transform 480ms cubic-bezier(.22,1,.36,1), background 260ms ease;
-}
-.cflow-dark .cflow-theme-toggle { border-color: #111315; background: #30343a; color: #eeeae2; box-shadow: 3px 3px 0 #111315; }
-.cflow-dark .cflow-theme-toggle-track { background: #202326; }
-.cflow-dark .cflow-theme-toggle-thumb { transform: translateX(18px); background: #eeeae2; }
-
-/* ============================================================
-   THEME CHANGE SCREEN
-   A single full-screen panel drops from above the viewport,
-   covers the UI, the theme changes while covered, then the
-   same panel continues downward to reveal the new theme.
-   No curtain split, no red fabric, no persistent overlay.
-============================================================ */
-
-.cflow-theme-curtain {
-  position: fixed;
-  inset: 0;
-  z-index: 10000;
-  overflow: hidden;
-  pointer-events: auto;
-}
-
-.cflow-theme-curtain__screen {
-  position: absolute;
-  inset: 0;
-  background: #202326;
-  transform: translateY(-100%);
-  will-change: transform;
-}
-
-.cflow-theme-curtain.is-target-light .cflow-theme-curtain__screen {
-  background: #fff9f0;
-}
-
-.cflow-theme-curtain.is-target-dark .cflow-theme-curtain__screen {
-  background: #202326;
-}
-
-/* The screen physically falls down from above. */
-.cflow-theme-curtain.is-closing .cflow-theme-curtain__screen {
-  animation: cflowScreenFall 1150ms cubic-bezier(.76,0,.18,1) forwards;
-}
-
-/* After the theme changes, the screen continues downward and leaves. */
-.cflow-theme-curtain.is-opening .cflow-theme-curtain__screen {
-  transform: translateY(0);
-  animation: cflowScreenReveal 1050ms cubic-bezier(.22,1,.36,1) forwards;
-}
-
-.cflow-theme-curtain__mark {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  z-index: 2;
-  transform: translate(-50%, -50%);
-  color: #eeeae2;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: .34em;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.cflow-theme-curtain.is-target-light .cflow-theme-curtain__mark {
-  color: #171717;
-}
-
-.cflow-theme-curtain.is-closing .cflow-theme-curtain__mark {
-  animation: cflowScreenMarkIn 450ms ease-out 650ms forwards;
-}
-
-.cflow-theme-curtain.is-opening .cflow-theme-curtain__mark {
-  animation: cflowScreenMarkOut 220ms ease-in forwards;
-}
-
-@keyframes cflowScreenFall {
-  from { transform: translateY(-100%); }
-  to { transform: translateY(0); }
-}
-
-@keyframes cflowScreenReveal {
-  from { transform: translateY(0); }
-  to { transform: translateY(100%); }
-}
-
-@keyframes cflowScreenMarkIn {
-  from { opacity: 0; transform: translate(-50%, -46%); }
-  to { opacity: .85; transform: translate(-50%, -50%); }
-}
-
-@keyframes cflowScreenMarkOut {
-  from { opacity: .85; }
-  to { opacity: 0; }
-}
-
-@media (max-width: 900px) {
-  .cflow-theme-toggle { top: 10px; right: 12px; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .cflow-theme-curtain.is-closing .cflow-theme-curtain__screen,
-  .cflow-theme-curtain.is-opening .cflow-theme-curtain__screen,
-  .cflow-theme-curtain.is-closing .cflow-theme-curtain__mark,
-  .cflow-theme-curtain.is-opening .cflow-theme-curtain__mark,
-  .cflow-theme-toggle,
-  .cflow-theme-toggle-thumb {
-    animation-duration: 1ms !important;
-    transition-duration: 1ms !important;
-  }
-}
+.cflow-dark,.cflow-dark > div,.cflow-dark header,.cflow-dark footer,.cflow-dark main,.cflow-dark section{color:var(--cflow-ink)!important}
+.cflow-dark > div,.cflow-dark header,.cflow-dark main{background-color:var(--cflow-bg)!important}
+.cflow-dark footer{background-color:#292d31!important}.cflow-dark section{border-color:var(--cflow-border)!important}
+/* Muted pastel workspace panels: visible but never neon. */
+.cflow-dark main>section:nth-child(1){background-color:var(--cflow-code)!important}
+.cflow-dark main>section:nth-child(2){background-color:var(--cflow-flow)!important}
+.cflow-dark main>section:nth-child(3){background-color:var(--cflow-memory)!important}
+.cflow-dark main>section:nth-child(1)>div,.cflow-dark main>section:nth-child(1)>div>div,.cflow-dark main>section:nth-child(1)>div>div>div{background-color:var(--cflow-code)!important}
+.cflow-dark main>section:nth-child(2)>div:nth-child(2),.cflow-dark main>section:nth-child(2)>div:nth-child(2)>div{background-color:var(--cflow-flow)!important}
+.cflow-dark main>section:nth-child(3)>div:nth-child(2){background-color:var(--cflow-memory)!important}
+.cflow-dark [class*="bg-[#FFF9F0]"]{background-color:#25282b!important}
+.cflow-dark [class*="bg-[#DDF4FF]"]{background-color:var(--cflow-code)!important}
+.cflow-dark [class*="bg-[#E8DFFF]"]{background-color:var(--cflow-flow)!important}
+.cflow-dark [class*="bg-[#DFF7E8]"]{background-color:var(--cflow-memory)!important}
+.cflow-dark [class*="bg-[#FFE3A3]"]{background-color:var(--cflow-exec)!important}
+.cflow-dark [class*="bg-[#FFD6E7]"]{background-color:var(--cflow-special)!important}
+.cflow-dark [class*="bg-white"]{background-color:var(--cflow-card)!important}.cflow-dark [data-memory]{background-color:var(--cflow-card)!important}
+/* Readability: light text with softer secondary text. */
+.cflow-dark [class*="text-[#171717]"]{color:#f1eee8!important}.cflow-dark [class*="text-black"]{color:#f1eee8!important}.cflow-dark [class*="text-white"]{color:#f7f4ee!important}.cflow-dark [class*="text-gray"]{color:#c3c5c8!important}.cflow-dark [class*="text-[#9"]{color:#b8bbc0!important}
+.cflow-dark [class*="border-[#171717]"]{border-color:var(--cflow-border)!important}.cflow-dark input,.cflow-dark textarea{color:#f1eee8!important;caret-color:#e8c77a}.cflow-dark input::placeholder,.cflow-dark textarea::placeholder{color:#9ea2a7!important;opacity:1}
+.cflow-dark [class*="shadow-"]{--tw-shadow-color:#111315!important}.cflow-dark [class*="ring-offset-"]{--tw-ring-offset-color:var(--cflow-bg)!important}.cflow-dark textarea{background:transparent!important}.cflow-dark ::selection{background:#62543a!important;color:#fffaf2!important}
+.cflow-dark [data-flow-node]{color:#f1eee8!important;border-color:var(--cflow-border)!important;box-shadow:4px 4px 0 var(--cflow-border)!important}
+.cflow-dark [data-flow-node][style*="#FFF9F0"]{background:#3b3f43!important}.cflow-dark [data-flow-node][style*="#FFFFFF"]{background:#353a3f!important}.cflow-dark [data-flow-node][style*="#FFE3A3"]{background:#62543a!important}.cflow-dark [data-flow-node][style*="#DDF4EA"]{background:#3c4b45!important}.cflow-dark [data-flow-node][style*="#FFD6E7"]{background:#5a414b!important}
+.cflow-dark svg path[stroke="#171717"]{stroke:#c2c4c7!important}.cflow-dark svg path[stroke="#FFE3A3"]{stroke:#d8bc70!important}.cflow-dark svg path[fill="#171717"]{fill:#c2c4c7!important}.cflow-dark svg rect{fill:#30353a!important;stroke:#aeb2b7!important}.cflow-dark svg text{fill:#f1eee8!important}
+.cflow-dark ::-webkit-scrollbar-track{background:#292d31!important}.cflow-dark ::-webkit-scrollbar-thumb{background:#62676e!important;border-color:#292d31!important}.cflow-dark ::-webkit-scrollbar-thumb:hover{background:#7b8087!important}
+/* Theme toggle */
+.cflow-theme-toggle{position:fixed;top:16px;right:20px;z-index:10001;display:inline-flex;align-items:center;gap:9px;min-height:42px;padding:5px 9px 5px 6px;border:2px solid #171717;background:#fff9f0;color:#171717;box-shadow:3px 3px 0 #171717;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:10px;font-weight:900;letter-spacing:.12em;transition:transform 180ms ease,box-shadow 180ms ease,background 260ms ease}
+.cflow-theme-toggle:hover{transform:translateY(-1px);box-shadow:4px 4px 0 #171717}.cflow-theme-toggle:active{transform:translateY(1px);box-shadow:2px 2px 0 #171717}.cflow-theme-toggle:disabled{cursor:wait}.cflow-theme-toggle:focus-visible{outline:3px solid #b7a3e5;outline-offset:3px}
+.cflow-theme-toggle-track{position:relative;display:flex;align-items:center;justify-content:space-between;width:42px;height:24px;padding:3px;border:2px solid currentColor;border-radius:999px;overflow:hidden;background:#e8dfcf}.cflow-theme-toggle-icon{position:relative;z-index:1;display:grid;width:15px;height:15px;place-items:center;font-size:11px;line-height:1}.cflow-theme-toggle-thumb{position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#171717;transition:transform 480ms cubic-bezier(.22,1,.36,1),background 260ms ease}.cflow-dark .cflow-theme-toggle{border-color:#111315;background:#34383d;color:#eeeae2;box-shadow:3px 3px 0 #111315}.cflow-dark .cflow-theme-toggle-track{background:#202326}.cflow-dark .cflow-theme-toggle-thumb{transform:translateX(18px);background:#eeeae2}
+/* Single full-screen sheet drops from above, changes theme while covering, then leaves downward. */
+.cflow-theme-curtain{position:fixed;inset:0;z-index:10000;overflow:hidden;pointer-events:auto}.cflow-theme-curtain__screen{position:absolute;inset:0;background:#202326;transform:translateY(-100%);will-change:transform}.cflow-theme-curtain.is-target-light .cflow-theme-curtain__screen{background:#fff9f0}.cflow-theme-curtain.is-target-dark .cflow-theme-curtain__screen{background:#202326}.cflow-theme-curtain.is-closing .cflow-theme-curtain__screen{animation:cflowScreenFall 1150ms cubic-bezier(.76,0,.18,1) forwards}.cflow-theme-curtain.is-opening .cflow-theme-curtain__screen{transform:translateY(0);animation:cflowScreenReveal 1050ms cubic-bezier(.22,1,.36,1) forwards}.cflow-theme-curtain__mark{position:absolute;left:50%;top:50%;z-index:2;transform:translate(-50%,-50%);color:#eeeae2;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px;font-weight:900;letter-spacing:.34em;white-space:nowrap;opacity:0;pointer-events:none}.cflow-theme-curtain.is-target-light .cflow-theme-curtain__mark{color:#171717}.cflow-theme-curtain.is-closing .cflow-theme-curtain__mark{animation:cflowScreenMarkIn 450ms ease-out 650ms forwards}.cflow-theme-curtain.is-opening .cflow-theme-curtain__mark{animation:cflowScreenMarkOut 220ms ease-in forwards}
+@keyframes cflowScreenFall{from{transform:translateY(-100%)}to{transform:translateY(0)}}@keyframes cflowScreenReveal{from{transform:translateY(0)}to{transform:translateY(100%)}}@keyframes cflowScreenMarkIn{from{opacity:0;transform:translate(-50%,-46%)}to{opacity:.85;transform:translate(-50%,-50%)}}@keyframes cflowScreenMarkOut{from{opacity:.85}to{opacity:0}}
+@media(max-width:900px){.cflow-theme-toggle{top:10px;right:12px}}@media(prefers-reduced-motion:reduce){.cflow-theme-curtain.is-closing .cflow-theme-curtain__screen,.cflow-theme-curtain.is-opening .cflow-theme-curtain__screen,.cflow-theme-curtain.is-closing .cflow-theme-curtain__mark,.cflow-theme-curtain.is-opening .cflow-theme-curtain__mark,.cflow-theme-toggle,.cflow-theme-toggle-thumb{animation-duration:1ms!important;transition-duration:1ms!important}}
