@@ -30,6 +30,34 @@
 .cflow-dark [data-flow-node][style*="#FFF9F0"]{background:#3b3f43!important}.cflow-dark [data-flow-node][style*="#FFFFFF"]{background:#353a3f!important}.cflow-dark [data-flow-node][style*="#FFE3A3"]{background:#62543a!important}.cflow-dark [data-flow-node][style*="#DDF4EA"]{background:#3c4b45!important}.cflow-dark [data-flow-node][style*="#FFD6E7"]{background:#5a414b!important}
 .cflow-dark svg path[stroke="#171717"]{stroke:#c2c4c7!important}.cflow-dark svg path[stroke="#FFE3A3"]{stroke:#d8bc70!important}.cflow-dark svg path[fill="#171717"]{fill:#c2c4c7!important}.cflow-dark svg rect{fill:#30353a!important;stroke:#aeb2b7!important}.cflow-dark svg text{fill:#f1eee8!important}
 .cflow-dark ::-webkit-scrollbar-track{background:#292d31!important}.cflow-dark ::-webkit-scrollbar-thumb{background:#62676e!important;border-color:#292d31!important}.cflow-dark ::-webkit-scrollbar-thumb:hover{background:#7b8087!important}
+
+/* Flow-node typography: force readable dark-mode text on every node and its children.
+   The node backgrounds remain muted pastel; labels use warm off-white for strong contrast. */
+.cflow-dark .cflow-flow-node,
+.cflow-dark .cflow-flow-node > div,
+.cflow-dark .cflow-flow-node > div > div {
+  color:#fffaf2!important;
+  -webkit-text-fill-color:#fffaf2!important;
+  opacity:1!important;
+  text-shadow:0 1px 1px rgba(17,19,21,.35);
+}
+.cflow-dark .cflow-flow-node--start,
+.cflow-dark .cflow-flow-node--exit {
+  color:#201f22!important;
+  -webkit-text-fill-color:#201f22!important;
+  text-shadow:none;
+}
+.cflow-dark .cflow-flow-node--start > div,
+.cflow-dark .cflow-flow-node--start > div > div,
+.cflow-dark .cflow-flow-node--exit > div,
+.cflow-dark .cflow-flow-node--exit > div > div {
+  color:#201f22!important;
+  -webkit-text-fill-color:#201f22!important;
+}
+/* Disabled/low-emphasis states must never wash the label out. */
+.cflow-dark .cflow-flow-node:disabled,
+.cflow-dark .cflow-flow-node[aria-disabled="true"] { opacity:1!important; }
+
 /* Theme toggle */
 .cflow-theme-toggle{position:fixed;top:16px;right:20px;z-index:10001;display:inline-flex;align-items:center;gap:9px;min-height:42px;padding:5px 9px 5px 6px;border:2px solid #171717;background:#fff9f0;color:#171717;box-shadow:3px 3px 0 #171717;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:10px;font-weight:900;letter-spacing:.12em;transition:transform 180ms ease,box-shadow 180ms ease,background 260ms ease}
 .cflow-theme-toggle:hover{transform:translateY(-1px);box-shadow:4px 4px 0 #171717}.cflow-theme-toggle:active{transform:translateY(1px);box-shadow:2px 2px 0 #171717}.cflow-theme-toggle:disabled{cursor:wait}.cflow-theme-toggle:focus-visible{outline:3px solid #b7a3e5;outline-offset:3px}
