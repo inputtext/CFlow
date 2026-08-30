@@ -1,480 +1,137 @@
 // ============================================================
 // C·FLOW FLOW BUILDER
 // ============================================================
-// Converts parser statements into a control-flow graph.
-//
-// Supported:
-// - sequential execution
-// - if
-// - else if
-// - else
-// - for
-// - while
-// - loop-back edges
-// - true / false edges
-// - start / exit
-// ============================================================
 
 function buildFlow(program) {
-  const nodes = [];
+  const statements = Array.isArray(program?.statements) ? program.statements : [];
+  const nodes = [{ id: "start", label: "START", type: "start" }];
   const edges = [];
 
-  const statements = Array.isArray(
-    program?.statements
-  )
-    ? program.statements
-    : [];
+  const isControl = (s) => s && ["for", "while", "condition", "else_if", "else"].includes(s.type);
 
-  // ----------------------------------------------------------
-  // EDGE HELPER
-  // ----------------------------------------------------------
-
-  const addEdge = (
-    from,
-    to,
-    type = "normal",
-    id
-  ) => {
+  const addEdge = (from, to, type = "normal", id = null) => {
     if (!from || !to) return;
-
-    const exists = edges.some(
-      (edge) =>
-        edge.from === from &&
-        edge.to === to &&
-        edge.type === type
-    );
-
-    if (exists) return;
-
-    edges.push({
-      id:
-        id ??
-        `edge_${edges.length}`,
-      from,
-      to,
-      type,
-    });
+    if (edges.some((e) => e.from === from && e.to === to && e.type === type)) return;
+    edges.push({ id: id || `edge_${edges.length}`, from, to, type });
   };
 
-  // ----------------------------------------------------------
-  // NODE CREATOR
-  // ----------------------------------------------------------
-
-  const createNode = (statement) => {
-    if (
-      statement.type === "for" ||
-      statement.type === "while" ||
-      statement.type === "condition" ||
-      statement.type === "else_if"
-    ) {
-      return {
-        id: statement.id,
-        label:
-          statement.expression
-            ? `${statement.expression} ?`
-            : statement.code,
-        type: "condition",
-        line: statement.line,
-      };
-    }
-
-    if (statement.type === "else") {
-      return {
-        id: statement.id,
-        label: "ELSE",
-        type: "condition",
-        line: statement.line,
-      };
-    }
-
-    if (
-      statement.type === "declaration"
-    ) {
-      return {
-        id: statement.id,
-        label:
-          statement.value !== null &&
-          statement.value !== undefined
-            ? `${statement.variable} = ${statement.value}`
-            : statement.variable,
-        type: "operation",
-        line: statement.line,
-      };
-    }
-
-    if (
-      statement.type === "output"
-    ) {
-      return {
-        id: statement.id,
-        label: "OUTPUT",
-        type: "output",
-        line: statement.line,
-      };
-    }
-
-    return {
-      id: statement.id,
-      label: String(
-        statement.code ?? ""
-      ).replace(/;$/, ""),
-      type: "operation",
-      line: statement.line,
-    };
+  const makeNode = (s) => {
+    if (s.type === "for") return { id: s.id, label: `for (${s.expression})`, type: "condition", line: s.line, controlType: "for" };
+    if (s.type === "while") return { id: s.id, label: `while (${s.expression})`, type: "condition", line: s.line, controlType: "while" };
+    if (s.type === "condition" || s.type === "else_if") return { id: s.id, label: `${s.expression || "condition"} ?`, type: "condition", line: s.line, controlType: s.type };
+    if (s.type === "else") return { id: s.id, label: "ELSE", type: "condition", line: s.line, controlType: "else" };
+    if (s.type === "output") return { id: s.id, label: "OUTPUT", type: "output", line: s.line };
+    if (s.type === "declaration") return { id: s.id, label: s.value == null ? s.variable : `${s.variable} = ${s.value}`, type: "operation", line: s.line };
+    return { id: s.id, label: String(s.code || "").replace(/;$/, ""), type: "operation", line: s.line };
   };
 
-  // ----------------------------------------------------------
-  // START
-  // ----------------------------------------------------------
+  statements.forEach((s) => nodes.push(makeNode(s)));
 
-  nodes.push({
-    id: "start",
-    label: "START",
-    type: "start",
-  });
-
-  // ----------------------------------------------------------
-  // STATEMENT NODES
-  // ----------------------------------------------------------
-
-  statements.forEach(
-    (statement) => {
-      nodes.push(
-        createNode(statement)
-      );
-    }
-  );
-
-  // ----------------------------------------------------------
-  // EMPTY PROGRAM
-  // ----------------------------------------------------------
-
-  if (statements.length === 0) {
-    nodes.push({
-      id: "exit",
-      label: "EXIT",
-      type: "exit",
-    });
-
-    addEdge(
-      "start",
-      "exit",
-      "normal",
-      "edge_start_exit"
-    );
-
-    return {
-      nodes,
-      edges,
-    };
+  if (!statements.length) {
+    nodes.push({ id: "exit", label: "EXIT", type: "exit" });
+    addEdge("start", "exit", "normal", "edge_start_exit");
+    return { nodes, edges };
   }
 
-  // ----------------------------------------------------------
-  // START → FIRST STATEMENT
-  // ----------------------------------------------------------
+  addEdge("start", statements[0].id, "normal", "edge_start");
 
-  addEdge(
-    "start",
-    statements[0].id,
-    "normal",
-    "edge_start"
-  );
+  // Statements deeper than a control node's depth belong to that block.
+  function bodyRange(index) {
+    const control = statements[index];
+    const next = statements[index + 1];
+    if (!next) return null;
 
-  // ----------------------------------------------------------
-  // FIND BLOCK END
-  // ----------------------------------------------------------
-
-  /*
-   * The parser gives us statements in source order.
-   *
-   * We use the source line numbers to determine where a control
-   * block finishes.
-   *
-   * This is intentionally conservative. It handles the common
-   * simple C/C++ structures used by C·FLOW without pretending to
-   * be a full C++ compiler.
-   */
-
-  function findLoopBodyEnd(index) {
-    const control =
-      statements[index];
+    if (next.depth <= control.depth) {
+      // Conservative support for a single statement without braces.
+      return { start: index + 1, end: index + 1 };
+    }
 
     let end = index + 1;
-
-    while (
-      end < statements.length
-    ) {
-      const current =
-        statements[end];
-
-      /*
-       * A new top-level control statement
-       * indicates the previous simple block
-       * has ended.
-       */
-      if (
-        end > index + 1 &&
-        (
-          current.type === "for" ||
-          current.type === "while" ||
-          current.type === "condition" ||
-          current.type === "else_if" ||
-          current.type === "else"
-        )
-      ) {
-        break;
-      }
-
-      end++;
-    }
-
-    return end - 1;
+    while (end + 1 < statements.length && statements[end + 1].depth > control.depth) end++;
+    return { start: index + 1, end };
   }
 
-  // ----------------------------------------------------------
-  // BUILD EDGES
-  // ----------------------------------------------------------
-
-  for (
-    let index = 0;
-    index < statements.length;
-    index++
-  ) {
-    const statement =
-      statements[index];
-
-    const current =
-      statement.id;
-
-    const next =
-      statements[index + 1]?.id ??
-      "exit";
-
-    // ========================================================
-    // FOR / WHILE
-    // ========================================================
-
-    if (
-      statement.type === "for" ||
-      statement.type === "while"
-    ) {
-      const bodyIndex =
-        index + 1;
-
-      const body =
-        statements[bodyIndex];
-
-      if (body) {
-        // condition → body
-        addEdge(
-          current,
-          body.id,
-          "true",
-          `edge_${current}_true`
-        );
-
-        /*
-         * Find the last statement belonging
-         * to the simple loop body.
-         */
-        const bodyEndIndex =
-          findLoopBodyEnd(index);
-
-        const bodyEnd =
-          statements[
-            bodyEndIndex
-          ];
-
-        if (bodyEnd) {
-          // body → condition
-          addEdge(
-            bodyEnd.id,
-            current,
-            "loop",
-            `edge_${current}_loop`
-          );
-
-          const afterLoop =
-            statements[
-              bodyEndIndex + 1
-            ]?.id ?? "exit";
-
-          // condition → after loop
-          addEdge(
-            current,
-            afterLoop,
-            "false",
-            `edge_${current}_false`
-          );
-        }
-      } else {
-        addEdge(
-          current,
-          "exit",
-          "false",
-          `edge_${current}_false`
-        );
-      }
-
-      continue;
+  function nextAtOrAbove(index, depth) {
+    for (let i = index + 1; i < statements.length; i++) {
+      if (statements[i].depth <= depth) return i;
     }
-
-    // ========================================================
-    // IF / ELSE-IF
-    // ========================================================
-
-    if (
-      statement.type ===
-        "condition" ||
-      statement.type ===
-        "else_if"
-    ) {
-      const trueTarget =
-        statements[index + 1];
-
-      if (trueTarget) {
-        addEdge(
-          current,
-          trueTarget.id,
-          "true",
-          `edge_${current}_true`
-        );
-      }
-
-      /*
-       * Look ahead for an ELSE.
-       */
-      let elseStatement =
-        null;
-
-      for (
-        let j = index + 1;
-        j < statements.length;
-        j++
-      ) {
-        if (
-          statements[j].type ===
-          "else"
-        ) {
-          elseStatement =
-            statements[j];
-
-          break;
-        }
-
-        /*
-         * Don't search through another
-         * independent control structure.
-         */
-        if (
-          j > index + 1 &&
-          (
-            statements[j].type ===
-              "condition" ||
-            statements[j].type ===
-              "for" ||
-            statements[j].type ===
-              "while"
-          )
-        ) {
-          break;
-        }
-      }
-
-      if (elseStatement) {
-        addEdge(
-          current,
-          elseStatement.id,
-          "false",
-          `edge_${current}_false`
-        );
-      } else {
-        /*
-         * No explicit ELSE.
-         *
-         * The false branch skips the immediate
-         * body statement.
-         */
-        const falseTarget =
-          statements[index + 2];
-
-        addEdge(
-          current,
-          falseTarget?.id ??
-            "exit",
-          "false",
-          `edge_${current}_false`
-        );
-      }
-
-      continue;
-    }
-
-    // ========================================================
-    // ELSE
-    // ========================================================
-
-    if (
-      statement.type === "else"
-    ) {
-      addEdge(
-        current,
-        next,
-        "normal",
-        `edge_${current}_next`
-      );
-
-      continue;
-    }
-
-    // ========================================================
-    // NORMAL STATEMENT
-    // ========================================================
-
-    addEdge(
-      current,
-      next,
-      "normal",
-      `edge_${current}_next`
-    );
+    return -1;
   }
 
-  // ----------------------------------------------------------
-  // EXIT
-  // ----------------------------------------------------------
+  // Ordinary edges stay inside the same block. Control nodes are handled below.
+  for (let i = 0; i < statements.length - 1; i++) {
+    const current = statements[i];
+    const next = statements[i + 1];
+    if (isControl(current) || current.type === "return") continue;
+    if (current.depth === next.depth) {
+      addEdge(current.id, next.id, "normal", `edge_${current.id}_next`);
+    }
+  }
 
-  nodes.push({
-    id: "exit",
-    label: "EXIT",
-    type: "exit",
+  for (let i = 0; i < statements.length; i++) {
+    const s = statements[i];
+
+    if (s.type === "for" || s.type === "while") {
+      const range = bodyRange(i);
+      if (!range) {
+        const after = nextAtOrAbove(i, s.depth);
+        addEdge(s.id, after >= 0 ? statements[after].id : "exit", "false", `edge_${s.id}_false`);
+        continue;
+      }
+
+      const first = statements[range.start];
+      const last = statements[range.end];
+      const after = nextAtOrAbove(range.end, s.depth);
+      const afterId = after >= 0 ? statements[after].id : "exit";
+
+      addEdge(s.id, first.id, "true", `edge_${s.id}_true`);
+      addEdge(last.id, s.id, "loop", `edge_${s.id}_loop`);
+      addEdge(s.id, afterId, "false", `edge_${s.id}_false`);
+      continue;
+    }
+
+    if (s.type === "condition" || s.type === "else_if") {
+      const range = bodyRange(i);
+      const bodyFirst = range ? statements[range.start] : statements[i + 1];
+      const bodyLastIndex = range ? range.end : i + 1;
+      const bodyLast = statements[bodyLastIndex];
+      if (bodyFirst) addEdge(s.id, bodyFirst.id, "true", `edge_${s.id}_true`);
+
+      const afterBody = nextAtOrAbove(bodyLastIndex, s.depth);
+      const maybeElse = afterBody >= 0 && statements[afterBody].type === "else" ? afterBody : -1;
+
+      if (maybeElse >= 0) {
+        const e = statements[maybeElse];
+        addEdge(s.id, e.id, "false", `edge_${s.id}_false`);
+        const er = bodyRange(maybeElse);
+        if (er) {
+          const ef = statements[er.start];
+          const el = statements[er.end];
+          const join = nextAtOrAbove(er.end, s.depth);
+          const joinId = join >= 0 ? statements[join].id : "exit";
+          addEdge(e.id, ef.id, "normal", `edge_${e.id}_body`);
+          addEdge(el.id, joinId, "normal", `edge_${el.id}_join`);
+          if (bodyLast && !isControl(bodyLast)) addEdge(bodyLast.id, joinId, "normal", `edge_${bodyLast.id}_join`);
+        }
+      } else {
+        const joinId = afterBody >= 0 ? statements[afterBody].id : "exit";
+        addEdge(s.id, joinId, "false", `edge_${s.id}_false`);
+        if (bodyLast && !isControl(bodyLast)) addEdge(bodyLast.id, joinId, "normal", `edge_${bodyLast.id}_join`);
+      }
+    }
+  }
+
+  nodes.push({ id: "exit", label: "EXIT", type: "exit" });
+  statements.forEach((s, i) => {
+    if (s.type === "return") addEdge(s.id, "exit", "normal", `edge_${s.id}_exit`);
   });
 
-  /*
-   * If the last executable statement isn't
-   * a loop, connect it to EXIT.
-   */
-  const last =
-    statements[
-      statements.length - 1
-    ];
-
-  if (
-    last &&
-    last.type !== "for" &&
-    last.type !== "while"
-  ) {
-    addEdge(
-      last.id,
-      "exit",
-      "normal",
-      "edge_exit"
-    );
+  const last = statements[statements.length - 1];
+  if (last && last.type !== "for" && last.type !== "while" && last.type !== "return") {
+    addEdge(last.id, "exit", "normal", "edge_exit");
   }
 
-  return {
-    nodes,
-    edges,
-  };
+  return { nodes, edges };
 }
 
 module.exports = buildFlow;
