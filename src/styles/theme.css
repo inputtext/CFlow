@@ -41,7 +41,6 @@
   border-color: var(--cflow-border) !important;
 }
 
-/* Robust semantic overrides for the existing C·FLOW three-column workspace. */
 .cflow-dark main > section:nth-child(1) { background-color: var(--cflow-code) !important; }
 .cflow-dark main > section:nth-child(2) { background-color: var(--cflow-flow) !important; }
 .cflow-dark main > section:nth-child(3) { background-color: var(--cflow-memory) !important; }
@@ -55,7 +54,6 @@
 
 .cflow-dark main > section:nth-child(3) > div:nth-child(2) { background-color: var(--cflow-memory) !important; }
 
-/* Existing pastel classes, retained for the language-selection screen and nested UI. */
 .cflow-dark [class*="bg-[#FFF9F0]"] { background-color: var(--cflow-bg) !important; }
 .cflow-dark [class*="bg-[#DDF4FF]"] { background-color: var(--cflow-code) !important; }
 .cflow-dark [class*="bg-[#E8DFFF]"] { background-color: var(--cflow-flow) !important; }
@@ -63,13 +61,10 @@
 .cflow-dark [class*="bg-[#FFE3A3]"] { background-color: var(--cflow-exec) !important; }
 .cflow-dark [class*="bg-[#FFD6E7]"] { background-color: var(--cflow-special) !important; }
 .cflow-dark [class*="bg-white"] { background-color: var(--cflow-card) !important; }
-
 .cflow-dark [data-memory] { background-color: var(--cflow-card) !important; }
-
 .cflow-dark [class*="text-[#171717]"] { color: var(--cflow-ink) !important; }
 .cflow-dark [class*="text-white"] { color: #f4f1eb !important; }
 .cflow-dark [class*="border-[#171717]"] { border-color: var(--cflow-border) !important; }
-
 .cflow-dark [class*="shadow-"] { --tw-shadow-color: #111315 !important; }
 .cflow-dark [class*="ring-offset-"] { --tw-ring-offset-color: var(--cflow-bg) !important; }
 
@@ -84,7 +79,6 @@
   color: #f7f4ee !important;
 }
 
-/* Flow graph: nodes use inline styles, therefore the dark replacements are important. */
 .cflow-dark [data-flow-node] {
   color: var(--cflow-ink) !important;
   border-color: var(--cflow-border) !important;
@@ -103,7 +97,6 @@
 .cflow-dark svg rect { fill: #292d32 !important; stroke: #aeb2b7 !important; }
 .cflow-dark svg text { fill: #eeeae2 !important; }
 
-/* Scrollbars */
 .cflow-dark ::-webkit-scrollbar-track {
   background: #25292d !important;
   border-left-color: #111315 !important;
@@ -172,7 +165,11 @@
 .cflow-dark .cflow-theme-toggle-thumb { transform: translateX(18px); background: #eeeae2; }
 
 /* ============================================================
-   THEATRICAL RED CURTAIN
+   THEME CHANGE SCREEN
+   A single full-screen panel drops from above the viewport,
+   covers the UI, the theme changes while covered, then the
+   same panel continues downward to reveal the new theme.
+   No curtain split, no red fabric, no persistent overlay.
 ============================================================ */
 
 .cflow-theme-curtain {
@@ -181,36 +178,34 @@
   z-index: 10000;
   overflow: hidden;
   pointer-events: auto;
-  background: #6f2434;
 }
-.cflow-theme-curtain__panel {
+
+.cflow-theme-curtain__screen {
   position: absolute;
-  left: 0;
-  width: 100%;
-  height: 50%;
-  background: repeating-linear-gradient(90deg,
-    #5a1c2a 0, #5a1c2a 5%,
-    #843044 9%, #651f2f 14%,
-    #96394d 19%, #611d2d 25%,
-    #7f2b3d 31%, #581a29 38%,
-    #8c3043 45%, #601c2c 52%,
-    #8e3144 60%, #5a1b2a 68%,
-    #8a2f42 76%, #5c1c2b 84%,
-    #923346 92%, #5a1c2a 100%);
-  box-shadow: inset 0 -16px 26px rgba(0,0,0,.20), inset 0 8px 16px rgba(255,255,255,.05);
+  inset: 0;
+  background: #202326;
+  transform: translateY(-100%);
   will-change: transform;
 }
-.cflow-theme-curtain__panel--top { top: 0; transform: translateY(-100%); border-bottom: 5px solid #42131f; }
-.cflow-theme-curtain__panel--bottom { bottom: 0; transform: translateY(100%); border-top: 5px solid #42131f; }
 
-/* Prepare is deliberately transition-free so the browser paints the off-screen start position. */
-.cflow-theme-curtain.is-prepare .cflow-theme-curtain__panel { transition: none !important; }
-.cflow-theme-curtain.is-closing .cflow-theme-curtain__panel,
-.cflow-theme-curtain.is-opening .cflow-theme-curtain__panel { transition: transform 1250ms cubic-bezier(.77,0,.18,1); }
-.cflow-theme-curtain.is-closing .cflow-theme-curtain__panel--top { transform: translateY(0); }
-.cflow-theme-curtain.is-closing .cflow-theme-curtain__panel--bottom { transform: translateY(0); }
-.cflow-theme-curtain.is-opening .cflow-theme-curtain__panel--top { transform: translateY(-100%); }
-.cflow-theme-curtain.is-opening .cflow-theme-curtain__panel--bottom { transform: translateY(100%); }
+.cflow-theme-curtain.is-target-light .cflow-theme-curtain__screen {
+  background: #fff9f0;
+}
+
+.cflow-theme-curtain.is-target-dark .cflow-theme-curtain__screen {
+  background: #202326;
+}
+
+/* The screen physically falls down from above. */
+.cflow-theme-curtain.is-closing .cflow-theme-curtain__screen {
+  animation: cflowScreenFall 1150ms cubic-bezier(.76,0,.18,1) forwards;
+}
+
+/* After the theme changes, the screen continues downward and leaves. */
+.cflow-theme-curtain.is-opening .cflow-theme-curtain__screen {
+  transform: translateY(0);
+  animation: cflowScreenReveal 1050ms cubic-bezier(.22,1,.36,1) forwards;
+}
 
 .cflow-theme-curtain__mark {
   position: absolute;
@@ -218,28 +213,60 @@
   top: 50%;
   z-index: 2;
   transform: translate(-50%, -50%);
-  color: #fff4ed;
+  color: #eeeae2;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 12px;
   font-weight: 900;
   letter-spacing: .34em;
   white-space: nowrap;
-  text-shadow: 2px 2px 0 rgba(0,0,0,.35);
   opacity: 0;
-  animation: cflowCurtainMarkIn 520ms ease-out 520ms forwards;
+  pointer-events: none;
 }
-.cflow-theme-curtain.is-opening .cflow-theme-curtain__mark { animation: cflowCurtainMarkOut 360ms ease-in forwards; }
-@keyframes cflowCurtainMarkIn {
-  from { opacity: 0; transform: translate(-50%, -46%) scale(.94); }
-  to { opacity: .9; transform: translate(-50%, -50%) scale(1); }
+
+.cflow-theme-curtain.is-target-light .cflow-theme-curtain__mark {
+  color: #171717;
 }
-@keyframes cflowCurtainMarkOut { from { opacity: .9; } to { opacity: 0; } }
+
+.cflow-theme-curtain.is-closing .cflow-theme-curtain__mark {
+  animation: cflowScreenMarkIn 450ms ease-out 650ms forwards;
+}
+
+.cflow-theme-curtain.is-opening .cflow-theme-curtain__mark {
+  animation: cflowScreenMarkOut 220ms ease-in forwards;
+}
+
+@keyframes cflowScreenFall {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes cflowScreenReveal {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
+
+@keyframes cflowScreenMarkIn {
+  from { opacity: 0; transform: translate(-50%, -46%); }
+  to { opacity: .85; transform: translate(-50%, -50%); }
+}
+
+@keyframes cflowScreenMarkOut {
+  from { opacity: .85; }
+  to { opacity: 0; }
+}
 
 @media (max-width: 900px) {
   .cflow-theme-toggle { top: 10px; right: 12px; }
 }
+
 @media (prefers-reduced-motion: reduce) {
-  .cflow-theme-curtain__panel,
+  .cflow-theme-curtain.is-closing .cflow-theme-curtain__screen,
+  .cflow-theme-curtain.is-opening .cflow-theme-curtain__screen,
+  .cflow-theme-curtain.is-closing .cflow-theme-curtain__mark,
+  .cflow-theme-curtain.is-opening .cflow-theme-curtain__mark,
   .cflow-theme-toggle,
-  .cflow-theme-toggle-thumb { transition-duration: 1ms !important; animation-duration: 1ms !important; }
+  .cflow-theme-toggle-thumb {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+  }
 }
