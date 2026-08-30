@@ -1,6 +1,11 @@
 // ============================================================
 // C·FLOW C / C++ PARSER
 // ============================================================
+// Lightweight structural parser for the visualizer.
+// It intentionally is NOT a C/C++ compiler. Its job is to keep
+// executable statements, control blocks, and source structure
+// consistent for FlowGraph + executionBuilder.
+// ============================================================
 
 function cleanLine(line) {
   return String(line ?? "")
@@ -9,193 +14,188 @@ function cleanLine(line) {
     .trim();
 }
 
+function countChar(text, char) {
+  return [...text].filter((value) => value === char).length;
+}
+
 function parser(code, language) {
   const statements = [];
   const lines = String(code ?? "").split(/\r?\n/);
-
   let id = 0;
+  let braceDepth = 0;
 
   const add = (statement) => {
     statements.push({
       id: `statement_${id++}`,
+      depth: braceDepth,
       ...statement,
     });
   };
 
-  lines.forEach((rawLine, index) => {
+  for (let index = 0; index < lines.length; index++) {
+    const rawLine = lines[index];
     const lineNumber = index + 1;
     const line = cleanLine(rawLine);
 
-    if (!line) return;
+    if (!line) continue;
+    if (line.startsWith("#")) continue;
+    if (/^using\s+namespace\s+/.test(line)) continue;
 
-    // Ignore preprocessor directives.
-    if (line.startsWith("#")) return;
-
-    // Ignore standalone braces.
-    if (
-      line === "{" ||
-      line === "}" ||
-      line === "};"
-    ) {
-      return;
+    // Closing braces belong to the block above the current line.
+    const leadingClosers = line.match(/^}+/?/);
+    if (leadingClosers) {
+      braceDepth = Math.max(
+        0,
+        braceDepth - leadingClosers[0].replace(/[^}]/g, "").length
+      );
     }
 
-    // ----------------------------------------------------------
-    // FUNCTION DECLARATION
-    // ----------------------------------------------------------
+    const normalized = line
+      .replace(/^}+/, "")
+      .replace(/^\{+/, "")
+      .trim();
 
-    const functionMatch = line.match(
-      /^(?:static\s+)?(?:inline\s+)?(?:int|void|float|double|char|bool|long|short|string)\s+[A-Za-z_]\w*\s*\([^;]*\)\s*\{?$/
-    );
-
-    if (functionMatch) {
-      return;
+    if (!normalized) {
+      braceDepth += countChar(line, "{");
+      braceDepth = Math.max(0, braceDepth - countChar(line, "}") + (leadingClosers ? leadingClosers[0].replace(/[^}]/g, "").length : 0));
+      continue;
     }
 
-    // using namespace std;
-    if (/^using\s+namespace\s+/.test(line)) {
-      return;
-    }
-
-    // Remove opening brace for control statements.
-    const controlLine = line
+    const controlLine = normalized
       .replace(/\s*\{\s*$/, "")
       .trim();
 
-    // ----------------------------------------------------------
-    // FOR LOOP
-    // ----------------------------------------------------------
-
-    const forMatch = controlLine.match(
-      /^for\s*\((.*)\)$/
+    // Function declaration: do not turn main() into a flow node.
+    const functionMatch = controlLine.match(
+      /^(?:static\s+)?(?:inline\s+)?(?:unsigned\s+|signed\s+)?(?:long\s+long\s+|long\s+|short\s+)?(?:int|void|float|double|char|bool|string)\s+[A-Za-z_]\w*\s*\([^;]*\)$/
     );
 
-    if (forMatch) {
-      const expression = forMatch[1].trim();
+    if (functionMatch) {
+      braceDepth += countChar(line, "{");
+      braceDepth = Math.max(0, braceDepth - countChar(line, "}") + (leadingClosers ? leadingClosers[0].replace(/[^}]/g, "").length : 0));
+      continue;
+    }
 
+    // ----------------------------------------------------------
+    // FOR
+    // ----------------------------------------------------------
+    const forMatch = controlLine.match(/^for\s*\((.*)\)$/);
+    if (forMatch) {
+      const parts = forMatch[1].split(";");
       add({
         type: "for",
         line: lineNumber,
         code: line,
-        expression,
+        expression: forMatch[1].trim(),
+        forInit: (parts[0] ?? "").trim(),
+        forCondition: (parts[1] ?? "").trim(),
+        forUpdate: (parts[2] ?? "").trim(),
+        opensBlock: line.includes("{"),
       });
 
-      return;
+      braceDepth += countChar(line, "{");
+      braceDepth = Math.max(0, braceDepth - countChar(line, "}") + (leadingClosers ? leadingClosers[0].replace(/[^}]/g, "").length : 0));
+      continue;
     }
 
     // ----------------------------------------------------------
-    // WHILE LOOP
+    // WHILE
     // ----------------------------------------------------------
-
-    const whileMatch = controlLine.match(
-      /^while\s*\((.*)\)$/
-    );
-
+    const whileMatch = controlLine.match(/^while\s*\((.*)\)$/);
     if (whileMatch) {
       add({
         type: "while",
         line: lineNumber,
         code: line,
         expression: whileMatch[1].trim(),
+        opensBlock: line.includes("{"),
       });
 
-      return;
+      braceDepth += countChar(line, "{");
+      braceDepth = Math.max(0, braceDepth - countChar(line, "}") + (leadingClosers ? leadingClosers[0].replace(/[^}]/g, "").length : 0));
+      continue;
     }
 
     // ----------------------------------------------------------
-    // IF
+    // ELSE IF BEFORE IF
     // ----------------------------------------------------------
-
-    const ifMatch = controlLine.match(
-      /^if\s*\((.*)\)$/
-    );
-
-    if (ifMatch) {
-      add({
-        type: "condition",
-        line: lineNumber,
-        code: line,
-        expression: ifMatch[1].trim(),
-      });
-
-      return;
-    }
-
-    // ----------------------------------------------------------
-    // ELSE IF
-    // ----------------------------------------------------------
-
-    const elseIfMatch = controlLine.match(
-      /^else\s+if\s*\((.*)\)$/
-    );
-
+    const elseIfMatch = controlLine.match(/^else\s+if\s*\((.*)\)$/);
     if (elseIfMatch) {
       add({
         type: "else_if",
         line: lineNumber,
         code: line,
         expression: elseIfMatch[1].trim(),
+        opensBlock: line.includes("{"),
       });
 
-      return;
+      braceDepth += countChar(line, "{");
+      braceDepth = Math.max(0, braceDepth - countChar(line, "}") + (leadingClosers ? leadingClosers[0].replace(/[^}]/g, "").length : 0));
+      continue;
+    }
+
+    // ----------------------------------------------------------
+    // IF
+    // ----------------------------------------------------------
+    const ifMatch = controlLine.match(/^if\s*\((.*)\)$/);
+    if (ifMatch) {
+      add({
+        type: "condition",
+        line: lineNumber,
+        code: line,
+        expression: ifMatch[1].trim(),
+        opensBlock: line.includes("{"),
+      });
+
+      braceDepth += countChar(line, "{");
+      braceDepth = Math.max(0, braceDepth - countChar(line, "}") + (leadingClosers ? leadingClosers[0].replace(/[^}]/g, "").length : 0));
+      continue;
     }
 
     // ----------------------------------------------------------
     // ELSE
     // ----------------------------------------------------------
-
-    if (
-      controlLine === "else" ||
-      controlLine === "else;"
-    ) {
+    if (controlLine === "else" || controlLine === "else;") {
       add({
         type: "else",
         line: lineNumber,
         code: line,
+        opensBlock: line.includes("{"),
       });
 
-      return;
+      braceDepth += countChar(line, "{");
+      braceDepth = Math.max(0, braceDepth - countChar(line, "}") + (leadingClosers ? leadingClosers[0].replace(/[^}]/g, "").length : 0));
+      continue;
     }
 
     // ----------------------------------------------------------
-    // VARIABLE DECLARATION
+    // DECLARATION
     // ----------------------------------------------------------
-
-    const declarationMatch = line.match(
+    const declarationMatch = controlLine.match(
       /^(?:const\s+)?(?:unsigned\s+|signed\s+)?(?:long\s+long\s+|long\s+|short\s+)?(?:int|float|double|char|bool|string)\s+([A-Za-z_]\w*)\s*(?:=\s*(.*?))?;?$/
     );
 
     if (declarationMatch) {
-      const variable =
-        declarationMatch[1];
-
-      let value =
-        declarationMatch[2];
-
-      if (value !== undefined) {
-        value = value
-          .replace(/;$/, "")
-          .trim();
-      } else {
-        value = null;
-      }
+      let value = declarationMatch[2];
+      if (value !== undefined) value = value.replace(/;$/, "").trim();
 
       add({
         type: "declaration",
         line: lineNumber,
         code: line,
-        variable,
-        value,
+        variable: declarationMatch[1],
+        value: value ?? null,
       });
 
-      return;
+      braceDepth += countChar(line, "{");
+      braceDepth = Math.max(0, braceDepth - countChar(line, "}") + (leadingClosers ? leadingClosers[0].replace(/[^}]/g, "").length : 0));
+      continue;
     }
 
     // ----------------------------------------------------------
     // COMPOUND ASSIGNMENT
     // ----------------------------------------------------------
-
-    const compoundMatch = line.match(
+    const compoundMatch = controlLine.match(
       /^([A-Za-z_]\w*)\s*(\+=|-=|\*=|\/=)\s*(.+?);?$/
     );
 
@@ -206,34 +206,25 @@ function parser(code, language) {
         code: line,
         variable: compoundMatch[1],
         operator: compoundMatch[2],
-        value: compoundMatch[3]
-          .replace(/;$/, "")
-          .trim(),
+        value: compoundMatch[3].replace(/;$/, "").trim(),
       });
 
-      return;
+      braceDepth += countChar(line, "{");
+      braceDepth = Math.max(0, braceDepth - countChar(line, "}") + (leadingClosers ? leadingClosers[0].replace(/[^}]/g, "").length : 0));
+      continue;
     }
 
     // ----------------------------------------------------------
     // INCREMENT / DECREMENT
     // ----------------------------------------------------------
-
-    const incrementMatch = line.match(
+    const incrementMatch = controlLine.match(
       /^(?:\+\+([A-Za-z_]\w*)|([A-Za-z_]\w*)\+\+|--([A-Za-z_]\w*)|([A-Za-z_]\w*)--);?$/
     );
 
     if (incrementMatch) {
       const variable =
-        incrementMatch[1] ||
-        incrementMatch[2] ||
-        incrementMatch[3] ||
-        incrementMatch[4];
-
-      const operator =
-        incrementMatch[1] ||
-        incrementMatch[2]
-          ? "++"
-          : "--";
+        incrementMatch[1] || incrementMatch[2] || incrementMatch[3] || incrementMatch[4];
+      const operator = incrementMatch[1] || incrementMatch[2] ? "++" : "--";
 
       add({
         type: "increment",
@@ -243,14 +234,15 @@ function parser(code, language) {
         operator,
       });
 
-      return;
+      braceDepth += countChar(line, "{");
+      braceDepth = Math.max(0, braceDepth - countChar(line, "}") + (leadingClosers ? leadingClosers[0].replace(/[^}]/g, "").length : 0));
+      continue;
     }
 
     // ----------------------------------------------------------
     // ASSIGNMENT
     // ----------------------------------------------------------
-
-    const assignmentMatch = line.match(
+    const assignmentMatch = controlLine.match(
       /^([A-Za-z_]\w*)\s*=\s*(.+?);?$/
     );
 
@@ -260,23 +252,22 @@ function parser(code, language) {
         line: lineNumber,
         code: line,
         variable: assignmentMatch[1],
-        value: assignmentMatch[2]
-          .replace(/;$/, "")
-          .trim(),
+        value: assignmentMatch[2].replace(/;$/, "").trim(),
       });
 
-      return;
+      braceDepth += countChar(line, "{");
+      braceDepth = Math.max(0, braceDepth - countChar(line, "}") + (leadingClosers ? leadingClosers[0].replace(/[^}]/g, "").length : 0));
+      continue;
     }
 
     // ----------------------------------------------------------
     // OUTPUT
     // ----------------------------------------------------------
-
     if (
-      /\bprintf\s*\(/.test(line) ||
-      /\bcout\b/.test(line) ||
-      /\bputs\s*\(/.test(line) ||
-      /\bputchar\s*\(/.test(line)
+      /\bprintf\s*\(/.test(controlLine) ||
+      /\bcout\b/.test(controlLine) ||
+      /\bputs\s*\(/.test(controlLine) ||
+      /\bputchar\s*\(/.test(controlLine)
     ) {
       add({
         type: "output",
@@ -284,33 +275,38 @@ function parser(code, language) {
         code: line,
       });
 
-      return;
+      braceDepth += countChar(line, "{");
+      braceDepth = Math.max(0, braceDepth - countChar(line, "}") + (leadingClosers ? leadingClosers[0].replace(/[^}]/g, "").length : 0));
+      continue;
     }
 
     // ----------------------------------------------------------
     // RETURN
     // ----------------------------------------------------------
-
-    if (/^return\b/.test(line)) {
+    if (/^return\b/.test(controlLine)) {
       add({
         type: "return",
         line: lineNumber,
         code: line,
       });
 
-      return;
+      braceDepth += countChar(line, "{");
+      braceDepth = Math.max(0, braceDepth - countChar(line, "}") + (leadingClosers ? leadingClosers[0].replace(/[^}]/g, "").length : 0));
+      continue;
     }
 
     // ----------------------------------------------------------
-    // GENERIC EXECUTABLE STATEMENT
+    // GENERIC STATEMENT
     // ----------------------------------------------------------
-
     add({
       type: "statement",
       line: lineNumber,
       code: line,
     });
-  });
+
+    braceDepth += countChar(line, "{");
+    braceDepth = Math.max(0, braceDepth - countChar(line, "}") + (leadingClosers ? leadingClosers[0].replace(/[^}]/g, "").length : 0));
+  }
 
   return {
     language,
