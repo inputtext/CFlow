@@ -1,8 +1,8 @@
 // ============================================================
 // C·FLOW EXECUTION BUILDER
 // ============================================================
-// Executes the same graph produced by flowBuilder.js.
-// The execution node IDs therefore always match FlowGraph IDs.
+// Executes the same control-flow decisions represented by
+// flowBuilder.js. Backend node IDs remain the single source of truth.
 // ============================================================
 
 function buildExecution(program) {
@@ -10,15 +10,12 @@ function buildExecution(program) {
   const statementById = new Map(statements.map((s) => [s.id, s]));
   const variables = {};
   const execution = [];
+  const edges = buildRuntimeEdges(statements);
+  const initializedForLoops = new Set();
   let step = 0;
   let currentNode = "start";
   let guard = 0;
-  const MAX_STEPS = 2000;
-  const initializedForLoops = new Set();
-
-  // Build the same control-flow edges locally so execution follows
-  // exactly the same decisions as the FlowGraph.
-  const edges = buildRuntimeEdges(statements);
+  const MAX_STEPS = 5000;
 
   const push = (data) => {
     execution.push({
@@ -139,9 +136,9 @@ function buildExecution(program) {
       let after = before;
 
       if (statement.operator === "+=") after = before + amount;
-      if (statement.operator === "-=") after = before - amount;
-      if (statement.operator === "*=") after = before * amount;
-      if (statement.operator === "/=") after = amount === 0 ? before : before / amount;
+      else if (statement.operator === "-=") after = before - amount;
+      else if (statement.operator === "*=") after = before * amount;
+      else if (statement.operator === "/=") after = amount === 0 ? before : before / amount;
 
       variables[statement.variable] = after;
 
@@ -215,7 +212,6 @@ function buildExecution(program) {
         variables: { ...variables },
         explanation: `Returning from the program: ${statement.code}`,
       });
-
       currentNode = "exit";
       continue;
     }
@@ -266,7 +262,6 @@ function buildRuntimeEdges(statements) {
     const control = statements[index];
     const next = statements[index + 1];
     if (!next) return null;
-
     if (next.depth <= control.depth) return { start: index + 1, end: index + 1 };
 
     let end = index + 1;
@@ -305,6 +300,7 @@ function buildRuntimeEdges(statements) {
       const first = statements[range.start];
       const last = statements[range.end];
       const after = nextAtOrAbove(range.end, s.depth);
+
       add(s.id, first.id, "true");
       add(last.id, s.id, "loop");
       add(s.id, after >= 0 ? statements[after].id : "exit", "false");
@@ -329,9 +325,7 @@ function buildRuntimeEdges(statements) {
           add(e.id, statements[er.start].id, "normal");
           const join = nextAtOrAbove(er.end, s.depth);
           add(statements[er.end].id, join >= 0 ? statements[join].id : "exit", "normal");
-          if (last && !isControl(last)) {
-            add(last.id, join >= 0 ? statements[join].id : "exit", "normal");
-          }
+          if (last && !isControl(last)) add(last.id, join >= 0 ? statements[join].id : "exit", "normal");
         }
       } else {
         add(s.id, afterBody >= 0 ? statements[afterBody].id : "exit", "false");
@@ -356,7 +350,6 @@ function buildRuntimeEdges(statements) {
 function chooseEdge(edges, from, preferredType) {
   const preferred = edges.find((edge) => edge.from === from && edge.type === preferredType);
   if (preferred) return preferred.to;
-
   const fallback = edges.find((edge) => edge.from === from);
   return fallback?.to || "exit";
 }
@@ -368,19 +361,13 @@ function chooseEdge(edges, from, preferredType) {
 function evaluateValue(expression, variables) {
   if (expression == null) return 0;
 
-  const clean = String(expression)
-    .replace(/;$/, "")
-    .trim();
-
+  const clean = String(expression).replace(/;$/, "").trim();
   if (/^-?\d+(\.\d+)?$/.test(clean)) return Number(clean);
-
   if (Object.prototype.hasOwnProperty.call(variables, clean)) return variables[clean];
 
-  const replaced = clean.replace(/\b[A-Za-z_]\w*\b/g, (name) => {
-    return Object.prototype.hasOwnProperty.call(variables, name)
-      ? String(variables[name])
-      : "0";
-  });
+  const replaced = clean.replace(/\b[A-Za-z_]\w*\b/g, (name) =>
+    Object.prototype.hasOwnProperty.call(variables, name) ? String(variables[name]) : "0"
+  );
 
   if (/^[0-9+\-*/().\s]+$/.test(replaced)) {
     try {
@@ -402,14 +389,15 @@ function evaluateCondition(expression, variables) {
   if (!expression) return false;
 
   let condition = String(expression).trim();
+  if (condition.includes(";")) condition = (condition.split(";")[1] || "").trim();
 
-  if (condition.includes(";")) {
-    const parts = condition.split(";");
-    condition = (parts[1] || "").trim();
-  }
+  // Logical AND / OR for simple conditions.
+  if (condition.includes("&&")) return condition.split("&&").every((part) => evaluateCondition(part, variables));
+  if (condition.includes("||")) return condition.split("||").some((part) => evaluateCondition(part, variables));
+
+  if (condition.startsWith("!")) return !evaluateCondition(condition.slice(1), variables);
 
   const operators = ["<=", ">=", "==", "!=", "<", ">"]; 
-
   for (const operator of operators) {
     const position = condition.indexOf(operator);
     if (position === -1) continue;
@@ -427,14 +415,14 @@ function evaluateCondition(expression, variables) {
     if (operator === ">") return leftValue > rightValue;
   }
 
-  return false;
+  return Boolean(evaluateValue(condition, variables));
 }
 
 function executeForInitializer(init, variables) {
   if (!init) return;
 
   const declaration = init.match(
-    /^(?:const\s+)?(?:unsigned\s+|signed\s+)?(?:(?:long\s+long|long|short)\s+)?(?:int|float|double|char|bool|string)\s+([A-Za-z_]\w*)\s*(?:=\s*(.*))?$/
+    /^(?:const\s+)?(?:(?:unsigned|signed)\s+)?(?:(?:long\s+long|long|short)\s+)?(?:int|float|double|char|bool|string)\s+([A-Za-z_]\w*)\s*(?:=\s*(.*))?$/
   );
 
   if (declaration) {
@@ -443,9 +431,7 @@ function executeForInitializer(init, variables) {
   }
 
   const assignment = init.match(/^([A-Za-z_]\w*)\s*=\s*(.*)$/);
-  if (assignment) {
-    variables[assignment[1]] = evaluateValue(assignment[2], variables);
-  }
+  if (assignment) variables[assignment[1]] = evaluateValue(assignment[2], variables);
 }
 
 module.exports = buildExecution;
