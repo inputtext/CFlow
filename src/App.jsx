@@ -52,27 +52,9 @@ int main() {
 function getFlowNode(flowStep) {
   if (!flowStep) return null;
 
-  if (flowStep.type === "condition") {
-    return "condition";
-  }
-
-  if (flowStep.target === "sum") {
-    return "sum";
-  }
-
-  if (flowStep.target === "evenNum") {
-    return "evenNum";
-  }
-
-  if (flowStep.target === "i") {
-    return "increment";
-  }
-
-  if (flowStep.type === "output") {
-    return "exit";
-  }
-
-  return null;
+  // The backend execution step already carries the exact node id
+  // produced by flowBuilder.js. Never map this to hardcoded names.
+  return flowStep.node ?? null;
 }
 
 /* ============================================================
@@ -196,36 +178,27 @@ function App() {
      ACTIVE FLOW EDGE
   ============================================================ */
 
-  const activeFlowEdge =
-    previousFlowNode === null &&
-    currentFlowNode === "initialize"
-      ? "initializeToCondition"
+  const activeFlowEdge = useMemo(() => {
+    if (!analysisResult?.edges?.length) {
+      return null;
+    }
 
-      : previousFlowNode === "initialize" &&
-          currentFlowNode === "condition"
-        ? "initializeToCondition"
+    if (!previousFlowNode || !currentFlowNode) {
+      return null;
+    }
 
-      : previousFlowNode === "condition" &&
-          currentFlowNode === "sum"
-        ? "conditionToSum"
+    const edge = analysisResult.edges.find(
+      (candidate) =>
+        candidate.from === previousFlowNode &&
+        candidate.to === currentFlowNode
+    );
 
-      : previousFlowNode === "sum" &&
-          currentFlowNode === "evenNum"
-        ? "sumToEven"
-
-      : previousFlowNode === "evenNum" &&
-          currentFlowNode === "increment"
-        ? "evenToIncrement"
-
-      : previousFlowNode === "increment" &&
-          currentFlowNode === "condition"
-        ? "incrementToCondition"
-
-      : previousFlowNode === "condition" &&
-          currentFlowNode === "exit"
-        ? "conditionToExit"
-
-      : null;
+    return edge?.id ?? null;
+  }, [
+    analysisResult,
+    previousFlowNode,
+    currentFlowNode,
+  ]);
 
   /* ============================================================
      FLOW AUTO SCROLL
@@ -1624,6 +1597,9 @@ function App() {
               "
             >
               <FlowGraph
+                nodes={analysisResult?.nodes ?? []}
+                edges={analysisResult?.edges ?? []}
+
                 activeNode={
                   animationPhase === "flow" ||
                   animationPhase === "memory"

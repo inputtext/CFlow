@@ -1,5 +1,23 @@
 /* ============================================================
    C·FLOW — DYNAMIC FLOW GRAPH
+   ============================================================
+
+   The graph is now driven by the backend's:
+     nodes[]
+     edges[]
+
+   The old version had hardcoded nodes such as:
+     INITIALIZE
+     i <= 10 ?
+     sum += evenNum
+     evenNum += 2
+     i++
+     EXIT
+
+   That meant changing the code in the editor could change Memory
+   and execution while the middle graph stayed frozen.
+
+   This component removes that limitation.
    ============================================================ */
 
 function FlowNode({
@@ -11,8 +29,6 @@ function FlowNode({
   x,
   y,
 }) {
-  const isCondition = type === "condition";
-
   const background =
     type === "condition"
       ? "bg-[#FFE3A3]"
@@ -22,7 +38,9 @@ function FlowNode({
           ? "bg-[#FFF9F0]"
           : "bg-white";
 
-  const result =
+  const isCondition = type === "condition";
+
+  const conditionState =
     isCondition && active
       ? conditionResult === true
         ? "true"
@@ -54,13 +72,17 @@ function FlowNode({
 
         ${
           active
-            ? "translate-y-[-2px] scale-[1.035] shadow-[6px_6px_0_#171717]"
+            ? `
+              translate-y-[-2px]
+              scale-[1.035]
+              shadow-[6px_6px_0_#171717]
+            `
             : ""
         }
 
         ${
-          result === "true" ||
-          result === "false"
+          conditionState === "true" ||
+          conditionState === "false"
             ? "ring-2 ring-[#171717] ring-offset-2 ring-offset-[#E8DFFF]"
             : ""
         }
@@ -70,7 +92,15 @@ function FlowNode({
         top: `${y}px`,
       }}
     >
-      <span className="block text-[13px] leading-5">
+      <span
+        className={`
+          block
+          transition-all
+          duration-300
+          ${active ? "opacity-100" : "opacity-90"}
+          ${active ? "tracking-[0.01em]" : ""}
+        `}
+      >
         {label}
       </span>
 
@@ -82,45 +112,40 @@ function FlowNode({
             items-center
             justify-center
             gap-2
-            animate-[conditionIn_0.25s_ease-out]
+            animate-[conditionResultIn_0.3s_ease-out]
           "
         >
-          {result === "checking" && (
+          {conditionState === "checking" && (
             <>
               <span
                 className="
                   h-2
                   w-2
                   rounded-full
+                  border
+                  border-[#171717]
                   bg-[#171717]
-                  animate-pulse
+                  animate-[conditionChecking_0.8s_ease-in-out_infinite]
                 "
               />
-
               <span className="text-[9px] uppercase tracking-[0.18em] opacity-65">
                 evaluating
               </span>
             </>
           )}
 
-          {result === "true" && (
+          {conditionState === "true" && (
             <>
-              <span className="text-sm">
-                ✓
-              </span>
-
+              <span className="text-sm leading-none">✓</span>
               <span className="text-[10px] uppercase tracking-[0.18em]">
                 TRUE
               </span>
             </>
           )}
 
-          {result === "false" && (
+          {conditionState === "false" && (
             <>
-              <span className="text-sm">
-                ×
-              </span>
-
+              <span className="text-sm leading-none">×</span>
               <span className="text-[10px] uppercase tracking-[0.18em]">
                 FALSE
               </span>
@@ -141,19 +166,166 @@ function FlowNode({
           "
         />
       )}
+
+      {isCondition &&
+        active &&
+        conditionResult !== null && (
+          <span
+            className="
+              pointer-events-none
+              absolute
+              -right-[7px]
+              -top-[7px]
+              flex
+              h-4
+              w-4
+              items-center
+              justify-center
+              border-2
+              border-[#171717]
+              bg-[#FFF9F0]
+              font-mono
+              text-[9px]
+              font-black
+              animate-[conditionBadgeIn_0.3s_ease-out]
+            "
+          >
+            {conditionResult ? "T" : "F"}
+          </span>
+        )}
     </div>
   );
 }
 
 
 /* ============================================================
-   TYPE
+   EDGE
    ============================================================ */
 
-function normalizeType(node) {
-  if (!node) {
-    return "operation";
-  }
+function FlowPath({
+  d,
+  active = false,
+  loop = false,
+  conditionPath = false,
+}) {
+  return (
+    <>
+      <path
+        d={d}
+        fill="none"
+        stroke="#171717"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        markerEnd="url(#cflow-arrow)"
+        opacity={active ? "1" : "0.8"}
+        className="transition-opacity duration-300"
+      />
+
+      {active && (
+        <>
+          <path
+            d={d}
+            fill="none"
+            stroke="#FFE3A3"
+            strokeWidth="8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeDasharray="12 18"
+            markerEnd="url(#cflow-arrow-active)"
+            className="
+              opacity-90
+              animate-[flowTravel_0.8s_linear_infinite]
+            "
+          />
+
+          <path
+            d={d}
+            fill="none"
+            stroke="#171717"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeDasharray="7 15"
+            className="
+              animate-[flowTravelDark_0.8s_linear_infinite]
+            "
+          />
+
+          {!loop && (
+            <circle
+              r="5"
+              fill="#171717"
+              className="animate-[flowDot_0.8s_ease-in-out_infinite]"
+            >
+              <animateMotion
+                dur="0.9s"
+                repeatCount="indefinite"
+                path={d}
+              />
+            </circle>
+          )}
+
+          {loop && (
+            <circle
+              r="4"
+              fill="#171717"
+              className="animate-[loopDot_1.1s_ease-in-out_infinite]"
+            >
+              <animateMotion
+                dur="1.1s"
+                repeatCount="indefinite"
+                path={d}
+              />
+            </circle>
+          )}
+        </>
+      )}
+
+      {active && conditionPath && (
+        <circle
+          r="3"
+          fill="#171717"
+          className="animate-[conditionPathPulse_0.8s_ease-in-out_infinite]"
+        >
+          <animateMotion
+            dur="0.9s"
+            repeatCount="indefinite"
+            path={d}
+          />
+        </circle>
+      )}
+    </>
+  );
+}
+
+
+/* ============================================================
+   LABEL NORMALIZATION
+   ============================================================ */
+
+function displayLabel(node) {
+  if (!node) return "";
+
+  const label =
+    node.label ??
+    node.code ??
+    node.id ??
+    "";
+
+  if (label === "START") return "START";
+  if (label === "EXIT") return "EXIT";
+
+  return String(label);
+}
+
+
+/* ============================================================
+   NODE TYPE NORMALIZATION
+   ============================================================ */
+
+function displayType(node) {
+  if (!node) return "operation";
 
   if (node.type === "condition") {
     return "condition";
@@ -172,103 +344,56 @@ function normalizeType(node) {
 
 
 /* ============================================================
-   LABEL
+   EDGE PATH GENERATOR
    ============================================================ */
 
-function normalizeLabel(node) {
-  if (!node) {
-    return "";
-  }
+function buildEdgePath(from, to, edge, layout) {
+  const a = layout[from];
+  const b = layout[to];
 
-  return String(
-    node.label ??
-      node.code ??
-      node.expression ??
-      node.id ??
-      ""
-  )
-    .replace(/\s+/g, " ")
-    .trim();
-}
+  if (!a || !b) return "";
 
+  const startX = a.x;
+  const startY = a.y + 65;
 
-/* ============================================================
-   LAYOUT
-   ============================================================ */
+  const endX = b.x;
+  const endY = b.y;
 
-function makeLayout(nodes) {
-  const layout = {};
-
-  nodes.forEach((node, index) => {
-    layout[node.id] = {
-      x: 500,
-      y: 30 + index * 115,
-    };
-  });
-
-  return layout;
-}
-
-
-/* ============================================================
-   EDGE PATH
-   ============================================================ */
-
-function edgePath(edge, layout) {
-  const from = layout[edge.from];
-  const to = layout[edge.to];
-
-  if (!from || !to) {
-    return "";
-  }
-
-  const startX = from.x;
-  const startY = from.y + 67;
-
-  const endX = to.x;
-  const endY = to.y;
-
+  // Loop/back edge.
   const isBackEdge =
-    to.y <= from.y ||
-    edge.type === "loop" ||
-    edge.type === "back";
+    b.y < a.y ||
+    edge?.type === "loop" ||
+    edge?.type === "back";
 
-  /*
-   * Loop / back edge.
-   */
   if (isBackEdge) {
-    const right =
-      Math.max(from.x, to.x) + 190;
+    const rightX =
+      Math.max(a.x, b.x) + 210;
+
+    const controlY =
+      Math.min(a.y, b.y) + 20;
 
     return `
       M ${startX} ${startY}
-      C ${right} ${startY},
-        ${right} ${endY - 25},
+      C ${rightX} ${startY}
+        ${rightX} ${controlY}
         ${endX} ${endY}
     `;
   }
 
-  /*
-   * Branch edge.
-   */
-  if (
-    Math.abs(startX - endX) > 2
-  ) {
-    const middle =
-      startY +
-      (endY - startY) / 2;
+  // Branching edge: use a slight horizontal curve.
+  if (Math.abs(startX - endX) > 5) {
+    const middleY =
+      startY + (endY - startY) * 0.5;
 
     return `
       M ${startX} ${startY}
-      C ${startX} ${middle},
-        ${endX} ${middle},
+      C ${startX} ${middleY}
+        ${endX} ${middleY}
         ${endX} ${endY}
     `;
   }
 
-  /*
-   * Normal edge.
-   */
+  // Normal vertical edge.
   return `
     M ${startX} ${startY}
     L ${endX} ${endY}
@@ -277,194 +402,196 @@ function edgePath(edge, layout) {
 
 
 /* ============================================================
-   EDGE COMPONENT
-   ============================================================ */
-
-function FlowPath({
-  d,
-  active,
-  loop,
-}) {
-  return (
-    <>
-      <path
-        d={d}
-        fill="none"
-        stroke="#171717"
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        markerEnd="url(#cflow-arrow)"
-        opacity={active ? 1 : 0.8}
-      />
-
-      {active && (
-        <>
-          <path
-            d={d}
-            fill="none"
-            stroke="#FFE3A3"
-            strokeWidth="8"
-            strokeLinecap="round"
-            strokeDasharray="12 18"
-            markerEnd="url(#cflow-arrow-active)"
-            className="
-              animate-[flowTravel_0.8s_linear_infinite]
-            "
-          />
-
-          <path
-            d={d}
-            fill="none"
-            stroke="#171717"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeDasharray="7 15"
-            className="
-              animate-[flowTravelDark_0.8s_linear_infinite]
-            "
-          />
-
-          <circle
-            r={loop ? 4 : 5}
-            fill="#171717"
-            className="
-              animate-[flowDot_0.9s_ease-in-out_infinite]
-            "
-          >
-            <animateMotion
-              dur={
-                loop
-                  ? "1.1s"
-                  : "0.9s"
-              }
-              repeatCount="indefinite"
-              path={d}
-            />
-          </circle>
-        </>
-      )}
-    </>
-  );
-}
-
-
-/* ============================================================
-   MAIN FLOWGRAPH
+   FLOW GRAPH
    ============================================================ */
 
 export default function FlowGraph({
-  nodes = [],
-  edges = [],
-  activeNode = null,
-  activeEdge = null,
+  nodes = null,
+  edges = null,
+  activeNode,
+  activeEdge,
   conditionResult = null,
 }) {
   /*
-   * IMPORTANT:
-   *
-   * There is NO mock graph anymore.
-   *
-   * The graph exists only when the backend gives us nodes.
+   * Before backend analysis, keep the old visualizer visible.
+   * Once backend nodes exist, everything below becomes dynamic.
    */
+  const fallbackNodes = [
+    {
+      id: "initialize",
+      label: "INITIALIZE",
+      type: "operation",
+    },
+    {
+      id: "condition",
+      label: "i <= 10 ?",
+      type: "condition",
+    },
+    {
+      id: "sum",
+      label: "sum += evenNum",
+      type: "operation",
+    },
+    {
+      id: "evenNum",
+      label: "evenNum += 2",
+      type: "operation",
+    },
+    {
+      id: "increment",
+      label: "i++",
+      type: "operation",
+    },
+    {
+      id: "exit",
+      label: "EXIT",
+      type: "exit",
+    },
+  ];
 
-  const safeNodes =
-    Array.isArray(nodes)
+  const fallbackEdges = [
+    {
+      id: "initializeToCondition",
+      from: "initialize",
+      to: "condition",
+    },
+    {
+      id: "conditionToSum",
+      from: "condition",
+      to: "sum",
+    },
+    {
+      id: "sumToEven",
+      from: "sum",
+      to: "evenNum",
+    },
+    {
+      id: "evenToIncrement",
+      from: "evenNum",
+      to: "increment",
+    },
+    {
+      id: "incrementToCondition",
+      from: "increment",
+      to: "condition",
+      type: "loop",
+    },
+    {
+      id: "conditionToExit",
+      from: "condition",
+      to: "exit",
+    },
+  ];
+
+  const usingBackendGraph =
+    Array.isArray(nodes) &&
+    nodes.length > 0;
+
+  const graphNodes =
+    usingBackendGraph
       ? nodes
-      : [];
+      : fallbackNodes;
 
-  const safeEdges =
+  const graphEdges =
+    usingBackendGraph &&
     Array.isArray(edges)
       ? edges
-      : [];
+      : fallbackEdges;
 
   /*
-   * Empty state.
+   * Put nodes into a clean vertical layout.
+   *
+   * We deliberately calculate this from the number of nodes
+   * instead of hardcoding six positions.
    */
+  const layout = {};
 
-  if (safeNodes.length === 0) {
-    return (
-      <div
-        className="
-          flex
-          min-h-[520px]
-          w-full
-          items-center
-          justify-center
-          px-8
-        "
-      >
-        <div
-          className="
-            w-[300px]
-            border-2
-            border-[#171717]
-            bg-white
-            p-6
-            text-center
-            font-mono
-            shadow-[4px_4px_0_#171717]
-          "
-        >
-          <div
-            className="
-              text-[11px]
-              font-black
-              uppercase
-              tracking-[0.18em]
-            "
-          >
-            FLOWGRAPH
-          </div>
+  const orderedNodes = [...graphNodes];
 
-          <div
-            className="
-              mt-3
-              text-[10px]
-              leading-5
-              opacity-55
-            "
-          >
-            Analyze C / C++ code to
-            generate the flow graph.
-          </div>
-        </div>
-      </div>
-    );
-  }
+  orderedNodes.forEach((node, index) => {
+    const isExit =
+      displayType(node) === "exit";
 
-  const layout =
-    makeLayout(safeNodes);
+    const isStart =
+      displayType(node) === "start";
 
+    layout[node.id] = {
+      x: 500,
+      y: isExit
+        ? Math.max(
+            24,
+            (orderedNodes.length - 1) * 105
+          )
+        : index * 105 + 24,
+    };
+
+    // Start and exit stay in the center for
+    // ordinary linear programs.
+    if (isStart) {
+      layout[node.id].y = 24;
+    }
+  });
+
+  /*
+   * Give an exit node a little breathing room.
+   */
   const graphHeight =
     Math.max(
       620,
-      safeNodes.length * 115 + 100
+      orderedNodes.length * 105 + 70
     );
 
-  const activeCondition =
-    safeNodes.find(
+  const conditionIsActive =
+    graphNodes.some(
       (node) =>
         node.id === activeNode &&
-        normalizeType(node) ===
-          "condition"
+        displayType(node) === "condition"
     );
+
+  const trueIsActive =
+    conditionIsActive &&
+    conditionResult === true;
+
+  const falseIsActive =
+    conditionIsActive &&
+    conditionResult === false;
 
   return (
     <div
       className="
         relative
-        min-h-[620px]
         w-full
         min-w-[760px]
         overflow-visible
       "
       style={{
-        minHeight: graphHeight,
+        minHeight: `${graphHeight}px`,
       }}
     >
       {/* ======================================================
-          EDGES
+          NODES
+      ====================================================== */}
+
+      {orderedNodes.map((node) => {
+        const type =
+          displayType(node);
+
+        return (
+          <FlowNode
+            key={node.id}
+            id={node.id}
+            label={displayLabel(node)}
+            type={type}
+            active={activeNode === node.id}
+            conditionResult={conditionResult}
+            x={layout[node.id].x}
+            y={layout[node.id].y}
+          />
+        );
+      })}
+
+      {/* ======================================================
+          CONNECTIONS
       ====================================================== */}
 
       <svg
@@ -508,94 +635,51 @@ export default function FlowGraph({
           </marker>
         </defs>
 
-        {safeEdges.map(
-          (edge) => {
-            const d =
-              edgePath(
-                edge,
-                layout
-              );
+        {graphEdges.map((edge) => {
+          const d = buildEdgePath(
+            edge.from,
+            edge.to,
+            edge,
+            layout
+          );
 
-            if (!d) {
-              return null;
-            }
+          if (!d) return null;
 
-            const loop =
-              edge.type ===
-                "loop" ||
-              edge.type === "back" ||
-              (
-                layout[edge.to] &&
-                layout[edge.from] &&
-                layout[edge.to].y <=
-                  layout[edge.from].y
-              );
+          const isLoop =
+            edge.type === "loop" ||
+            edge.type === "back" ||
+            layout[edge.to]?.y <
+              layout[edge.from]?.y;
 
-            return (
-              <FlowPath
-                key={edge.id}
-                d={d}
-                active={
-                  edge.id ===
-                  activeEdge
-                }
-                loop={loop}
-              />
-            );
-          }
-        )}
-      </svg>
-
-
-      {/* ======================================================
-          NODES
-      ====================================================== */}
-
-      {safeNodes.map(
-        (node) => {
-          const position =
-            layout[node.id];
-
-          if (!position) {
-            return null;
-          }
+          const isConditionPath =
+            edge.type === "true" ||
+            edge.type === "false";
 
           return (
-            <FlowNode
-              key={node.id}
-              id={node.id}
-              label={normalizeLabel(
-                node
-              )}
-              type={normalizeType(
-                node
-              )}
+            <FlowPath
+              key={edge.id}
+              d={d}
               active={
-                node.id ===
-                activeNode
+                activeEdge === edge.id
               }
-              conditionResult={
-                conditionResult
+              loop={isLoop}
+              conditionPath={
+                isConditionPath
               }
-              x={position.x}
-              y={position.y}
             />
           );
-        }
-      )}
-
+        })}
+      </svg>
 
       {/* ======================================================
-          TRUE / FALSE LABELS
+          CONDITION LABELS
       ====================================================== */}
 
-      {safeEdges
+      {graphEdges
         .filter(
           (edge) =>
-            edge.type ===
-              "true" ||
-            edge.type ===
-              "false"
+            edge.type === "true" ||
+            edge.type === "false"
         )
         .map((edge) => {
           const from =
@@ -608,50 +692,94 @@ export default function FlowGraph({
             return null;
           }
 
+          const isTrue =
+            edge.type === "true";
+
           return (
             <span
-              key={`branch-${edge.id}`}
+              key={`label-${edge.id}`}
               className={`
                 absolute
                 font-mono
-                text-[9px]
-                font-black
-                uppercase
-                tracking-[0.15em]
-                transition-opacity
+                text-[10px]
+                font-bold
+                transition-all
                 duration-300
                 ${
-                  edge.id ===
-                  activeEdge
-                    ? "opacity-100"
-                    : "opacity-55"
+                  (
+                    isTrue &&
+                    trueIsActive
+                  ) ||
+                  (
+                    !isTrue &&
+                    falseIsActive
+                  )
+                    ? "font-black opacity-100"
+                    : "opacity-65"
                 }
               `}
               style={{
                 left: `${
-                  (from.x + to.x) /
-                    2 +
-                  12
+                  (from.x + to.x) / 2 + 15
                 }px`,
                 top: `${
-                  (from.y + to.y) /
-                  2
+                  (from.y + to.y) / 2
                 }px`,
               }}
             >
-              {edge.type}
+              {isTrue
+                ? "TRUE"
+                : "FALSE"}
             </span>
           );
         })}
 
-
       {/* ======================================================
-          ACTIVE CONDITION STATUS
+          LOOP LABEL
       ====================================================== */}
 
-      {activeCondition &&
-        conditionResult !==
-          null && (
+      {graphEdges.some(
+        (edge) =>
+          edge.type === "loop" ||
+          edge.type === "back" ||
+          layout[edge.to]?.y <
+            layout[edge.from]?.y
+      ) && (
+        <span
+          className={`
+            absolute
+            right-[2%]
+            top-[42%]
+            rotate-[-78deg]
+            font-mono
+            text-[10px]
+            font-bold
+            transition-all
+            duration-300
+            ${
+              graphEdges.some(
+                (edge) =>
+                  edge.id === activeEdge &&
+                  (
+                    edge.type === "loop" ||
+                    edge.type === "back"
+                  )
+              )
+                ? "font-black opacity-100 animate-[loopLabelPulse_1s_ease-in-out_infinite]"
+                : "opacity-70"
+            }
+          `}
+        >
+          LOOP BACK
+        </span>
+      )}
+
+      {/* ======================================================
+          CONDITION STATUS
+      ====================================================== */}
+
+      {conditionIsActive &&
+        conditionResult !== null && (
           <div
             className="
               absolute
@@ -662,12 +790,11 @@ export default function FlowGraph({
               uppercase
               tracking-[0.16em]
               opacity-60
+              animate-[conditionStatusIn_0.3s_ease-out]
             "
             style={{
               top: `${
-                layout[
-                  activeCondition.id
-                ].y + 82
+                (layout[activeNode]?.y ?? 0) + 80
               }px`,
               transform:
                 "translateX(-50%)",
@@ -678,7 +805,6 @@ export default function FlowGraph({
               : "condition failed"}
           </div>
         )}
-
 
       {/* ======================================================
           ANIMATIONS
@@ -745,15 +871,114 @@ export default function FlowGraph({
             }
           }
 
-          @keyframes conditionIn {
-            from {
+          @keyframes loopDot {
+            0% {
+              opacity: 0;
+              transform: scale(0.65);
+            }
+
+            20% {
+              opacity: 1;
+              transform: scale(1);
+            }
+
+            80% {
+              opacity: 1;
+              transform: scale(1);
+            }
+
+            100% {
+              opacity: 0;
+              transform: scale(0.65);
+            }
+          }
+
+          @keyframes loopLabelPulse {
+            0% {
+              opacity: 0.7;
+            }
+
+            50% {
+              opacity: 1;
+            }
+
+            100% {
+              opacity: 0.7;
+            }
+          }
+
+          @keyframes conditionResultIn {
+            0% {
               opacity: 0;
               transform: translateY(-3px);
             }
 
-            to {
+            100% {
               opacity: 1;
               transform: translateY(0);
+            }
+          }
+
+          @keyframes conditionChecking {
+            0% {
+              opacity: 0.35;
+              transform: scale(0.8);
+            }
+
+            50% {
+              opacity: 1;
+              transform: scale(1.15);
+            }
+
+            100% {
+              opacity: 0.35;
+              transform: scale(0.8);
+            }
+          }
+
+          @keyframes conditionBadgeIn {
+            0% {
+              opacity: 0;
+              transform: scale(0.65);
+            }
+
+            70% {
+              opacity: 1;
+              transform: scale(1.08);
+            }
+
+            100% {
+              opacity: 1;
+              transform: scale(1);
+            }
+          }
+
+          @keyframes conditionPathPulse {
+            0% {
+              opacity: 0.2;
+              transform: scale(0.75);
+            }
+
+            50% {
+              opacity: 1;
+              transform: scale(1);
+            }
+
+            100% {
+              opacity: 0.2;
+              transform: scale(0.75);
+            }
+          }
+
+          @keyframes conditionStatusIn {
+            from {
+              opacity: 0;
+              transform: translate(-50%, -3px);
+            }
+
+            to {
+              opacity: 0.6;
+              transform: translate(-50%, 0);
             }
           }
         `}
