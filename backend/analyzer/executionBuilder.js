@@ -1,233 +1,205 @@
 // ============================================================
 // C·FLOW EXECUTION BUILDER
 // ============================================================
-// Executes the same control-flow decisions represented by
-// flowBuilder.js. Backend node IDs remain the single source of truth.
-// ============================================================
 
 function buildExecution(program) {
   const statements = Array.isArray(program?.statements) ? program.statements : [];
-  const statementById = new Map(statements.map((s) => [s.id, s]));
+  const byId = new Map(statements.map((s) => [s.id, s]));
+  const edges = buildRuntimeEdges(statements);
   const variables = {};
   const execution = [];
-  const edges = buildRuntimeEdges(statements);
-  const initializedForLoops = new Set();
+  const initializedLoops = new Set();
+  let current = "start";
   let step = 0;
-  let currentNode = "start";
   let guard = 0;
   const MAX_STEPS = 5000;
 
-  const push = (data) => {
-    execution.push({
-      step: step++,
-      variables: { ...variables },
-      ...data,
-    });
-  };
+  const push = (data) => execution.push({ step: step++, variables: { ...variables }, ...data });
 
-  push({
-    node: "start",
-    line: null,
-    type: "start",
-    explanation: "Program execution begins.",
-  });
+  push({ node: "start", line: null, type: "start", explanation: "Program execution begins." });
 
-  while (currentNode !== "exit" && guard++ < MAX_STEPS) {
-    const statement = statementById.get(currentNode);
-    if (!statement) break;
+  while (current !== "exit" && guard++ < MAX_STEPS) {
+    const s = byId.get(current);
+    if (!s) break;
 
     // --------------------------------------------------------
     // FOR
     // --------------------------------------------------------
-    if (statement.type === "for") {
-      if (!initializedForLoops.has(statement.id)) {
-        executeForInitializer(statement.forInit, variables);
-        initializedForLoops.add(statement.id);
+    if (s.type === "for") {
+      if (!initializedLoops.has(s.id)) {
+        executeForInitializer(s.forInit, variables);
+        initializedLoops.add(s.id);
+      } else {
+        // We only reach the FOR node again through its loop edge,
+        // so execute the C/C++ for-update before rechecking it.
+        executeForUpdate(s.forUpdate, variables);
       }
 
-      const result = evaluateCondition(statement.forCondition, variables);
-
+      const result = evaluateCondition(s.forCondition, variables);
       push({
-        node: statement.id,
-        line: statement.line,
+        node: s.id,
+        line: s.line,
         type: "condition",
-        expression: statement.forCondition,
+        expression: s.forCondition,
         result,
         variables: { ...variables },
-        explanation: `The loop condition ${statement.forCondition} evaluates to ${result}.`,
+        explanation: `The loop condition ${s.forCondition} evaluates to ${result}.`,
       });
-
-      currentNode = chooseEdge(edges, statement.id, result ? "true" : "false");
+      current = chooseEdge(edges, s.id, result ? "true" : "false");
       continue;
     }
 
     // --------------------------------------------------------
     // WHILE / IF / ELSE-IF
     // --------------------------------------------------------
-    if (statement.type === "while" || statement.type === "condition" || statement.type === "else_if") {
-      const result = evaluateCondition(statement.expression, variables);
-
+    if (s.type === "while" || s.type === "condition" || s.type === "else_if") {
+      const result = evaluateCondition(s.expression, variables);
       push({
-        node: statement.id,
-        line: statement.line,
+        node: s.id,
+        line: s.line,
         type: "condition",
-        expression: statement.expression,
+        expression: s.expression,
         result,
         variables: { ...variables },
-        explanation: `The condition ${statement.expression} evaluates to ${result}.`,
+        explanation: `The condition ${s.expression} evaluates to ${result}.`,
       });
-
-      currentNode = chooseEdge(edges, statement.id, result ? "true" : "false");
+      current = chooseEdge(edges, s.id, result ? "true" : "false");
       continue;
     }
 
     // --------------------------------------------------------
     // DECLARATION
     // --------------------------------------------------------
-    if (statement.type === "declaration") {
-      const before = variables[statement.variable];
-      const after = evaluateValue(statement.value, variables);
-      variables[statement.variable] = after;
-
+    if (s.type === "declaration") {
+      const before = variables[s.variable];
+      const after = evaluateValue(s.value, variables);
+      variables[s.variable] = after;
       push({
-        node: statement.id,
-        line: statement.line,
+        node: s.id,
+        line: s.line,
         type: "assignment",
-        target: statement.variable,
+        target: s.variable,
         before,
         after,
         variables: { ...variables },
-        explanation: `${statement.variable} is initialized with the value ${after}.`,
+        explanation: `${s.variable} is initialized with the value ${after}.`,
       });
-
-      currentNode = chooseEdge(edges, statement.id, "normal");
+      current = chooseEdge(edges, s.id, "normal");
       continue;
     }
 
     // --------------------------------------------------------
     // ASSIGNMENT
     // --------------------------------------------------------
-    if (statement.type === "assignment") {
-      const before = variables[statement.variable];
-      const after = evaluateValue(statement.value, variables);
-      variables[statement.variable] = after;
-
+    if (s.type === "assignment") {
+      const before = variables[s.variable];
+      const after = evaluateValue(s.value, variables);
+      variables[s.variable] = after;
       push({
-        node: statement.id,
-        line: statement.line,
+        node: s.id,
+        line: s.line,
         type: "assignment",
-        target: statement.variable,
+        target: s.variable,
         before,
         after,
         variables: { ...variables },
-        explanation: `${statement.variable} changes from ${before ?? "undefined"} to ${after}.`,
+        explanation: `${s.variable} changes from ${before ?? "undefined"} to ${after}.`,
       });
-
-      currentNode = chooseEdge(edges, statement.id, "normal");
+      current = chooseEdge(edges, s.id, "normal");
       continue;
     }
 
     // --------------------------------------------------------
     // COMPOUND ASSIGNMENT
     // --------------------------------------------------------
-    if (statement.type === "compound_assignment") {
-      const before = variables[statement.variable] ?? 0;
-      const amount = evaluateValue(statement.value, variables);
+    if (s.type === "compound_assignment") {
+      const before = variables[s.variable] ?? 0;
+      const amount = evaluateValue(s.value, variables);
       let after = before;
-
-      if (statement.operator === "+=") after = before + amount;
-      else if (statement.operator === "-=") after = before - amount;
-      else if (statement.operator === "*=") after = before * amount;
-      else if (statement.operator === "/=") after = amount === 0 ? before : before / amount;
-
-      variables[statement.variable] = after;
-
+      if (s.operator === "+=") after = before + amount;
+      if (s.operator === "-=") after = before - amount;
+      if (s.operator === "*=") after = before * amount;
+      if (s.operator === "/=") after = amount === 0 ? before : before / amount;
+      variables[s.variable] = after;
       push({
-        node: statement.id,
-        line: statement.line,
+        node: s.id,
+        line: s.line,
         type: "compound_assignment",
-        target: statement.variable,
+        target: s.variable,
         before,
         operand: amount,
         after,
-        expression: `${statement.variable} ${statement.operator} ${statement.value}`,
+        expression: `${s.variable} ${s.operator} ${s.value}`,
         variables: { ...variables },
-        explanation: `${statement.variable} changes from ${before} to ${after}.`,
+        explanation: `${s.variable} changes from ${before} to ${after}.`,
       });
-
-      currentNode = chooseEdge(edges, statement.id, "normal");
+      current = chooseEdge(edges, s.id, "normal");
       continue;
     }
 
     // --------------------------------------------------------
     // INCREMENT / DECREMENT
     // --------------------------------------------------------
-    if (statement.type === "increment") {
-      const before = variables[statement.variable] ?? 0;
-      const after = statement.operator === "++" ? before + 1 : before - 1;
-      variables[statement.variable] = after;
-
+    if (s.type === "increment") {
+      const before = variables[s.variable] ?? 0;
+      const after = s.operator === "++" ? before + 1 : before - 1;
+      variables[s.variable] = after;
       push({
-        node: statement.id,
-        line: statement.line,
+        node: s.id,
+        line: s.line,
         type: "increment",
-        target: statement.variable,
+        target: s.variable,
         before,
         operand: 1,
         after,
-        expression: `${statement.variable}${statement.operator}`,
+        expression: `${s.variable}${s.operator}`,
         variables: { ...variables },
-        explanation: `${statement.variable} changes from ${before} to ${after}.`,
+        explanation: `${s.variable} changes from ${before} to ${after}.`,
       });
-
-      currentNode = chooseEdge(edges, statement.id, "normal");
+      current = chooseEdge(edges, s.id, "normal");
       continue;
     }
 
     // --------------------------------------------------------
     // OUTPUT
     // --------------------------------------------------------
-    if (statement.type === "output") {
+    if (s.type === "output") {
       push({
-        node: statement.id,
-        line: statement.line,
+        node: s.id,
+        line: s.line,
         type: "output",
-        expression: statement.code,
+        expression: s.code,
         variables: { ...variables },
         explanation: "The program produces output.",
       });
-
-      currentNode = chooseEdge(edges, statement.id, "normal");
+      current = chooseEdge(edges, s.id, "normal");
       continue;
     }
 
     // --------------------------------------------------------
     // RETURN
     // --------------------------------------------------------
-    if (statement.type === "return") {
+    if (s.type === "return") {
       push({
-        node: statement.id,
-        line: statement.line,
+        node: s.id,
+        line: s.line,
         type: "return",
         variables: { ...variables },
-        explanation: `Returning from the program: ${statement.code}`,
+        explanation: `Returning from the program: ${s.code}`,
       });
-      currentNode = "exit";
+      current = "exit";
       continue;
     }
 
-    // --------------------------------------------------------
-    // ELSE / GENERIC
-    // --------------------------------------------------------
+    // ELSE / generic statement
     push({
-      node: statement.id,
-      line: statement.line,
-      type: statement.type,
+      node: s.id,
+      line: s.line,
+      type: s.type,
       variables: { ...variables },
-      explanation: `Executing: ${statement.code}`,
+      explanation: `Executing: ${s.code}`,
     });
-
-    currentNode = chooseEdge(edges, statement.id, "normal");
+    current = chooseEdge(edges, s.id, "normal");
   }
 
   push({
@@ -235,17 +207,14 @@ function buildExecution(program) {
     line: null,
     type: "exit",
     variables: { ...variables },
-    explanation:
-      guard >= MAX_STEPS
-        ? "Execution stopped after reaching the safety limit."
-        : "Program execution has finished.",
+    explanation: guard >= MAX_STEPS ? "Execution stopped after reaching the safety limit." : "Program execution has finished.",
   });
 
   return execution;
 }
 
 // ============================================================
-// RUNTIME GRAPH
+// RUNTIME GRAPH — mirrors flowBuilder.js
 // ============================================================
 
 function buildRuntimeEdges(statements) {
@@ -255,7 +224,6 @@ function buildRuntimeEdges(statements) {
     if (edges.some((e) => e.from === from && e.to === to && e.type === type)) return;
     edges.push({ from, to, type });
   };
-
   const isControl = (s) => s && ["for", "while", "condition", "else_if", "else"].includes(s.type);
 
   function bodyRange(index) {
@@ -263,7 +231,6 @@ function buildRuntimeEdges(statements) {
     const next = statements[index + 1];
     if (!next) return null;
     if (next.depth <= control.depth) return { start: index + 1, end: index + 1 };
-
     let end = index + 1;
     while (end + 1 < statements.length && statements[end + 1].depth > control.depth) end++;
     return { start: index + 1, end };
@@ -276,7 +243,7 @@ function buildRuntimeEdges(statements) {
     return -1;
   }
 
-  add("start", statements[0]?.id, "normal");
+  if (statements.length) add("start", statements[0].id, "normal");
 
   for (let i = 0; i < statements.length - 1; i++) {
     const current = statements[i];
@@ -296,11 +263,9 @@ function buildRuntimeEdges(statements) {
         add(s.id, after >= 0 ? statements[after].id : "exit", "false");
         continue;
       }
-
       const first = statements[range.start];
       const last = statements[range.end];
       const after = nextAtOrAbove(range.end, s.depth);
-
       add(s.id, first.id, "true");
       add(last.id, s.id, "loop");
       add(s.id, after >= 0 ? statements[after].id : "exit", "false");
@@ -343,24 +308,21 @@ function buildRuntimeEdges(statements) {
 
   const last = statements[statements.length - 1];
   if (last && !["for", "while", "return"].includes(last.type)) add(last.id, "exit", "normal");
-
   return edges;
 }
 
 function chooseEdge(edges, from, preferredType) {
   const preferred = edges.find((edge) => edge.from === from && edge.type === preferredType);
   if (preferred) return preferred.to;
-  const fallback = edges.find((edge) => edge.from === from);
-  return fallback?.to || "exit";
+  return edges.find((edge) => edge.from === from)?.to || "exit";
 }
 
 // ============================================================
-// VALUE EVALUATION
+// EXPRESSIONS
 // ============================================================
 
 function evaluateValue(expression, variables) {
   if (expression == null) return 0;
-
   const clean = String(expression).replace(/;$/, "").trim();
   if (/^-?\d+(\.\d+)?$/.test(clean)) return Number(clean);
   if (Object.prototype.hasOwnProperty.call(variables, clean)) return variables[clean];
@@ -377,61 +339,57 @@ function evaluateValue(expression, variables) {
       return 0;
     }
   }
-
   return 0;
 }
 
-// ============================================================
-// CONDITION EVALUATION
-// ============================================================
-
 function evaluateCondition(expression, variables) {
   if (!expression) return false;
-
   let condition = String(expression).trim();
   if (condition.includes(";")) condition = (condition.split(";")[1] || "").trim();
-
-  // Logical AND / OR for simple conditions.
-  if (condition.includes("&&")) return condition.split("&&").every((part) => evaluateCondition(part, variables));
-  if (condition.includes("||")) return condition.split("||").some((part) => evaluateCondition(part, variables));
-
+  if (condition.includes("&&")) return condition.split("&&").every((p) => evaluateCondition(p, variables));
+  if (condition.includes("||")) return condition.split("||").some((p) => evaluateCondition(p, variables));
   if (condition.startsWith("!")) return !evaluateCondition(condition.slice(1), variables);
 
-  const operators = ["<=", ">=", "==", "!=", "<", ">"]; 
-  for (const operator of operators) {
-    const position = condition.indexOf(operator);
-    if (position === -1) continue;
-
-    const left = condition.slice(0, position).trim();
-    const right = condition.slice(position + operator.length).trim();
-    const leftValue = evaluateValue(left, variables);
-    const rightValue = evaluateValue(right, variables);
-
-    if (operator === "<=") return leftValue <= rightValue;
-    if (operator === ">=") return leftValue >= rightValue;
-    if (operator === "==") return leftValue === rightValue;
-    if (operator === "!=") return leftValue !== rightValue;
-    if (operator === "<") return leftValue < rightValue;
-    if (operator === ">") return leftValue > rightValue;
+  for (const op of ["<=", ">=", "==", "!=", "<", ">"]) {
+    const pos = condition.indexOf(op);
+    if (pos < 0) continue;
+    const left = evaluateValue(condition.slice(0, pos), variables);
+    const right = evaluateValue(condition.slice(pos + op.length), variables);
+    if (op === "<=") return left <= right;
+    if (op === ">=") return left >= right;
+    if (op === "==") return left === right;
+    if (op === "!=") return left !== right;
+    if (op === "<") return left < right;
+    if (op === ">") return left > right;
   }
-
   return Boolean(evaluateValue(condition, variables));
 }
 
 function executeForInitializer(init, variables) {
   if (!init) return;
-
-  const declaration = init.match(
-    /^(?:const\s+)?(?:(?:unsigned|signed)\s+)?(?:(?:long\s+long|long|short)\s+)?(?:int|float|double|char|bool|string)\s+([A-Za-z_]\w*)\s*(?:=\s*(.*))?$/
-  );
-
+  const declaration = init.match(/^(?:const\s+)?(?:(?:unsigned|signed)\s+)?(?:(?:long\s+long|long|short)\s+)?(?:int|float|double|char|bool|string)\s+([A-Za-z_]\w*)\s*(?:=\s*(.*))?$/);
   if (declaration) {
     variables[declaration[1]] = evaluateValue(declaration[2] ?? "0", variables);
     return;
   }
-
   const assignment = init.match(/^([A-Za-z_]\w*)\s*=\s*(.*)$/);
   if (assignment) variables[assignment[1]] = evaluateValue(assignment[2], variables);
+}
+
+function executeForUpdate(update, variables) {
+  if (!update) return;
+  const clean = String(update).trim();
+  const inc = clean.match(/^(?:\+\+([A-Za-z_]\w*)|([A-Za-z_]\w*)\+\+|--([A-Za-z_]\w*)|([A-Za-z_]\w*)--)$|^([A-Za-z_]\w*)\s*(\+=|-=)\s*(.+)$/);
+
+  if (inc) {
+    const variable = inc[1] || inc[2] || inc[3] || inc[4] || inc[5];
+    if (inc[1] || inc[2]) variables[variable] = (variables[variable] ?? 0) + 1;
+    else if (inc[3] || inc[4]) variables[variable] = (variables[variable] ?? 0) - 1;
+    else {
+      const amount = evaluateValue(inc[7], variables);
+      variables[variable] = inc[6] === "+=" ? (variables[variable] ?? 0) + amount : (variables[variable] ?? 0) - amount;
+    }
+  }
 }
 
 module.exports = buildExecution;
