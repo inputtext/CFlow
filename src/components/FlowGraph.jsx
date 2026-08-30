@@ -1,16 +1,42 @@
+/* ============================================================
+   C·FLOW — DYNAMIC FLOW GRAPH
+   ============================================================
+
+   The graph is now driven by the backend's:
+     nodes[]
+     edges[]
+
+   The old version had hardcoded nodes such as:
+     INITIALIZE
+     i <= 10 ?
+     sum += evenNum
+     evenNum += 2
+     i++
+     EXIT
+
+   That meant changing the code in the editor could change Memory
+   and execution while the middle graph stayed frozen.
+
+   This component removes that limitation.
+   ============================================================ */
+
 function FlowNode({
   id,
   label,
   type,
   active,
   conditionResult,
+  x,
+  y,
 }) {
   const background =
     type === "condition"
       ? "bg-[#FFE3A3]"
       : type === "exit"
         ? "bg-[#FFD6E7]"
-        : "bg-white";
+        : type === "start"
+          ? "bg-[#FFF9F0]"
+          : "bg-white";
 
   const isCondition = type === "condition";
 
@@ -29,26 +55,17 @@ function FlowNode({
       className={`
         absolute
         z-10
-
         w-[220px]
-        max-w-[220px]
-
         -translate-x-1/2
-
         border-2
         border-[#171717]
-
-        px-6
+        px-5
         py-4
-
         text-center
         font-mono
         font-bold
-
         ${background}
-
         shadow-[4px_4px_0_#171717]
-
         transition-all
         duration-300
         ease-out
@@ -64,52 +81,28 @@ function FlowNode({
         }
 
         ${
-          conditionState === "true"
-            ? `
-              ring-2
-              ring-[#171717]
-              ring-offset-2
-              ring-offset-[#E8DFFF]
-            `
-            : ""
-        }
-
-        ${
+          conditionState === "true" ||
           conditionState === "false"
-            ? `
-              ring-2
-              ring-[#171717]
-              ring-offset-2
-              ring-offset-[#E8DFFF]
-            `
+            ? "ring-2 ring-[#171717] ring-offset-2 ring-offset-[#E8DFFF]"
             : ""
         }
       `}
+      style={{
+        left: `${x}px`,
+        top: `${y}px`,
+      }}
     >
-      {/* ======================================================
-          NODE LABEL
-      ====================================================== */}
-
       <span
         className={`
+          block
           transition-all
           duration-300
-
           ${active ? "opacity-100" : "opacity-90"}
-
-          ${
-            active
-              ? "tracking-[0.01em]"
-              : ""
-          }
+          ${active ? "tracking-[0.01em]" : ""}
         `}
       >
         {label}
       </span>
-
-      {/* ======================================================
-          CONDITION RESULT
-      ====================================================== */}
 
       {isCondition && active && (
         <div
@@ -135,15 +128,7 @@ function FlowNode({
                   animate-[conditionChecking_0.8s_ease-in-out_infinite]
                 "
               />
-
-              <span
-                className="
-                  text-[9px]
-                  uppercase
-                  tracking-[0.18em]
-                  opacity-65
-                "
-              >
+              <span className="text-[9px] uppercase tracking-[0.18em] opacity-65">
                 evaluating
               </span>
             </>
@@ -151,17 +136,8 @@ function FlowNode({
 
           {conditionState === "true" && (
             <>
-              <span className="text-sm leading-none">
-                ✓
-              </span>
-
-              <span
-                className="
-                  text-[10px]
-                  uppercase
-                  tracking-[0.18em]
-                "
-              >
+              <span className="text-sm leading-none">✓</span>
+              <span className="text-[10px] uppercase tracking-[0.18em]">
                 TRUE
               </span>
             </>
@@ -169,27 +145,14 @@ function FlowNode({
 
           {conditionState === "false" && (
             <>
-              <span className="text-sm leading-none">
-                ×
-              </span>
-
-              <span
-                className="
-                  text-[10px]
-                  uppercase
-                  tracking-[0.18em]
-                "
-              >
+              <span className="text-sm leading-none">×</span>
+              <span className="text-[10px] uppercase tracking-[0.18em]">
                 FALSE
               </span>
             </>
           )}
         </div>
       )}
-
-      {/* ======================================================
-          ACTIVE NODE PULSE
-      ====================================================== */}
 
       {active && (
         <span
@@ -204,10 +167,6 @@ function FlowNode({
         />
       )}
 
-      {/* ======================================================
-          CONDITION STATE MARKER
-      ====================================================== */}
-
       {isCondition &&
         active &&
         conditionResult !== null && (
@@ -217,22 +176,17 @@ function FlowNode({
               absolute
               -right-[7px]
               -top-[7px]
-
               flex
               h-4
               w-4
-
               items-center
               justify-center
-
               border-2
               border-[#171717]
               bg-[#FFF9F0]
-
               font-mono
               text-[9px]
               font-black
-
               animate-[conditionBadgeIn_0.3s_ease-out]
             "
           >
@@ -245,8 +199,8 @@ function FlowNode({
 
 
 /* ============================================================
-   CONNECTION
-============================================================ */
+   EDGE
+   ============================================================ */
 
 function FlowPath({
   d,
@@ -256,10 +210,6 @@ function FlowPath({
 }) {
   return (
     <>
-      {/* ======================================================
-          BASE PATH
-      ====================================================== */}
-
       <path
         d={d}
         fill="none"
@@ -268,16 +218,9 @@ function FlowPath({
         strokeLinecap="round"
         strokeLinejoin="round"
         markerEnd="url(#cflow-arrow)"
-        className="
-          transition-opacity
-          duration-300
-        "
         opacity={active ? "1" : "0.8"}
+        className="transition-opacity duration-300"
       />
-
-      {/* ======================================================
-          ACTIVE EXECUTION PATH
-      ====================================================== */}
 
       {active && (
         <>
@@ -313,9 +256,7 @@ function FlowPath({
             <circle
               r="5"
               fill="#171717"
-              className="
-                animate-[flowDot_0.8s_ease-in-out_infinite]
-              "
+              className="animate-[flowDot_0.8s_ease-in-out_infinite]"
             >
               <animateMotion
                 dur="0.9s"
@@ -329,9 +270,7 @@ function FlowPath({
             <circle
               r="4"
               fill="#171717"
-              className="
-                animate-[loopDot_1.1s_ease-in-out_infinite]
-              "
+              className="animate-[loopDot_1.1s_ease-in-out_infinite]"
             >
               <animateMotion
                 dur="1.1s"
@@ -343,17 +282,11 @@ function FlowPath({
         </>
       )}
 
-      {/* ======================================================
-          CONDITION PATH INDICATOR
-      ====================================================== */}
-
       {active && conditionPath && (
         <circle
           r="3"
           fill="#171717"
-          className="
-            animate-[conditionPathPulse_0.8s_ease-in-out_infinite]
-          "
+          className="animate-[conditionPathPulse_0.8s_ease-in-out_infinite]"
         >
           <animateMotion
             dur="0.9s"
@@ -368,16 +301,252 @@ function FlowPath({
 
 
 /* ============================================================
+   LABEL NORMALIZATION
+   ============================================================ */
+
+function displayLabel(node) {
+  if (!node) return "";
+
+  const label =
+    node.label ??
+    node.code ??
+    node.id ??
+    "";
+
+  if (label === "START") return "START";
+  if (label === "EXIT") return "EXIT";
+
+  return String(label);
+}
+
+
+/* ============================================================
+   NODE TYPE NORMALIZATION
+   ============================================================ */
+
+function displayType(node) {
+  if (!node) return "operation";
+
+  if (node.type === "condition") {
+    return "condition";
+  }
+
+  if (node.type === "start") {
+    return "start";
+  }
+
+  if (node.type === "exit") {
+    return "exit";
+  }
+
+  return "operation";
+}
+
+
+/* ============================================================
+   EDGE PATH GENERATOR
+   ============================================================ */
+
+function buildEdgePath(from, to, edge, layout) {
+  const a = layout[from];
+  const b = layout[to];
+
+  if (!a || !b) return "";
+
+  const startX = a.x;
+  const startY = a.y + 65;
+
+  const endX = b.x;
+  const endY = b.y;
+
+  // Loop/back edge.
+  const isBackEdge =
+    b.y < a.y ||
+    edge?.type === "loop" ||
+    edge?.type === "back";
+
+  if (isBackEdge) {
+    const rightX =
+      Math.max(a.x, b.x) + 210;
+
+    const controlY =
+      Math.min(a.y, b.y) + 20;
+
+    return `
+      M ${startX} ${startY}
+      C ${rightX} ${startY}
+        ${rightX} ${controlY}
+        ${endX} ${endY}
+    `;
+  }
+
+  // Branching edge: use a slight horizontal curve.
+  if (Math.abs(startX - endX) > 5) {
+    const middleY =
+      startY + (endY - startY) * 0.5;
+
+    return `
+      M ${startX} ${startY}
+      C ${startX} ${middleY}
+        ${endX} ${middleY}
+        ${endX} ${endY}
+    `;
+  }
+
+  // Normal vertical edge.
+  return `
+    M ${startX} ${startY}
+    L ${endX} ${endY}
+  `;
+}
+
+
+/* ============================================================
    FLOW GRAPH
-============================================================ */
+   ============================================================ */
 
 export default function FlowGraph({
+  nodes = null,
+  edges = null,
   activeNode,
   activeEdge,
   conditionResult = null,
 }) {
+  /*
+   * Before backend analysis, keep the old visualizer visible.
+   * Once backend nodes exist, everything below becomes dynamic.
+   */
+  const fallbackNodes = [
+    {
+      id: "initialize",
+      label: "INITIALIZE",
+      type: "operation",
+    },
+    {
+      id: "condition",
+      label: "i <= 10 ?",
+      type: "condition",
+    },
+    {
+      id: "sum",
+      label: "sum += evenNum",
+      type: "operation",
+    },
+    {
+      id: "evenNum",
+      label: "evenNum += 2",
+      type: "operation",
+    },
+    {
+      id: "increment",
+      label: "i++",
+      type: "operation",
+    },
+    {
+      id: "exit",
+      label: "EXIT",
+      type: "exit",
+    },
+  ];
+
+  const fallbackEdges = [
+    {
+      id: "initializeToCondition",
+      from: "initialize",
+      to: "condition",
+    },
+    {
+      id: "conditionToSum",
+      from: "condition",
+      to: "sum",
+    },
+    {
+      id: "sumToEven",
+      from: "sum",
+      to: "evenNum",
+    },
+    {
+      id: "evenToIncrement",
+      from: "evenNum",
+      to: "increment",
+    },
+    {
+      id: "incrementToCondition",
+      from: "increment",
+      to: "condition",
+      type: "loop",
+    },
+    {
+      id: "conditionToExit",
+      from: "condition",
+      to: "exit",
+    },
+  ];
+
+  const usingBackendGraph =
+    Array.isArray(nodes) &&
+    nodes.length > 0;
+
+  const graphNodes =
+    usingBackendGraph
+      ? nodes
+      : fallbackNodes;
+
+  const graphEdges =
+    usingBackendGraph &&
+    Array.isArray(edges)
+      ? edges
+      : fallbackEdges;
+
+  /*
+   * Put nodes into a clean vertical layout.
+   *
+   * We deliberately calculate this from the number of nodes
+   * instead of hardcoding six positions.
+   */
+  const layout = {};
+
+  const orderedNodes = [...graphNodes];
+
+  orderedNodes.forEach((node, index) => {
+    const isExit =
+      displayType(node) === "exit";
+
+    const isStart =
+      displayType(node) === "start";
+
+    layout[node.id] = {
+      x: 500,
+      y: isExit
+        ? Math.max(
+            24,
+            (orderedNodes.length - 1) * 105
+          )
+        : index * 105 + 24,
+    };
+
+    // Start and exit stay in the center for
+    // ordinary linear programs.
+    if (isStart) {
+      layout[node.id].y = 24;
+    }
+  });
+
+  /*
+   * Give an exit node a little breathing room.
+   */
+  const graphHeight =
+    Math.max(
+      620,
+      orderedNodes.length * 105 + 70
+    );
+
   const conditionIsActive =
-    activeNode === "condition";
+    graphNodes.some(
+      (node) =>
+        node.id === activeNode &&
+        displayType(node) === "condition"
+    );
 
   const trueIsActive =
     conditionIsActive &&
@@ -391,139 +560,35 @@ export default function FlowGraph({
     <div
       className="
         relative
-
-        h-[620px]
-        min-h-[620px]
-
         w-full
         min-w-[760px]
-
         overflow-visible
       "
+      style={{
+        minHeight: `${graphHeight}px`,
+      }}
     >
       {/* ======================================================
           NODES
       ====================================================== */}
 
-      {/* INITIALIZE */}
+      {orderedNodes.map((node) => {
+        const type =
+          displayType(node);
 
-      <div
-        className="
-          absolute
-          left-1/2
-          top-[24px]
-          -translate-x-1/2
-        "
-      >
-        <FlowNode
-          id="initialize"
-          label="INITIALIZE"
-          type="operation"
-          active={activeNode === "initialize"}
-          conditionResult={conditionResult}
-        />
-      </div>
-
-
-      {/* CONDITION */}
-
-      <div
-        className="
-          absolute
-          left-1/2
-          top-[125px]
-          -translate-x-1/2
-        "
-      >
-        <FlowNode
-          id="condition"
-          label="i <= 10 ?"
-          type="condition"
-          active={activeNode === "condition"}
-          conditionResult={conditionResult}
-        />
-      </div>
-
-
-      {/* SUM */}
-
-      <div
-        className="
-          absolute
-          left-1/2
-          top-[230px]
-          -translate-x-1/2
-        "
-      >
-        <FlowNode
-          id="sum"
-          label="sum += evenNum"
-          type="operation"
-          active={activeNode === "sum"}
-          conditionResult={conditionResult}
-        />
-      </div>
-
-
-      {/* EVEN NUM */}
-
-      <div
-        className="
-          absolute
-          left-1/2
-          top-[335px]
-          -translate-x-1/2
-        "
-      >
-        <FlowNode
-          id="evenNum"
-          label="evenNum += 2"
-          type="operation"
-          active={activeNode === "evenNum"}
-          conditionResult={conditionResult}
-        />
-      </div>
-
-
-      {/* INCREMENT */}
-
-      <div
-        className="
-          absolute
-          left-1/2
-          top-[440px]
-          -translate-x-1/2
-        "
-      >
-        <FlowNode
-          id="increment"
-          label="i++"
-          type="operation"
-          active={activeNode === "increment"}
-          conditionResult={conditionResult}
-        />
-      </div>
-
-
-      {/* EXIT */}
-
-      <div
-        className="
-          absolute
-          left-[82%]
-          top-[500px]
-          -translate-x-1/2
-        "
-      >
-        <FlowNode
-          id="exit"
-          label="EXIT"
-          type="exit"
-          active={activeNode === "exit"}
-          conditionResult={conditionResult}
-        />
-      </div>
-
+        return (
+          <FlowNode
+            key={node.id}
+            id={node.id}
+            label={displayLabel(node)}
+            type={type}
+            active={activeNode === node.id}
+            conditionResult={conditionResult}
+            x={layout[node.id].x}
+            y={layout[node.id].y}
+          />
+        );
+      })}
 
       {/* ======================================================
           CONNECTIONS
@@ -537,13 +602,10 @@ export default function FlowGraph({
           h-full
           w-full
         "
-        viewBox="0 0 1000 620"
+        viewBox={`0 0 1000 ${graphHeight}`}
         preserveAspectRatio="none"
       >
         <defs>
-
-          {/* NORMAL ARROW */}
-
           <marker
             id="cflow-arrow"
             markerWidth="10"
@@ -558,9 +620,6 @@ export default function FlowGraph({
             />
           </marker>
 
-
-          {/* ACTIVE ARROW */}
-
           <marker
             id="cflow-arrow-active"
             markerWidth="10"
@@ -574,203 +633,146 @@ export default function FlowGraph({
               fill="#171717"
             />
           </marker>
-
         </defs>
 
+        {graphEdges.map((edge) => {
+          const d = buildEdgePath(
+            edge.from,
+            edge.to,
+            edge,
+            layout
+          );
 
-        {/* ====================================================
-            INITIALIZE → CONDITION
-        ==================================================== */}
+          if (!d) return null;
 
-        <FlowPath
-          d="M500 89 L500 125"
-          active={
-            activeEdge ===
-            "initializeToCondition"
-          }
-        />
+          const isLoop =
+            edge.type === "loop" ||
+            edge.type === "back" ||
+            layout[edge.to]?.y <
+              layout[edge.from]?.y;
 
+          const isConditionPath =
+            edge.type === "true" ||
+            edge.type === "false";
 
-        {/* ====================================================
-            CONDITION → SUM
-            TRUE
-        ==================================================== */}
-
-        <FlowPath
-          d="M500 190 L500 230"
-          active={
-            activeEdge ===
-            "conditionToSum"
-          }
-          conditionPath
-        />
-
-
-        {/* ====================================================
-            SUM → EVEN NUM
-        ==================================================== */}
-
-        <FlowPath
-          d="M500 295 L500 335"
-          active={
-            activeEdge ===
-            "sumToEven"
-          }
-        />
-
-
-        {/* ====================================================
-            EVEN NUM → i++
-        ==================================================== */}
-
-        <FlowPath
-          d="M500 400 L500 440"
-          active={
-            activeEdge ===
-            "evenToIncrement"
-          }
-        />
-
-
-        {/* ====================================================
-            i++ → CONDITION
-            LOOP BACK
-        ==================================================== */}
-
-        <FlowPath
-          d="
-            M610 472
-            C760 472 820 400 820 310
-            C820 210 750 157 610 157
-          "
-          active={
-            activeEdge ===
-            "incrementToCondition"
-          }
-          loop
-        />
-
-
-        {/* ====================================================
-            CONDITION → EXIT
-            FALSE
-        ==================================================== */}
-
-        <FlowPath
-          d="
-            M610 157
-            C680 157 760 200 760 280
-            L760 532
-            L710 532
-          "
-          active={
-            activeEdge ===
-            "conditionToExit"
-          }
-          conditionPath
-        />
-
+          return (
+            <FlowPath
+              key={edge.id}
+              d={d}
+              active={
+                activeEdge === edge.id
+              }
+              loop={isLoop}
+              conditionPath={
+                isConditionPath
+              }
+            />
+          );
+        })}
       </svg>
 
-
       {/* ======================================================
-          TRUE LABEL
+          CONDITION LABELS
       ====================================================== */}
 
-      <span
-        className={`
-          absolute
-          left-[calc(50%+125px)]
-          top-[192px]
+      {graphEdges
+        .filter(
+          (edge) =>
+            edge.type === "true" ||
+            edge.type === "false"
+        )
+        .map((edge) => {
+          const from =
+            layout[edge.from];
 
-          font-mono
-          text-[10px]
-          font-bold
+          const to =
+            layout[edge.to];
 
-          transition-all
-          duration-300
-
-          ${
-            trueIsActive
-              ? `
-                translate-x-1
-                font-black
-                opacity-100
-              `
-              : "opacity-65"
+          if (!from || !to) {
+            return null;
           }
-        `}
-      >
-        TRUE
-      </span>
 
+          const isTrue =
+            edge.type === "true";
+
+          return (
+            <span
+              key={`label-${edge.id}`}
+              className={`
+                absolute
+                font-mono
+                text-[10px]
+                font-bold
+                transition-all
+                duration-300
+                ${
+                  (
+                    isTrue &&
+                    trueIsActive
+                  ) ||
+                  (
+                    !isTrue &&
+                    falseIsActive
+                  )
+                    ? "font-black opacity-100"
+                    : "opacity-65"
+                }
+              `}
+              style={{
+                left: `${
+                  (from.x + to.x) / 2 + 15
+                }px`,
+                top: `${
+                  (from.y + to.y) / 2
+                }px`,
+              }}
+            >
+              {isTrue
+                ? "TRUE"
+                : "FALSE"}
+            </span>
+          );
+        })}
 
       {/* ======================================================
-          FALSE LABEL
+          LOOP LABEL
       ====================================================== */}
 
-      <span
-        className={`
-          absolute
-          left-[68%]
-          top-[142px]
-
-          font-mono
-          text-[10px]
-          font-bold
-
-          transition-all
-          duration-300
-
-          ${
-            falseIsActive
-              ? `
-                translate-x-1
-                font-black
-                opacity-100
-              `
-              : "opacity-65"
-          }
-        `}
-      >
-        FALSE
-      </span>
-
-
-      {/* ======================================================
-          LOOP BACK LABEL
-      ====================================================== */}
-
-      <span
-        className={`
-          absolute
-          right-[2%]
-          top-[37%]
-
-          rotate-[-78deg]
-
-          font-mono
-          text-[10px]
-          font-bold
-
-          transition-all
-          duration-300
-
-          ${
-            activeEdge ===
-            "incrementToCondition"
-              ? `
-                font-black
-                opacity-100
-                animate-[loopLabelPulse_1s_ease-in-out_infinite]
-              `
-              : "opacity-70"
-          }
-        `}
-      >
-        LOOP BACK
-      </span>
-
+      {graphEdges.some(
+        (edge) =>
+          edge.type === "loop" ||
+          edge.type === "back" ||
+          layout[edge.to]?.y <
+            layout[edge.from]?.y
+      ) && (
+        <span
+          className={`
+            absolute
+            right-[2%]
+            top-[42%]
+            rotate-[-78deg]
+            font-mono
+            text-[10px]
+            font-bold
+            transition-all
+            duration-300
+            ${
+              graphEdges.some(
+                (edge) =>
+                  edge.id === activeEdge &&
+                  (
+                    edge.type === "loop" ||
+                    edge.type === "back"
+                  )
+              )
+                ? "font-black opacity-100 animate-[loopLabelPulse_1s_ease-in-out_infinite]"
+                : "opacity-70"
+            }
+          `}
+        >
+          LOOP BACK
+        </span>
+      )}
 
       {/* ======================================================
           CONDITION STATUS
@@ -782,18 +784,21 @@ export default function FlowGraph({
             className="
               absolute
               left-1/2
-              top-[205px]
-              -translate-x-1/2
-
               font-mono
               text-[9px]
               font-black
               uppercase
               tracking-[0.16em]
               opacity-60
-
               animate-[conditionStatusIn_0.3s_ease-out]
             "
+            style={{
+              top: `${
+                (layout[activeNode]?.y ?? 0) + 80
+              }px`,
+              transform:
+                "translateX(-50%)",
+            }}
           >
             {conditionResult
               ? "condition passed"
@@ -801,16 +806,13 @@ export default function FlowGraph({
           </div>
         )}
 
-
       {/* ======================================================
-          ANIMATION KEYFRAMES
+          ANIMATIONS
       ====================================================== */}
 
       <style>
         {`
-
           @keyframes nodePulse {
-
             0% {
               opacity: 0;
               transform: scale(1);
@@ -825,12 +827,9 @@ export default function FlowGraph({
               opacity: 0;
               transform: scale(1.08);
             }
-
           }
 
-
           @keyframes flowTravel {
-
             from {
               stroke-dashoffset: 30;
             }
@@ -838,12 +837,9 @@ export default function FlowGraph({
             to {
               stroke-dashoffset: 0;
             }
-
           }
 
-
           @keyframes flowTravelDark {
-
             from {
               stroke-dashoffset: 22;
             }
@@ -851,12 +847,9 @@ export default function FlowGraph({
             to {
               stroke-dashoffset: 0;
             }
-
           }
 
-
           @keyframes flowDot {
-
             0% {
               opacity: 0;
               transform: scale(0.7);
@@ -876,12 +869,9 @@ export default function FlowGraph({
               opacity: 0;
               transform: scale(0.7);
             }
-
           }
 
-
           @keyframes loopDot {
-
             0% {
               opacity: 0;
               transform: scale(0.65);
@@ -901,12 +891,9 @@ export default function FlowGraph({
               opacity: 0;
               transform: scale(0.65);
             }
-
           }
 
-
           @keyframes loopLabelPulse {
-
             0% {
               opacity: 0.7;
             }
@@ -918,12 +905,9 @@ export default function FlowGraph({
             100% {
               opacity: 0.7;
             }
-
           }
 
-
           @keyframes conditionResultIn {
-
             0% {
               opacity: 0;
               transform: translateY(-3px);
@@ -933,12 +917,9 @@ export default function FlowGraph({
               opacity: 1;
               transform: translateY(0);
             }
-
           }
 
-
           @keyframes conditionChecking {
-
             0% {
               opacity: 0.35;
               transform: scale(0.8);
@@ -953,12 +934,9 @@ export default function FlowGraph({
               opacity: 0.35;
               transform: scale(0.8);
             }
-
           }
 
-
           @keyframes conditionBadgeIn {
-
             0% {
               opacity: 0;
               transform: scale(0.65);
@@ -973,12 +951,9 @@ export default function FlowGraph({
               opacity: 1;
               transform: scale(1);
             }
-
           }
 
-
           @keyframes conditionPathPulse {
-
             0% {
               opacity: 0.2;
               transform: scale(0.75);
@@ -993,26 +968,19 @@ export default function FlowGraph({
               opacity: 0.2;
               transform: scale(0.75);
             }
-
           }
 
-
           @keyframes conditionStatusIn {
-
             from {
               opacity: 0;
-              transform:
-                translate(-50%, -3px);
+              transform: translate(-50%, -3px);
             }
 
             to {
               opacity: 0.6;
-              transform:
-                translate(-50%, 0);
+              transform: translate(-50%, 0);
             }
-
           }
-
         `}
       </style>
     </div>
