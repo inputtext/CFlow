@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from "react";
 
 const STORAGE_KEY = "cflow-theme";
 const DARK_CLASS = "cflow-dark";
-const CLOSE_MS = 620;
-const OPEN_MS = 620;
+const CLOSE_MS = 1250;
+const HOLD_MS = 420;
+const OPEN_MS = 1050;
 
 function readStoredTheme() {
   try {
@@ -14,22 +15,24 @@ function readStoredTheme() {
 }
 
 function applyTheme(dark) {
+  const root = document.getElementById("root");
+  root?.classList.toggle(DARK_CLASS, dark);
   document.documentElement.classList.toggle(DARK_CLASS, dark);
   document.body.classList.toggle(DARK_CLASS, dark);
 }
 
 export default function ThemeToggle() {
   const [dark, setDark] = useState(readStoredTheme);
-  const [curtainVisible, setCurtainVisible] = useState(false);
-  const [opening, setOpening] = useState(false);
+  const [curtain, setCurtain] = useState(null);
   const busyRef = useRef(false);
   const timersRef = useRef([]);
 
   useEffect(() => {
+    // Apply the saved theme immediately on mount. No curtain is shown on refresh.
     applyTheme(dark);
 
     return () => {
-      timersRef.current.forEach(clearTimeout);
+      timersRef.current.forEach((timer) => window.clearTimeout(timer));
     };
   }, [dark]);
 
@@ -37,47 +40,55 @@ export default function ThemeToggle() {
     if (busyRef.current) return;
 
     busyRef.current = true;
-    setCurtainVisible(true);
-    setOpening(false);
+    const nextDark = !dark;
 
-    const closeTimer = window.setTimeout(() => {
-      setDark((current) => {
-        const next = !current;
+    // Start with both curtains off-screen, then pull them into the center.
+    setCurtain("closing");
 
-        try {
-          window.localStorage.setItem(STORAGE_KEY, next ? "dark" : "light");
-        } catch {
-          // Keep the selected theme for this session if storage is unavailable.
-        }
+    const settleClose = window.setTimeout(() => {
+      setCurtain("closed");
+    }, 40);
 
-        applyTheme(next);
-        return next;
-      });
+    const changeTheme = window.setTimeout(() => {
+      setDark(nextDark);
 
+      try {
+        window.localStorage.setItem(
+          STORAGE_KEY,
+          nextDark ? "dark" : "light",
+        );
+      } catch {
+        // Theme still works for this session if storage is unavailable.
+      }
+
+      applyTheme(nextDark);
+
+      // Give the covered screen a deliberate beat before revealing it.
       const openTimer = window.setTimeout(() => {
-        setOpening(true);
+        setCurtain("opening");
 
         const cleanupTimer = window.setTimeout(() => {
-          setCurtainVisible(false);
-          setOpening(false);
+          setCurtain(null);
           busyRef.current = false;
         }, OPEN_MS);
 
         timersRef.current.push(cleanupTimer);
-      }, 140);
+      }, HOLD_MS);
 
       timersRef.current.push(openTimer);
-    }, CLOSE_MS);
+    }, CLOSE_MS + 40);
 
-    timersRef.current.push(closeTimer);
+    timersRef.current.push(settleClose, changeTheme);
   };
+
+  const curtainLabel = nextLabel(dark);
 
   return (
     <>
       <button
         type="button"
         onClick={toggle}
-        disabled={curtainVisible}
+        disabled={Boolean(curtain)}
         aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
         aria-pressed={dark}
         className="cflow-theme-toggle"
@@ -93,18 +104,22 @@ export default function ThemeToggle() {
         </span>
       </button>
 
-      {curtainVisible && (
+      {curtain && (
         <div
-          className={`cflow-theme-curtain${opening ? " is-opening" : ""}`}
+          className={`cflow-theme-curtain is-${curtain}`}
           aria-hidden="true"
         >
           <div className="cflow-theme-curtain__panel cflow-theme-curtain__panel--top" />
           <div className="cflow-theme-curtain__panel cflow-theme-curtain__panel--bottom" />
           <div className="cflow-theme-curtain__mark">
-            C·FLOW / {dark ? "LIGHT" : "DARK"}
+            C·FLOW&nbsp;&nbsp;/&nbsp;&nbsp;{curtainLabel}
           </div>
         </div>
       )}
     </>
   );
+}
+
+function nextLabel(dark) {
+  return dark ? "LIGHT" : "DARK";
 }
