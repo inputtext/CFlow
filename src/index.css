@@ -103,29 +103,28 @@ body,
    the user scrolls.
 ------------------------------------------------------------ */
 
-/*
- * Keep the line-number rail above the transparent textarea.
- * Its background is limited to the 54px number column, while the
- * active-row pseudo-element extends across the code editor.
- */
 [class*="w-[54px]"] {
   overflow: visible !important;
   z-index: 20 !important;
 }
 
-/* Active line number stays readable above its highlight. */
 [class*="w-[54px]"] > div.font-bold {
   position: relative;
   z-index: 2;
 }
 
+/*
+ * The line-number row is shorter than the editor's actual code-line
+ * rhythm. Offset the paint layer by one editor line so its center
+ * sits on the same source line as the active number/text.
+ */
 [class*="w-[54px]"] > div.font-bold::after {
   content: "";
   position: absolute;
   left: 54px;
-  top: 0;
+  top: 38px;
   width: 1200px;
-  height: 28px;
+  height: 38px;
   pointer-events: none;
   z-index: 0;
   background: rgba(218, 190, 116, 0.20);
@@ -133,7 +132,6 @@ body,
   border-bottom: 1px solid rgba(145, 119, 58, 0.18);
 }
 
-/* Never use the textarea itself as the execution-highlight layer. */
 .cflow-dark main > section:first-child textarea {
   background-image: none !important;
 }
@@ -193,7 +191,6 @@ body,
   border-bottom-color: rgba(210, 184, 120, 0.22);
 }
 
-/* Keep normal dark-mode code readable. */
 .cflow-dark main > section:first-child textarea {
   color: #F3EFE7 !important;
   -webkit-text-fill-color: #F3EFE7 !important;
@@ -201,7 +198,6 @@ body,
   caret-color: #E8C77A !important;
 }
 
-/* Dark-mode selection remains separate from execution highlighting. */
 .cflow-dark main > section:first-child textarea::selection {
   background: #6F6247 !important;
   color: #FFF9F0 !important;
