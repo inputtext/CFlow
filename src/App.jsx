@@ -4,7 +4,12 @@ import { animateVariableUpdate } from "./animations/animateVariableUpdate";
 import { animateConditionEvaluation } from "./animations/animateConditionEvaluation";
 import FlowGraph from "./components/FlowGraph";
 import { playLoopSound } from "./animations/executionSound";
-
+import {
+  Show,
+  SignInButton,
+  SignUpButton,
+  UserButton
+} from '@clerk/react'
 /* ============================================================
    STARTER CODE
 ============================================================ */
