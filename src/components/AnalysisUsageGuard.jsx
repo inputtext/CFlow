@@ -200,7 +200,7 @@ export default function AnalysisUsageGuard({ children }) {
       {children}
 
       {isLoaded && isSignedIn && (
-        <div className="pointer-events-none fixed bottom-[92px] left-4 z-[80] flex flex-col gap-2 font-mono text-[10px] font-black uppercase tracking-[0.12em]">
+        <div className="cflow-usage-badges pointer-events-none fixed top-4 right-[300px] z-[80] flex flex-col gap-2 font-mono text-[10px] font-black uppercase tracking-[0.12em]">
           <div className={`w-fit border-2 border-[#171717] px-3 py-2 shadow-[3px_3px_0_#171717] ${badgeClass}`}>
             {badgeText}{!isAdmin && " ANALYSES"}
           </div>
