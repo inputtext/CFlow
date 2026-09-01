@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { executionSteps as fallbackExecutionSteps, initialState as fallbackInitialState } from "./core/mockEngine";
+import { useUser } from "@clerk/react";
 
 const MAX_LINES = 1000;
 const FREE_ATTEMPTS = 4;
@@ -39,17 +39,11 @@ export default function AnalysisUsageGuard({ children }) {
   const { isLoaded, isSignedIn, user } = useUser();
   const userId = isSignedIn ? user?.id : null;
 
-  // Read the metadata already present on the live Clerk user immediately.
-  // This prevents the UI from briefly treating an admin as a free user.
   const [isAdmin, setIsAdmin] = useState(() => getAdminStatus(user));
   const [used, setUsed] = useState(() => readUsage(userId));
   const [lineCount, setLineCount] = useState(0);
   const [guardError, setGuardError] = useState(null);
 
-  // Refresh the Clerk user once when the signed-in account becomes available.
-  // Then read publicMetadata from the refreshed user object. The important
-  // part is that we also use the metadata already exposed by useUser(), so an
-  // admin does not depend on reload() returning a User object in every SDK version.
   useEffect(() => {
     let cancelled = false;
 
@@ -59,16 +53,11 @@ export default function AnalysisUsageGuard({ children }) {
         return;
       }
 
-      // The metadata visible on the current Clerk session is authoritative for
-      // this client-side UI gate. This is also what the Clerk dashboard exposes.
       setIsAdmin(getAdminStatus(user));
 
       try {
         await user.reload();
         if (cancelled) return;
-
-        // Clerk may mutate the same User instance during reload(), so inspect
-        // the user object itself rather than relying on reload()'s return value.
         setIsAdmin(getAdminStatus(user));
       } catch {
         if (!cancelled) setIsAdmin(getAdminStatus(user));
@@ -117,7 +106,6 @@ export default function AnalysisUsageGuard({ children }) {
         });
       }
 
-      // Admin accounts bypass the free-attempt counter completely.
       if (isAdmin) {
         setGuardError(null);
         return originalFetch(input, init);
