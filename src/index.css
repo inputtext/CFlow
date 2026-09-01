@@ -121,14 +121,15 @@ body,
 }
 
 /*
- * Keep the user's calibrated execution marker position.
- * The marker is anchored to the same 28px row as the active number.
+ * Execution marker: keep the user's calibrated size/opacity,
+ * but move it upward so its center sits on the actual textarea
+ * glyph line instead of the line-number row's flex center.
  */
 [class*="w-[54px]"] > div.font-bold::after {
   content: "";
   position: absolute;
   left: 54px;
-  top: -20px;
+  top: -27px;
   width: 1200px;
   height: 25px;
   pointer-events: none;
