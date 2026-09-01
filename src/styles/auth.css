@@ -1,0 +1,38 @@
+/* C·FLOW AUTH LANDING — subtle entrance + tactile button lift */
+
+@keyframes cflowAuthCardIn {
+  0% {
+    opacity: 0;
+    transform: translateY(22px) scale(0.985);
+  }
+
+  55% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.cflow-auth-card-enter {
+  animation: cflowAuthCardIn 850ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: transform, opacity;
+}
+
+.cflow-auth-card-enter button {
+  will-change: transform, box-shadow;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cflow-auth-card-enter {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .cflow-auth-card-enter button {
+    transition: none !important;
+  }
+}
