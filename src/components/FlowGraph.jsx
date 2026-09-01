@@ -8,8 +8,11 @@ const GAP_Y = 104;
 const TOP_Y = 34;
 const VIEW_W = 900;
 const CENTER_X = 50;
-const LEFT_X = 24;
-const RIGHT_X = 70;
+const LEFT_X = 27;
+const RIGHT_X = 73;
+const LOOP_OUTER_X = 835;
+
+const LOOP_TYPES = new Set(["for", "while", "do", "loop"]);
 
 function typeOf(node) {
   if (!node) return "operation";
@@ -125,7 +128,9 @@ function reachableFrom(startId, edges) {
     seen.add(id);
 
     for (const edge of edges) {
-      if (edge.from === id && edge.type !== "loop") queue.push(edge.to);
+      if (edge.from === id && edge.type !== "loop") {
+        queue.push(edge.to);
+      }
     }
   }
 
@@ -137,70 +142,158 @@ function findMergeNode(edges, yesId, noId) {
 
   const yesReachable = reachableFrom(yesId, edges);
   const noReachable = reachableFrom(noId, edges);
-
-  for (const edge of edges) {
-    if (yesReachable.has(edge.from) && noReachable.has(edge.from)) {
-      return edge.from;
-    }
-  }
+  const common = [];
 
   for (const id of yesReachable) {
-    if (noReachable.has(id)) return id;
+    if (noReachable.has(id)) common.push(id);
   }
 
-  return null;
+  if (!common.length) return null;
+
+  // The graph builder keeps nodes in execution order. Choosing the first
+  // common node gives us the nearest visual merge point instead of sending
+  // one branch all the way to the bottom of the graph.
+  const index = new Map();
+  for (let i = 0; i < common.length; i += 1) index.set(common[i], i);
+
+  for (const edge of edges) {
+    if (common.includes(edge.from)) return edge.from;
+    if (common.includes(edge.to)) return edge.to;
+  }
+
+  return common.sort((a, b) => String(a).localeCompare(String(b)))[0] ?? null;
+}
+
+function makeRanks(nodes, edges) {
+  const rank = new Map(nodes.map((node) => [node.id, Number.POSITIVE_INFINITY]));
+  const start = nodes.find((node) => typeOf(node) === "start") ?? nodes[0];
+
+  if (start) rank.set(start.id, 0);
+
+  // Relax only non-loop edges. A small bounded number of passes keeps this
+  // safe even when an unusual backend graph contains another cycle.
+  for (let pass = 0; pass < nodes.length; pass += 1) {
+    let changed = false;
+
+    for (const edge of edges) {
+      if (edge.type === "loop") continue;
+
+      const fromRank = rank.get(edge.from);
+      if (!Number.isFinite(fromRank)) continue;
+
+      const nextRank = fromRank + 1;
+      if (nextRank < (rank.get(edge.to) ?? Number.POSITIVE_INFINITY)) {
+        rank.set(edge.to, nextRank);
+        changed = true;
+      }
+    }
+
+    if (!changed) break;
+  }
+
+  let fallbackRank = 0;
+  nodes.forEach((node, index) => {
+    if (!Number.isFinite(rank.get(node.id))) {
+      rank.set(node.id, fallbackRank + index);
+    }
+    fallbackRank = Math.max(fallbackRank, rank.get(node.id));
+  });
+
+  return rank;
 }
 
 function makeLayout(nodes, edges) {
   const layout = {};
-  const index = new Map(nodes.map((node, i) => [node.id, i]));
-  const lanes = new Map(nodes.map((node) => [node.id, 0]));
+  const ranks = makeRanks(nodes, edges);
+  const laneSets = new Map(nodes.map((node) => [node.id, new Set()]));
 
+  // First allocate explicit TRUE/FALSE lanes. We stop each lane at the
+  // nearest common node so branches do not drag unrelated downstream nodes
+  // to the side of the graph.
   for (const condition of nodes) {
     if (typeOf(condition) !== "condition") continue;
-    if (["for", "while", "do", "loop"].includes(condition.controlType)) continue;
+    if (LOOP_TYPES.has(condition.controlType)) continue;
 
     const yes = outgoing(edges, condition.id, "true");
     const no = outgoing(edges, condition.id, "false");
     if (!yes || !no) continue;
 
     const mergeId = findMergeNode(edges, yes.to, no.to);
-    const conditionIndex = index.get(condition.id);
-    const mergeIndex = mergeId == null ? null : index.get(mergeId);
+    const yesReachable = reachableFrom(yes.to, edges);
+    const noReachable = reachableFrom(no.to, edges);
 
-    const end = mergeIndex != null && conditionIndex != null
-      ? mergeIndex
-      : nodes.length;
+    for (const node of nodes) {
+      if (node.id === mergeId || node.id === condition.id) continue;
 
-    const yesIndex = index.get(yes.to);
-    const noIndex = index.get(no.to);
+      const inYes = yesReachable.has(node.id);
+      const inNo = noReachable.has(node.id);
 
-    if (yesIndex != null) {
-      for (let i = yesIndex; i < end; i++) {
-        const node = nodes[i];
-        if (node.id !== mergeId) lanes.set(node.id, 1);
-      }
-    }
-
-    if (noIndex != null) {
-      for (let i = noIndex; i < end; i++) {
-        const node = nodes[i];
-        if (node.id !== mergeId) lanes.set(node.id, -1);
-      }
+      if (inYes && !inNo) laneSets.get(node.id)?.add(1);
+      if (inNo && !inYes) laneSets.get(node.id)?.add(-1);
     }
   }
 
-  nodes.forEach((node) => {
-    if (["for", "while", "do", "loop"].includes(node.controlType)) {
-      lanes.set(node.id, 0);
-    }
-  });
+  // A node reachable from both sides is a merge and must return to center.
+  const rankGroups = new Map();
+  for (const node of nodes) {
+    const nodeRank = ranks.get(node.id) ?? 0;
+    if (!rankGroups.has(nodeRank)) rankGroups.set(nodeRank, []);
+    rankGroups.get(nodeRank).push(node);
+  }
 
-  nodes.forEach((node, i) => {
-    const side = lanes.get(node.id) || 0;
+  const sortedRanks = [...rankGroups.keys()].sort((a, b) => a - b);
+
+  for (const nodeRank of sortedRanks) {
+    const group = rankGroups.get(nodeRank);
+
+    group.sort((a, b) => {
+      const aLane = laneSets.get(a.id)?.size === 1 ? [...laneSets.get(a.id)][0] : 0;
+      const bLane = laneSets.get(b.id)?.size === 1 ? [...laneSets.get(b.id)][0] : 0;
+      return aLane - bLane;
+    });
+
+    const laneCounts = new Map();
+
+    group.forEach((node) => {
+      const lanes = laneSets.get(node.id) ?? new Set();
+      let lane = lanes.size === 1 ? [...lanes][0] : 0;
+
+      if (typeOf(node) === "condition" && !LOOP_TYPES.has(node.controlType)) {
+        lane = 0;
+      }
+
+      if (typeOf(node) === "start" || typeOf(node) === "exit" || typeOf(node) === "output") {
+        // Merge/terminal nodes are visually strongest in the center.
+        if (lanes.size !== 1) lane = 0;
+      }
+
+      const count = laneCounts.get(lane) ?? 0;
+      laneCounts.set(lane, count + 1);
+
+      let x = CENTER_X;
+      if (lane < 0) x = LEFT_X;
+      if (lane > 0) x = RIGHT_X;
+
+      // If the backend gives multiple nodes the same rank/lane, keep them
+      // readable without changing the overall branch geometry.
+      if (count > 0) {
+        const offset = Math.min(8, count * 7);
+        x = lane < 0 ? LEFT_X - offset : lane > 0 ? RIGHT_X + offset : CENTER_X + (count % 2 ? 8 : -8);
+      }
+
+      layout[node.id] = {
+        x: Math.max(15, Math.min(85, x)),
+        y: TOP_Y + nodeRank * GAP_Y,
+      };
+    });
+  }
+
+  // Any nodes omitted from the ranked pass still receive a stable position.
+  nodes.forEach((node, index) => {
+    if (layout[node.id]) return;
     layout[node.id] = {
-      x: side > 0 ? RIGHT_X : side < 0 ? LEFT_X : CENTER_X,
-      y: TOP_Y + i * GAP_Y,
+      x: CENTER_X,
+      y: TOP_Y + index * GAP_Y,
     };
   });
 
@@ -218,6 +311,29 @@ function pointFor(node, position, side) {
   return { x: x + halfW, y: position.y + h / 2 };
 }
 
+function branchPath(edge, fromNode, toNode, from, to) {
+  const truth = edge.type === "true";
+  const start = pointFor(fromNode, from, "bottom");
+  const end = pointFor(toNode, to, "top");
+  const direction = truth ? 1 : -1;
+
+  // If a branch points backward, route it around the appropriate side.
+  if (to.y <= from.y) {
+    const sideX = (truth ? RIGHT_X : LEFT_X) / 100 * VIEW_W;
+    const startX = direction > 0 ? start.x + 28 : start.x - 28;
+    return `M ${start.x} ${start.y}
+      C ${startX} ${start.y + 30}, ${sideX} ${end.y - 30}, ${sideX} ${end.y - 12}
+      C ${sideX} ${end.y - 4}, ${end.x} ${end.y - 4}, ${end.x} ${end.y}`;
+  }
+
+  const verticalGap = Math.max(34, end.y - start.y);
+  const branchY = start.y + Math.min(48, verticalGap * 0.45);
+  const laneX = end.x;
+
+  return `M ${start.x} ${start.y}
+    C ${start.x} ${branchY}, ${laneX} ${branchY}, ${laneX} ${end.y}`;
+}
+
 function pathFor(edge, nodesById, layout) {
   const fromNode = nodesById.get(edge.from);
   const toNode = nodesById.get(edge.to);
@@ -229,7 +345,7 @@ function pathFor(edge, nodesById, layout) {
   if (edge.type === "loop") {
     const start = pointFor(fromNode, from, "right");
     const end = pointFor(toNode, to, "right");
-    const outerX = VIEW_W - 74;
+    const outerX = Math.max(start.x + 80, LOOP_OUTER_X);
     const returnY = end.y;
 
     return `M ${start.x} ${start.y}
@@ -237,30 +353,7 @@ function pathFor(edge, nodesById, layout) {
   }
 
   if (edge.type === "true" || edge.type === "false") {
-    const truth = edge.type === "true";
-    const isLoopCondition =
-      typeOf(fromNode) === "condition" &&
-      ["for", "while", "do", "loop"].includes(fromNode.controlType);
-
-    if (isLoopCondition && to.y > from.y) {
-      const start = pointFor(fromNode, from, truth ? "bottom" : "left");
-      const end = pointFor(toNode, to, "top");
-
-      if (truth) {
-        return `M ${start.x} ${start.y} L ${end.x} ${end.y}`;
-      }
-
-      const sideX = Math.max(26, start.x - 92);
-
-      return `M ${start.x} ${start.y}
-        C ${sideX} ${start.y}, ${sideX} ${end.y}, ${end.x} ${end.y}`;
-    }
-
-    const start = pointFor(fromNode, from, truth ? "right" : "left");
-    const end = pointFor(toNode, to, truth ? "left" : "right");
-    const horizontal = truth ? 70 : -70;
-
-    return `M ${start.x} ${start.y} C ${start.x + horizontal} ${start.y}, ${end.x - horizontal} ${end.y}, ${end.x} ${end.y}`;
+    return branchPath(edge, fromNode, toNode, from, to);
   }
 
   const start = pointFor(fromNode, from, "bottom");
@@ -270,8 +363,9 @@ function pathFor(edge, nodesById, layout) {
     return `M ${start.x} ${start.y} L ${end.x} ${end.y}`;
   }
 
-  const middleY = start.y + (end.y - start.y) / 2;
-  return `M ${start.x} ${start.y} C ${start.x} ${middleY}, ${end.x} ${middleY}, ${end.x} ${end.y}`;
+  const middleY = start.y + Math.max(30, (end.y - start.y) / 2);
+  return `M ${start.x} ${start.y}
+    C ${start.x} ${middleY}, ${end.x} ${middleY}, ${end.x} ${end.y}`;
 }
 
 function edgeLabel(edge, nodesById, layout) {
@@ -281,7 +375,7 @@ function edgeLabel(edge, nodesById, layout) {
 
   if (edge.type === "loop") {
     return {
-      x: VIEW_W - 148,
+      x: VIEW_W - 130,
       y: Math.max(28, to.y - 18),
       text: "LOOP BACK",
       width: 88,
@@ -292,18 +386,13 @@ function edgeLabel(edge, nodesById, layout) {
     const fromNode = nodesById.get(edge.from);
     const toNode = nodesById.get(edge.to);
     const truth = edge.type === "true";
-    const start = pointFor(
-      fromNode,
-      from,
-      truth ? "bottom" : "left",
-    );
+    const start = pointFor(fromNode, from, "bottom");
     const end = pointFor(toNode, to, "top");
+    const branchY = start.y + Math.min(48, Math.max(34, (end.y - start.y) * 0.45));
 
     return {
-      x: truth
-        ? (start.x + end.x) / 2
-        : (start.x + end.x) / 2 - 6,
-      y: (start.y + end.y) / 2 - 10,
+      x: truth ? end.x - 34 : end.x + 34,
+      y: Math.max(start.y + 20, branchY - 10),
       text: truth ? "TRUE" : "FALSE",
       width: 52,
     };
@@ -399,11 +488,12 @@ export default function FlowGraph({
     [graphNodes, graphEdges],
   );
 
-  const graphHeight = Math.max(
-    620,
-    TOP_Y + graphNodes.reduce((height, node) => height + nodeHeight(node) + GAP_Y, 0),
+  const maxY = graphNodes.reduce(
+    (max, node) => Math.max(max, (layout[node.id]?.y ?? TOP_Y) + nodeHeight(node)),
+    TOP_Y,
   );
 
+  const graphHeight = Math.max(620, maxY + 110);
   const activeEdgeId = typeof activeEdge === "string" ? activeEdge : activeEdge?.id;
 
   useEffect(() => {
@@ -413,12 +503,8 @@ export default function FlowGraph({
       const container = scrollRef.current;
       if (!container) return;
 
-      const nodesInGraph = Array.from(
-        container.querySelectorAll("[data-flow-node]"),
-      );
-
-      const element = nodesInGraph.find(
-        (item) => item.getAttribute("data-flow-node") === String(activeNode),
+      const element = container.querySelector(
+        `[data-flow-node="${activeNode}"]`,
       );
 
       if (!element) return;
@@ -448,35 +534,27 @@ export default function FlowGraph({
   return (
     <div className="relative h-full w-full min-w-0">
       <div
-        className="pointer-events-none absolute right-3 top-3 z-30 flex items-center gap-1 rounded-[12px] border-2 border-[#171717] bg-[#FFF9F0] p-1 shadow-[3px_3px_0_#171717]"
+        className="pointer-events-auto absolute right-3 top-3 z-30 flex items-center gap-1 rounded-[12px] border-2 border-[#171717] bg-[#FFF9F0] p-1 shadow-[3px_3px_0_#171717]"
         aria-label="Flowchart zoom controls"
       >
         <button
           type="button"
-          onClick={() => setZoom((value) => Math.max(0.8, Number((value - 0.1).toFixed(1))))}
-          className="pointer-events-auto flex h-7 w-7 items-center justify-center rounded-[8px] font-mono text-sm font-black transition-transform hover:scale-105 active:translate-y-px"
           aria-label="Zoom out"
-          title="Zoom out"
+          onClick={() => setZoom((value) => Math.max(0.8, Number((value - 0.1).toFixed(1))))}
+          className="h-8 w-8 font-mono text-lg font-bold hover:-translate-y-0.5"
         >
           −
         </button>
 
-        <button
-          type="button"
-          onClick={() => setZoom(1)}
-          className="pointer-events-auto min-w-[52px] rounded-[8px] px-2 py-1 font-mono text-[10px] font-black tracking-wide transition-transform hover:scale-105"
-          aria-label="Reset flowchart zoom"
-          title="Reset zoom"
-        >
+        <span className="min-w-[54px] text-center font-mono text-sm font-bold">
           {Math.round(zoom * 100)}%
-        </button>
+        </span>
 
         <button
           type="button"
-          onClick={() => setZoom((value) => Math.min(1.8, Number((value + 0.1).toFixed(1))))}
-          className="pointer-events-auto flex h-7 w-7 items-center justify-center rounded-[8px] font-mono text-sm font-black transition-transform hover:scale-105 active:translate-y-px"
           aria-label="Zoom in"
-          title="Zoom in"
+          onClick={() => setZoom((value) => Math.min(1.2, Number((value + 0.1).toFixed(1))))}
+          className="h-8 w-8 font-mono text-lg font-bold hover:-translate-y-0.5"
         >
           +
         </button>
@@ -484,56 +562,65 @@ export default function FlowGraph({
 
       <div
         ref={scrollRef}
-        className="relative h-full w-full min-w-0 overflow-auto rounded-[18px] bg-[#FFF9F0]"
+        className="h-full w-full overflow-auto rounded-[18px]"
       >
         <div
-          className="relative mx-auto origin-top"
+          className="relative mx-auto"
           style={{
-            height: graphHeight,
-            width: "100%",
-            minWidth: 640,
-            maxWidth: 900,
-            zoom,
+            width: `${VIEW_W}px`,
+            height: `${graphHeight * zoom}px`,
           }}
         >
-          <svg
-            className="pointer-events-none absolute inset-0 h-full w-full"
-            viewBox={`0 0 ${VIEW_W} ${graphHeight}`}
-            preserveAspectRatio="none"
+          <div
+            className="relative origin-top"
+            style={{
+              width: `${VIEW_W}px`,
+              height: `${graphHeight}px`,
+              transform: `scale(${zoom})`,
+            }}
           >
-            <defs>
-              <marker
-                id="cflow-arrow"
-                markerWidth="10"
-                markerHeight="10"
-                refX="8"
-                refY="4"
-                orient="auto"
-              >
-                <path d="M0,0 L8,4 L0,8 Z" fill="#171717" />
-              </marker>
-            </defs>
+            <svg
+              className="pointer-events-none absolute inset-0 z-0"
+              width={VIEW_W}
+              height={graphHeight}
+              viewBox={`0 0 ${VIEW_W} ${graphHeight}`}
+              aria-hidden="true"
+            >
+              <defs>
+                <marker
+                  id="cflow-arrow"
+                  markerWidth="10"
+                  markerHeight="10"
+                  refX="8"
+                  refY="5"
+                  orient="auto"
+                  markerUnits="strokeWidth"
+                >
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="#171717" />
+                </marker>
+              </defs>
 
-            {graphEdges.map((edge) => (
-              <FlowEdge
-                key={edge.id || `${edge.from}-${edge.to}-${edge.type}`}
-                edge={edge}
-                nodesById={nodesById}
-                layout={layout}
-                active={edge.id === activeEdgeId}
+              {graphEdges.map((edge) => (
+                <FlowEdge
+                  key={edge.id ?? `${edge.from}-${edge.to}-${edge.type}`}
+                  edge={edge}
+                  nodesById={nodesById}
+                  layout={layout}
+                  active={edge.id === activeEdgeId}
+                />
+              ))}
+            </svg>
+
+            {graphNodes.map((node) => (
+              <NodeBox
+                key={node.id}
+                node={node}
+                position={layout[node.id]}
+                active={node.id === activeNode}
+                conditionResult={conditionResult}
               />
             ))}
-          </svg>
-
-          {graphNodes.map((node) => (
-            <NodeBox
-              key={node.id}
-              node={node}
-              position={layout[node.id]}
-              active={node.id === activeNode}
-              conditionResult={conditionResult}
-            />
-          ))}
+          </div>
         </div>
       </div>
     </div>
