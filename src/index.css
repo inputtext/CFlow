@@ -109,23 +109,23 @@ body,
 }
 
 /*
- * The execution state currently marks the line-number one row below
- * the source statement. Move only the visual paint layer upward by
- * one editor row. This keeps the execution logic untouched and makes
- * the highlight land on the actual source statement in both themes.
+ * Keep the visual highlight aligned with the executing source line.
+ * It is intentionally smaller than the editor line-height so it does
+ * not bleed into the line above/below, while remaining translucent so
+ * the source code stays clearly readable.
  */
 [class*="w-[54px]"] > div.font-bold::after {
   content: "";
   position: absolute;
   left: 54px;
-  top: -38px;
+  top: -33px;
   width: 1200px;
-  height: 38px;
+  height: 28px;
   pointer-events: none;
   z-index: 0;
-  background: rgba(218, 190, 116, 0.20);
-  border-top: 1px solid rgba(145, 119, 58, 0.18);
-  border-bottom: 1px solid rgba(145, 119, 58, 0.18);
+  background: rgba(218, 190, 116, 0.55);
+  border-top: 1px solid rgba(145, 119, 58, 0.35);
+  border-bottom: 1px solid rgba(145, 119, 58, 0.35);
 }
 
 .cflow-dark main > section:first-child textarea {
@@ -182,9 +182,9 @@ body,
 }
 
 .cflow-dark [class*="w-[54px]"] > div.font-bold::after {
-  background: rgba(210, 184, 120, 0.24);
-  border-top-color: rgba(210, 184, 120, 0.22);
-  border-bottom-color: rgba(210, 184, 120, 0.22);
+  background: rgba(210, 184, 120, 0.55);
+  border-top-color: rgba(210, 184, 120, 0.35);
+  border-bottom-color: rgba(210, 184, 120, 0.35);
 }
 
 .cflow-dark main > section:first-child textarea {
