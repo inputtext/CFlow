@@ -4,12 +4,14 @@ const NODE_W = 220;
 const NODE_H = 72;
 const CONDITION_H = 88;
 const TERMINAL_H = 62;
-const GAP_Y = 156;
+// Keep the large canvas for complex DSA graphs, but make the default
+// arrangement compact enough to read as one connected flow.
+const GAP_Y = 116;
 const TOP_Y = 34;
 const VIEW_W = 1400;
 const CENTER_X = 50;
-const LEFT_X = 16;
-const RIGHT_X = 84;
+const LEFT_X = 30;
+const RIGHT_X = 70;
 const LOOP_OUTER_X = 1370;
 const LOOP_TYPES = new Set(["for", "while", "do", "loop"]);
 
@@ -136,7 +138,7 @@ function makeLayout(nodes, edges) {
         const x = positions[Math.min(index, positions.length - 1)];
         layout[node.id] = {
           x,
-          y: TOP_Y + rank * GAP_Y + (index >= positions.length ? (index - positions.length + 1) * 96 : 0),
+          y: TOP_Y + rank * GAP_Y + (index >= positions.length ? (index - positions.length + 1) * 76 : 0),
         };
       });
     };
@@ -148,11 +150,11 @@ function makeLayout(nodes, edges) {
         assign(ordered, [LEFT_X, RIGHT_X]);
       } else {
         const ordered = [...group].sort((a, b) => (lane.get(a.id) ?? 0) - (lane.get(b.id) ?? 0));
-        assign(ordered, [10, CENTER_X, 90]);
+        assign(ordered, [18, CENTER_X, 82]);
       }
     } else {
       const ordered = [...group].sort((a, b) => (lane.get(a.id) ?? 0) - (lane.get(b.id) ?? 0));
-      assign(ordered, [8, 30, 50, 70, 92]);
+      assign(ordered, [14, 32, 50, 68, 86]);
     }
   }
   return layout;
