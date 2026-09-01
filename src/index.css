@@ -101,18 +101,28 @@ body,
 [class*="w-[54px]"] {
   overflow: visible !important;
   z-index: 20 !important;
+  line-height: 28px !important;
+}
+
+[class*="w-[54px]"] > div {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  height: 28px !important;
+  min-height: 28px !important;
+  line-height: 28px !important;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 [class*="w-[54px]"] > div.font-bold {
-  position: relative;
   z-index: 2;
 }
 
 /*
- * The line-number row and the textarea use the same 28px line-height.
- * Paint the marker from the active row itself instead of shifting it
- * upward. This keeps the marker exactly behind the executing source line
- * in both light and dark mode and prevents overlap with adjacent lines.
+ * Keep the user's calibrated execution marker position.
+ * The marker is anchored to the same 28px row as the active number.
  */
 [class*="w-[54px]"] > div.font-bold::after {
   content: "";
@@ -126,6 +136,20 @@ body,
   background: rgba(218, 190, 116, 0.72);
   border-top: 1px solid rgba(145, 119, 58, 0.28);
   border-bottom: 1px solid rgba(145, 119, 58, 0.28);
+}
+
+/*
+ * The line-number gutter and the native textarea must use exactly the
+ * same typography metrics. Native textareas can otherwise render their
+ * line boxes slightly differently from ordinary divs.
+ */
+main > section:first-child textarea {
+  box-sizing: border-box !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+  font-size: 14px !important;
+  line-height: 28px !important;
+  padding-top: 24px !important;
+  padding-bottom: 24px !important;
 }
 
 .cflow-dark main > section:first-child textarea {
