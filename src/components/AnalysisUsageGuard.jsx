@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useUser } from "@clerk/react";
+import { executionSteps as fallbackExecutionSteps, initialState as fallbackInitialState } from "./core/mockEngine";
 
 const MAX_LINES = 1000;
 const FREE_ATTEMPTS = 4;
@@ -25,6 +25,11 @@ function writeUsage(userId, value) {
   }
 }
 
+function getAdminStatus(user) {
+  const role = user?.publicMetadata?.role;
+  return typeof role === "string" && role.trim().toLowerCase() === "admin";
+}
+
 function isAnalysisRequest(input) {
   const url = typeof input === "string" ? input : input?.url;
   return typeof url === "string" && (url.endsWith(ANALYZE_URL) || url.includes(ANALYZE_URL));
@@ -33,14 +38,18 @@ function isAnalysisRequest(input) {
 export default function AnalysisUsageGuard({ children }) {
   const { isLoaded, isSignedIn, user } = useUser();
   const userId = isSignedIn ? user?.id : null;
-  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Read the metadata already present on the live Clerk user immediately.
+  // This prevents the UI from briefly treating an admin as a free user.
+  const [isAdmin, setIsAdmin] = useState(() => getAdminStatus(user));
   const [used, setUsed] = useState(() => readUsage(userId));
   const [lineCount, setLineCount] = useState(0);
   const [guardError, setGuardError] = useState(null);
 
   // Refresh the Clerk user once when the signed-in account becomes available.
-  // This is important when publicMetadata (for example role: "admin") was
-  // changed in the Clerk Dashboard while an older session was still cached.
+  // Then read publicMetadata from the refreshed user object. The important
+  // part is that we also use the metadata already exposed by useUser(), so an
+  // admin does not depend on reload() returning a User object in every SDK version.
   useEffect(() => {
     let cancelled = false;
 
@@ -50,16 +59,19 @@ export default function AnalysisUsageGuard({ children }) {
         return;
       }
 
+      // The metadata visible on the current Clerk session is authoritative for
+      // this client-side UI gate. This is also what the Clerk dashboard exposes.
+      setIsAdmin(getAdminStatus(user));
+
       try {
-        const freshUser = await user.reload();
+        await user.reload();
         if (cancelled) return;
-        const role = freshUser?.publicMetadata?.role;
-        setIsAdmin(typeof role === "string" && role.toLowerCase() === "admin");
+
+        // Clerk may mutate the same User instance during reload(), so inspect
+        // the user object itself rather than relying on reload()'s return value.
+        setIsAdmin(getAdminStatus(user));
       } catch {
-        if (!cancelled) {
-          const role = user?.publicMetadata?.role;
-          setIsAdmin(typeof role === "string" && role.toLowerCase() === "admin");
-        }
+        if (!cancelled) setIsAdmin(getAdminStatus(user));
       }
     }
 
@@ -105,8 +117,7 @@ export default function AnalysisUsageGuard({ children }) {
         });
       }
 
-      // Admin accounts are never charged a free analysis attempt.
-      // Admin status comes from Clerk publicMetadata set by the project owner.
+      // Admin accounts bypass the free-attempt counter completely.
       if (isAdmin) {
         setGuardError(null);
         return originalFetch(input, init);
