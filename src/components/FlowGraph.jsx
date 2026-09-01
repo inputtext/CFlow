@@ -9,7 +9,7 @@ const TOP_Y = 34;
 const VIEW_W = 900;
 const CENTER_X = 50;
 const LEFT_X = 24;
-const RIGHT_X = 76;
+const RIGHT_X = 70;
 
 function typeOf(node) {
   if (!node) return "operation";
