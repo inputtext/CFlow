@@ -33,6 +33,7 @@ function isAnalysisRequest(input) {
 export default function AnalysisUsageGuard({ children }) {
   const { isLoaded, isSignedIn, user } = useUser();
   const userId = isSignedIn ? user?.id : null;
+  const isAdmin = isSignedIn && user?.publicMetadata?.role === "admin";
   const [used, setUsed] = useState(() => readUsage(userId));
   const [lineCount, setLineCount] = useState(0);
   const [guardError, setGuardError] = useState(null);
@@ -71,6 +72,13 @@ export default function AnalysisUsageGuard({ children }) {
           status: 413,
           headers: { "Content-Type": "application/json" },
         });
+      }
+
+      // Admin accounts are never charged a free analysis attempt.
+      // Admin status comes from Clerk publicMetadata set by the project owner.
+      if (isAdmin) {
+        setGuardError(null);
+        return originalFetch(input, init);
       }
 
       const currentUsed = readUsage(userId);
@@ -124,17 +132,16 @@ export default function AnalysisUsageGuard({ children }) {
     return () => {
       window.fetch = originalFetch;
     };
-  }, [isLoaded, isSignedIn, userId]);
+  }, [isLoaded, isSignedIn, userId, isAdmin]);
 
-  // Keep the line counter synced with the existing C·FLOW textarea without
-  // changing the editor implementation itself.
   useEffect(() => {
     const findEditor = () => document.querySelector('textarea[aria-label="C or C++ code editor"]');
 
     const sync = () => {
       const editor = findEditor();
-      if (!editor) return;
+      if (!editor) return false;
       setLineCount(editor.value ? editor.value.split(/\r?\n/).length : 0);
+      return true;
     };
 
     sync();
@@ -150,12 +157,14 @@ export default function AnalysisUsageGuard({ children }) {
 
   const remaining = Math.max(0, FREE_ATTEMPTS - used);
   const lineStatus = lineCount > MAX_LINES ? "danger" : lineCount >= 950 ? "warning" : "normal";
+  const badgeText = isAdmin ? "ADMIN · UNLIMITED" : isSignedIn ? `${remaining}/4 FREE` : "SIGN IN";
 
   const badgeClass = useMemo(() => {
+    if (isAdmin) return "bg-[#DFF7E8]";
     if (lineStatus === "danger") return "bg-[#FFD6E7]";
     if (lineStatus === "warning") return "bg-[#FFE3A3]";
     return "bg-[#FFF9F0]";
-  }, [lineStatus]);
+  }, [isAdmin, lineStatus]);
 
   return (
     <>
@@ -164,7 +173,7 @@ export default function AnalysisUsageGuard({ children }) {
       {isLoaded && isSignedIn && (
         <div className="pointer-events-none fixed bottom-[92px] left-4 z-[80] flex flex-col gap-2 font-mono text-[10px] font-black uppercase tracking-[0.12em]">
           <div className={`w-fit border-2 border-[#171717] px-3 py-2 shadow-[3px_3px_0_#171717] ${badgeClass}`}>
-            {remaining}/4 FREE ANALYSES
+            {badgeText}{!isAdmin && " ANALYSES"}
           </div>
 
           <div className="w-fit border-2 border-[#171717] bg-white px-3 py-2 shadow-[3px_3px_0_#171717]">
