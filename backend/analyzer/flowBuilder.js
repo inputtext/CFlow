@@ -3,10 +3,7 @@
 // ============================================================
 
 function buildFlow(program) {
-  const statements = Array.isArray(program?.statements)
-    ? program.statements
-    : [];
-
+  const statements = Array.isArray(program?.statements) ? program.statements : [];
   const nodes = [{ id: "start", label: "START", type: "start" }];
   const edges = [];
 
@@ -21,38 +18,14 @@ function buildFlow(program) {
   };
 
   const makeNode = (s) => {
-    if (s.type === "for") {
-      return { id: s.id, label: `for (${s.expression})`, type: "condition", controlType: "for", line: s.line };
-    }
-    if (s.type === "while") {
-      return { id: s.id, label: `while (${s.expression})`, type: "condition", controlType: "while", line: s.line };
-    }
-    if (s.type === "condition" || s.type === "else_if") {
-      return { id: s.id, label: `${s.expression || "condition"} ?`, type: "condition", controlType: s.type, line: s.line };
-    }
-    if (s.type === "else") {
-      return { id: s.id, label: "ELSE", type: "condition", controlType: "else", line: s.line };
-    }
-    if (s.type === "output") {
-      return { id: s.id, label: "OUTPUT", type: "output", line: s.line };
-    }
-    if (s.type === "return") {
-      return { id: s.id, label: "RETURN", type: "operation", line: s.line };
-    }
-    if (s.type === "declaration") {
-      return {
-        id: s.id,
-        label: s.value == null ? s.variable : `${s.variable} = ${s.value}`,
-        type: "operation",
-        line: s.line,
-      };
-    }
-    return {
-      id: s.id,
-      label: String(s.code || "").replace(/;$/, ""),
-      type: "operation",
-      line: s.line,
-    };
+    if (s.type === "for") return { id: s.id, label: `for (${s.expression})`, type: "condition", controlType: "for", line: s.line };
+    if (s.type === "while") return { id: s.id, label: `while (${s.expression})`, type: "condition", controlType: "while", line: s.line };
+    if (s.type === "condition" || s.type === "else_if") return { id: s.id, label: `${s.expression || "condition"} ?`, type: "condition", controlType: s.type, line: s.line };
+    if (s.type === "else") return { id: s.id, label: "ELSE", type: "condition", controlType: "else", line: s.line };
+    if (s.type === "output") return { id: s.id, label: "OUTPUT", type: "output", line: s.line };
+    if (s.type === "return") return { id: s.id, label: "RETURN", type: "operation", line: s.line };
+    if (s.type === "declaration") return { id: s.id, label: s.value == null ? s.variable : `${s.variable} = ${s.value}`, type: "operation", line: s.line };
+    return { id: s.id, label: String(s.code || "").replace(/;$/, ""), type: "operation", line: s.line };
   };
 
   statements.forEach((s) => nodes.push(makeNode(s)));
@@ -65,19 +38,13 @@ function buildFlow(program) {
 
   addEdge("start", statements[0].id, "normal", "edge_start");
 
-  // Return the direct lexical body of a control statement.
   const bodyRange = (index) => {
     const control = statements[index];
     const first = statements[index + 1];
     if (!first || first.depth <= control.depth) return null;
 
     let end = index + 1;
-    while (
-      end + 1 < statements.length &&
-      statements[end + 1].depth > control.depth
-    ) {
-      end += 1;
-    }
+    while (end + 1 < statements.length && statements[end + 1].depth > control.depth) end += 1;
     return { start: index + 1, end };
   };
 
@@ -88,26 +55,31 @@ function buildFlow(program) {
     return -1;
   };
 
-  // Find the nearest enclosing lexical control block. This is the key
-  // piece for nested if/else blocks at the end of a loop body: when there
-  // is no later sibling statement, the branch must rejoin its parent
-  // control instead of incorrectly escaping to EXIT.
   const enclosingControl = (index, depth) => {
     for (let i = index - 1; i >= 0; i -= 1) {
       const candidate = statements[i];
-      if (candidate.depth < depth && isControl(candidate)) return i;
+      if (candidate.depth >= depth || !isControl(candidate)) continue;
+      const range = bodyRange(i);
+      if (range && index >= range.start && index <= range.end) return i;
     }
     return -1;
   };
 
+  // Resolve a branch's merge point. If the lexical next statement is outside
+  // an enclosing loop, the branch must re-enter that loop instead of escaping
+  // to a later RETURN/EXIT node.
   const joinTarget = (index, depth) => {
     const next = nextAtOrAbove(index, depth);
-    if (next >= 0) return statements[next].id;
-
     const parent = enclosingControl(index, depth);
-    if (parent >= 0) return statements[parent].id;
 
-    return "exit";
+    if (parent >= 0) {
+      const parentStatement = statements[parent];
+      if (next < 0 || statements[next].depth <= parentStatement.depth) {
+        return parentStatement.id;
+      }
+    }
+
+    return next >= 0 ? statements[next].id : "exit";
   };
 
   // Ordinary sequential edges stay inside the same lexical block.
@@ -115,14 +87,9 @@ function buildFlow(program) {
     const current = statements[i];
     const next = statements[i + 1];
     if (current.type === "return" || isControl(current)) continue;
-    if (current.depth === next.depth) {
-      addEdge(current.id, next.id, "normal", `edge_${current.id}_next`);
-    }
+    if (current.depth === next.depth) addEdge(current.id, next.id, "normal", `edge_${current.id}_next`);
   }
 
-  // ----------------------------------------------------------
-  // CONTROL FLOW
-  // ----------------------------------------------------------
   for (let i = 0; i < statements.length; i += 1) {
     const s = statements[i];
 
@@ -131,24 +98,19 @@ function buildFlow(program) {
     // --------------------------------------------------------
     if (loopTypes.has(s.type)) {
       const range = bodyRange(i);
-      const after = range
-        ? joinTarget(range.end, s.depth)
-        : joinTarget(i, s.depth);
+      const after = range ? nextAtOrAbove(range.end, s.depth) : nextAtOrAbove(i, s.depth);
+      const afterId = after >= 0 ? statements[after].id : "exit";
 
       if (!range) {
-        addEdge(s.id, after, "false", `edge_${s.id}_false`);
+        addEdge(s.id, afterId, "false", `edge_${s.id}_false`);
         continue;
       }
 
       const first = statements[range.start];
       const last = statements[range.end];
-
       addEdge(s.id, first.id, "true", `edge_${s.id}_true`);
-
-      // Every completed path through the loop body returns to the loop
-      // condition. The condition's FALSE edge leaves the loop.
       addEdge(last.id, s.id, "loop", `edge_${last.id}_loop`);
-      addEdge(s.id, after, "false", `edge_${s.id}_false`);
+      addEdge(s.id, afterId, "false", `edge_${s.id}_false`);
       continue;
     }
 
@@ -166,27 +128,19 @@ function buildFlow(program) {
       const bodyLast = statements[range.end];
       const nextIndex = nextAtOrAbove(range.end, s.depth);
       const nextStatement = nextIndex >= 0 ? statements[nextIndex] : null;
-
       addEdge(s.id, bodyFirst.id, "true", `edge_${s.id}_true`);
 
-      // ELSE belonging to this IF.
-      if (
-        nextStatement &&
-        nextStatement.type === "else" &&
-        nextStatement.depth === s.depth
-      ) {
+      if (nextStatement && nextStatement.type === "else" && nextStatement.depth === s.depth) {
         const elseRange = bodyRange(nextIndex);
         const elseNode = nextStatement;
-
         addEdge(s.id, elseNode.id, "false", `edge_${s.id}_false`);
 
         if (elseRange) {
           const elseFirst = statements[elseRange.start];
           const elseLast = statements[elseRange.end];
           const joinId = joinTarget(elseRange.end, s.depth);
-
           addEdge(elseNode.id, elseFirst.id, "normal", `edge_${elseNode.id}_body`);
-          addEdge(bodyLast.id, joinId, "normal", `edge_${bodyLast.id}_join`);
+          addEdge(bodyLast.id, joinTarget(range.end, s.depth), "normal", `edge_${bodyLast.id}_join`);
           addEdge(elseLast.id, joinId, "normal", `edge_${elseLast.id}_join`);
         } else {
           const joinId = joinTarget(nextIndex, s.depth);
@@ -199,23 +153,16 @@ function buildFlow(program) {
         addEdge(bodyLast.id, joinId, "normal", `edge_${bodyLast.id}_join`);
       }
     }
-
-    // ELSE itself is represented as a visible node. Its body edge and
-    // branch merge are created by the IF that owns it above.
   }
 
   nodes.push({ id: "exit", label: "EXIT", type: "exit" });
 
   statements.forEach((s) => {
-    if (s.type === "return") {
-      addEdge(s.id, "exit", "normal", `edge_${s.id}_exit`);
-    }
+    if (s.type === "return") addEdge(s.id, "exit", "normal", `edge_${s.id}_exit`);
   });
 
   const last = statements[statements.length - 1];
-  if (last && last.type !== "return" && !loopTypes.has(last.type)) {
-    addEdge(last.id, "exit", "normal", "edge_exit");
-  }
+  if (last && last.type !== "return" && !loopTypes.has(last.type)) addEdge(last.id, "exit", "normal", "edge_exit");
 
   return { nodes, edges };
 }
