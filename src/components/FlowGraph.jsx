@@ -131,12 +131,6 @@ function makeLayout(nodes, edges) {
 
   const layout = {};
   for (const [rank, group] of [...groups.entries()].sort((a, b) => a[0] - b[0])) {
-    const byLane = { left: [], center: [], right: [] };
-    group.forEach((node) => {
-      const l = lane.get(node.id) ?? 0;
-      byLane[l < 0 ? "left" : l > 0 ? "right" : "center"].push(node);
-    });
-
     const assign = (items, positions) => {
       items.forEach((node, index) => {
         const x = positions[Math.min(index, positions.length - 1)];
@@ -144,9 +138,6 @@ function makeLayout(nodes, edges) {
       });
     };
 
-    // Three 220px blocks fit cleanly in the 900px canvas. When more blocks
-    // share a rank, spread them across the available columns instead of
-    // applying tiny offsets that cause overlap.
     if (group.length <= 3) {
       if (group.length === 1) assign(group, [CENTER_X]);
       else if (group.length === 2) {
@@ -158,8 +149,7 @@ function makeLayout(nodes, edges) {
       }
     } else {
       const ordered = [...group].sort((a, b) => (lane.get(a.id) ?? 0) - (lane.get(b.id) ?? 0));
-      const positions = [13, 37, 63, 87];
-      assign(ordered, positions);
+      assign(ordered, [13, 37, 63, 87]);
     }
   }
   return layout;
@@ -244,8 +234,8 @@ function NodeBox({ node, position, active, conditionResult, onPointerDown, dragg
     <div
       data-flow-node={node.id}
       onPointerDown={(event) => onPointerDown(event, node.id)}
-      className={`cflow-flow-node cflow-flow-node--${type} absolute z-10 flex select-none touch-none items-center justify-center border-2 border-[#171717] px-4 text-center font-mono font-bold transition-[box-shadow,transform] duration-200 ${dragging ? "cursor-grabbing shadow-[8px_8px_0_#171717]" : "cursor-grab shadow-[4px_4px_0_#171717] hover:-translate-y-1 hover:shadow-[6px_6px_0_#171717]"} ${type === "start" || type === "exit" ? "rounded-[32px]" : "rounded-[16px]"}`}
-      style={{ width: NODE_W, height: nodeHeight(node), left: `${position.x}%`, top: position.y, transform: active && !dragging ? "translateX(-50%) scale(1.025)" : "translateX(-50%)" , background }}
+      className={`cflow-flow-node cflow-flow-node--${type} absolute z-10 flex select-none touch-none items-center justify-center border-2 border-[#171717] px-4 text-center font-mono font-bold transition-[box-shadow,transform] duration-300 ease-out ${dragging ? "cursor-grabbing shadow-[8px_8px_0_#171717]" : "cursor-grab shadow-[4px_4px_0_#171717] hover:-translate-y-1 hover:shadow-[6px_6px_0_#171717]"} ${type === "start" || type === "exit" ? "rounded-[32px]" : "rounded-[16px]"}`}
+      style={{ width: NODE_W, height: nodeHeight(node), left: `${position.x}%`, top: position.y, transform: active && !dragging ? "translateX(-50%) scale(1.025)" : "translateX(-50%)", background }}
       title="Drag to reposition"
     >
       <div className="max-w-full">
@@ -262,6 +252,7 @@ export default function FlowGraph({ nodes = null, edges = null, activeNode = nul
   const dragRef = useRef(null);
   const [zoom, setZoom] = useState(1);
   const [manualPositions, setManualPositions] = useState({});
+  const [isMaximized, setIsMaximized] = useState(false);
 
   const fallbackNodes = [{ id: "start", label: "START", type: "start" }, { id: "exit", label: "EXIT", type: "exit" }];
   const fallbackEdges = [{ id: "fallback", from: "start", to: "exit", type: "normal" }];
@@ -273,6 +264,20 @@ export default function FlowGraph({ nodes = null, edges = null, activeNode = nul
   const maxY = graphNodes.reduce((max, node) => Math.max(max, (layout[node.id]?.y ?? TOP_Y) + nodeHeight(node)), TOP_Y);
   const graphHeight = Math.max(620, maxY + 120);
   const activeEdgeId = typeof activeEdge === "string" ? activeEdge : activeEdge?.id;
+
+  useEffect(() => {
+    if (!isMaximized) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") setIsMaximized(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [isMaximized]);
 
   useEffect(() => {
     if (!activeNode || !scrollRef.current) return;
@@ -287,7 +292,7 @@ export default function FlowGraph({ nodes = null, edges = null, activeNode = nul
       container.scrollTo({ top: Math.min(container.scrollHeight - container.clientHeight, Math.max(0, target)), behavior: "smooth" });
     });
     return () => cancelAnimationFrame(frame);
-  }, [activeNode, graphHeight]);
+  }, [activeNode, graphHeight, isMaximized]);
 
   const resetLayout = () => setManualPositions({});
 
@@ -325,12 +330,15 @@ export default function FlowGraph({ nodes = null, edges = null, activeNode = nul
   }, [zoom]);
 
   return (
-    <div className="relative h-full w-full min-w-0">
-      <div className="pointer-events-auto absolute right-3 top-3 z-30 flex items-center gap-1 rounded-[12px] border-2 border-[#171717] bg-[#FFF9F0] p-1 shadow-[3px_3px_0_#171717]" aria-label="Flowchart controls">
-        <button type="button" aria-label="Zoom out" onClick={() => setZoom((v) => Math.max(0.8, Number((v - 0.1).toFixed(1))))} className="h-8 w-8 font-mono text-lg font-bold hover:-translate-y-0.5">−</button>
-        <span className="min-w-[54px] text-center font-mono text-sm font-bold">{Math.round(zoom * 100)}%</span>
-        <button type="button" aria-label="Zoom in" onClick={() => setZoom((v) => Math.min(1.2, Number((v + 0.1).toFixed(1))))} className="h-8 w-8 font-mono text-lg font-bold hover:-translate-y-0.5">+</button>
-        <button type="button" onClick={resetLayout} className="ml-1 h-8 rounded-[8px] border-2 border-[#171717] px-2 font-mono text-[10px] font-bold uppercase tracking-wider hover:-translate-y-0.5">Reset</button>
+    <div className={`cflow-flow-shell relative h-full w-full min-w-0 transition-[opacity,transform,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${isMaximized ? "fixed inset-3 z-[100] rounded-[18px] border-2 border-[#171717] bg-[#FFF9F0] p-2 shadow-[12px_12px_0_#171717]" : ""}`}>
+      <div className="pointer-events-auto absolute right-2 top-2 z-30 flex items-center gap-0.5 rounded-[9px] border-2 border-[#171717] bg-[#FFF9F0] p-0.5 shadow-[2px_2px_0_#171717]" aria-label="Flowchart controls">
+        <button type="button" aria-label="Zoom out" onClick={() => setZoom((v) => Math.max(0.5, Number((v - 0.1).toFixed(1))))} className="h-6 w-6 rounded-[5px] font-mono text-xs font-bold transition-transform duration-200 hover:-translate-y-0.5">−</button>
+        <span className="min-w-[38px] text-center font-mono text-[10px] font-bold">{Math.round(zoom * 100)}%</span>
+        <button type="button" aria-label="Zoom in" onClick={() => setZoom((v) => Math.min(1.2, Number((v + 0.1).toFixed(1))))} className="h-6 w-6 rounded-[5px] font-mono text-xs font-bold transition-transform duration-200 hover:-translate-y-0.5">+</button>
+        <button type="button" onClick={resetLayout} className="ml-0.5 h-6 rounded-[5px] border border-[#171717] px-1.5 font-mono text-[8px] font-bold uppercase tracking-wider transition-transform duration-200 hover:-translate-y-0.5">RESET</button>
+        <button type="button" aria-label={isMaximized ? "Minimize flowchart" : "Maximize flowchart"} onClick={() => setIsMaximized((value) => !value)} className="ml-0.5 flex h-6 w-6 items-center justify-center rounded-[5px] border border-[#171717] font-mono text-xs font-bold transition-transform duration-200 hover:-translate-y-0.5" title={isMaximized ? "Minimize" : "Maximize"}>
+          {isMaximized ? "↙" : "↗"}
+        </button>
       </div>
 
       <div ref={scrollRef} className="h-full w-full overflow-auto rounded-[18px]">
