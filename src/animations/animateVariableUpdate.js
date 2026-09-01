@@ -47,6 +47,43 @@ function findFlowSource(target) {
   return operation ?? matches[0] ?? null;
 }
 
+function getVisibleCardRect(element) {
+  let rect = element.getBoundingClientRect();
+  let current = element.parentElement;
+
+  // Clamp the target to the intersection of the card and its scrollable
+  // ancestors. This keeps the arrow endpoint attached to the visible
+  // portion of the Memory card instead of a clipped/off-screen location.
+  while (current && current !== document.body) {
+    const style = window.getComputedStyle(current);
+    const scrollableY = /(auto|scroll|hidden|clip)/.test(style.overflowY);
+    const scrollableX = /(auto|scroll|hidden|clip)/.test(style.overflowX);
+
+    if (scrollableY || scrollableX) {
+      const parentRect = current.getBoundingClientRect();
+      const left = Math.max(rect.left, parentRect.left);
+      const right = Math.min(rect.right, parentRect.right);
+      const top = Math.max(rect.top, parentRect.top);
+      const bottom = Math.min(rect.bottom, parentRect.bottom);
+
+      if (right <= left || bottom <= top) return null;
+
+      rect = {
+        left,
+        right,
+        top,
+        bottom,
+        width: right - left,
+        height: bottom - top,
+      };
+    }
+
+    current = current.parentElement;
+  }
+
+  return rect;
+}
+
 export function animateVariableUpdate({
   sourceSelector,
   targetSelector,
@@ -76,18 +113,30 @@ export function animateVariableUpdate({
     .forEach((element) => element.remove());
 
   const sourceRect = source.getBoundingClientRect();
-  const targetRect = target.getBoundingClientRect();
+  const targetRect = getVisibleCardRect(target);
 
+  if (!targetRect) return;
+
+  // Start at the visible right edge of the Flow node and land at the
+  // visible left edge of the Memory card, vertically centered on the card.
   const startX = sourceRect.right + 6;
   const startY = sourceRect.top + sourceRect.height / 2;
   const endX = targetRect.left - 10;
-  const endY = targetRect.top + targetRect.height / 2;
+  const endY = Math.min(
+    Math.max(
+      startY,
+      targetRect.top + Math.min(targetRect.height * 0.5, 32)
+    ),
+    targetRect.bottom - Math.min(targetRect.height * 0.5, 32)
+  );
 
-  const distanceX = endX - startX;
+  // Don't send the curve behind the Flow panel when the horizontal gap is
+  // small or the panels overlap at unusual viewport sizes.
+  const distanceX = Math.max(24, endX - startX);
   const distanceY = endY - startY;
   const curve = Math.min(
     105,
-    Math.max(38, Math.abs(distanceX) * 0.25)
+    Math.max(38, distanceX * 0.25)
   );
 
   const pathD = `
