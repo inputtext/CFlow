@@ -33,10 +33,41 @@ function isAnalysisRequest(input) {
 export default function AnalysisUsageGuard({ children }) {
   const { isLoaded, isSignedIn, user } = useUser();
   const userId = isSignedIn ? user?.id : null;
-  const isAdmin = isSignedIn && user?.publicMetadata?.role === "admin";
+  const [isAdmin, setIsAdmin] = useState(false);
   const [used, setUsed] = useState(() => readUsage(userId));
   const [lineCount, setLineCount] = useState(0);
   const [guardError, setGuardError] = useState(null);
+
+  // Refresh the Clerk user once when the signed-in account becomes available.
+  // This is important when publicMetadata (for example role: "admin") was
+  // changed in the Clerk Dashboard while an older session was still cached.
+  useEffect(() => {
+    let cancelled = false;
+
+    async function refreshAdminStatus() {
+      if (!isLoaded || !isSignedIn || !user) {
+        if (!cancelled) setIsAdmin(false);
+        return;
+      }
+
+      try {
+        const freshUser = await user.reload();
+        if (cancelled) return;
+        const role = freshUser?.publicMetadata?.role;
+        setIsAdmin(typeof role === "string" && role.toLowerCase() === "admin");
+      } catch {
+        if (!cancelled) {
+          const role = user?.publicMetadata?.role;
+          setIsAdmin(typeof role === "string" && role.toLowerCase() === "admin");
+        }
+      }
+    }
+
+    refreshAdminStatus();
+    return () => {
+      cancelled = true;
+    };
+  }, [isLoaded, isSignedIn, user]);
 
   useEffect(() => {
     setUsed(readUsage(userId));
@@ -96,7 +127,6 @@ export default function AnalysisUsageGuard({ children }) {
       setGuardError(null);
       const response = await originalFetch(input, init);
 
-      // Read a clone so App.jsx can still consume the original response.
       try {
         const data = await response.clone().json();
         const validAnalysis =
