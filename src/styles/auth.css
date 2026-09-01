@@ -1,19 +1,9 @@
 /* C·FLOW AUTH LANDING — subtle entrance + tactile button lift */
 
 @keyframes cflowAuthCardIn {
-  0% {
-    opacity: 0;
-    transform: translateY(22px) scale(0.985);
-  }
-
-  55% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  0% { opacity: 0; transform: translateY(22px) scale(0.985); }
+  55% { opacity: 1; }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .cflow-auth-card-enter {
@@ -21,18 +11,23 @@
   will-change: transform, opacity;
 }
 
-.cflow-auth-card-enter button {
-  will-change: transform, box-shadow;
+.cflow-auth-card-enter button { will-change: transform, box-shadow; }
+
+/* Keep workspace language/status clear of the Clerk profile. */
+#root > div > header > div:last-child { margin-right: 165px; }
+
+@media (max-width: 900px) {
+  #root > div > header > div:last-child { margin-right: 125px; }
+}
+
+@media (max-width: 640px) {
+  #root > div > header > div:last-child {
+    margin-right: 90px;
+    gap: 0.5rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cflow-auth-card-enter {
-    animation: none;
-    opacity: 1;
-    transform: none;
-  }
-
-  .cflow-auth-card-enter button {
-    transition: none !important;
-  }
+  .cflow-auth-card-enter { animation: none; opacity: 1; transform: none; }
+  .cflow-auth-card-enter button { transition: none !important; }
 }
