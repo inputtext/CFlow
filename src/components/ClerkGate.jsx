@@ -4,6 +4,7 @@ import {
   SignUpButton,
   UserButton,
 } from "@clerk/react";
+import "../styles/auth.css";
 
 function ClerkGate({ children }) {
   return (
