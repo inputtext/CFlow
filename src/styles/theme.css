@@ -2,13 +2,14 @@
 .cflow-dark {
   --cflow-bg:#202326; --cflow-surface:#292d31; --cflow-card:#34383d; --cflow-card-soft:#3c4147;
   --cflow-ink:#f1eee8; --cflow-muted:#b8bbc0; --cflow-border:#111315;
-  --cflow-code:#3b4850; --cflow-flow:#46404f; --cflow-memory:#3c4b45;
+  --cflow-code:#4a4a42; --cflow-flow:#46404f; --cflow-memory:#3c4b45;
   --cflow-exec:#62543a; --cflow-special:#5a414b;
+  --cflow-code-ink:#f3efe7; --cflow-code-selection:#7b6a48;
+  --cflow-code-active:#5a5444; --cflow-code-active-edge:#d5bd78;
 }
 .cflow-dark,.cflow-dark > div,.cflow-dark header,.cflow-dark footer,.cflow-dark main,.cflow-dark section{color:var(--cflow-ink)!important}
 .cflow-dark > div,.cflow-dark header,.cflow-dark main{background-color:var(--cflow-bg)!important}
 .cflow-dark footer{background-color:#292d31!important}.cflow-dark section{border-color:var(--cflow-border)!important}
-/* Muted pastel workspace panels: visible but never neon. */
 .cflow-dark main>section:nth-child(1){background-color:var(--cflow-code)!important}
 .cflow-dark main>section:nth-child(2){background-color:var(--cflow-flow)!important}
 .cflow-dark main>section:nth-child(3){background-color:var(--cflow-memory)!important}
@@ -22,11 +23,17 @@
 .cflow-dark [class*="bg-[#FFE3A3]"]{background-color:var(--cflow-exec)!important}
 .cflow-dark [class*="bg-[#FFD6E7]"]{background-color:var(--cflow-special)!important}
 .cflow-dark [class*="bg-white"]{background-color:var(--cflow-card)!important}.cflow-dark [data-memory]{background-color:var(--cflow-card)!important}
-/* General dark-mode readability. */
 .cflow-dark [class*="text-[#171717]"]{color:#f1eee8!important}.cflow-dark [class*="text-black"]{color:#f1eee8!important}.cflow-dark [class*="text-white"]{color:#f7f4ee!important}.cflow-dark [class*="text-gray"]{color:#c3c5c8!important}.cflow-dark [class*="text-[#9"]{color:#b8bbc0!important}
 .cflow-dark [class*="border-[#171717]"]{border-color:var(--cflow-border)!important}.cflow-dark input,.cflow-dark textarea{color:#f1eee8!important;caret-color:#e8c77a}.cflow-dark input::placeholder,.cflow-dark textarea::placeholder{color:#9ea2a7!important;opacity:1}
-.cflow-dark [class*="shadow-"]{--tw-shadow-color:#111315!important}.cflow-dark [class*="ring-offset-"]{--tw-ring-offset-color:var(--cflow-bg)!important}.cflow-dark textarea{background:transparent!important}.cflow-dark ::selection{background:#62543a!important;color:#fffaf2!important}
-/* FLOW GRAPH: explicit per-node text colors. These override inherited/Tailwind text rules so labels remain readable on pastel nodes. */
+.cflow-dark [class*="shadow-"]{--tw-shadow-color:#111315!important}.cflow-dark [class*="ring-offset-"]{--tw-ring-offset-color:var(--cflow-bg)!important}.cflow-dark textarea{background:transparent!important}.cflow-dark ::selection{background:var(--cflow-code-selection)!important;color:#fffaf2!important}
+
+/* CODE EDITOR — readable graphite palette + execution-line indicator. */
+.cflow-dark main>section:first-child textarea{color:var(--cflow-code-ink)!important;-webkit-text-fill-color:var(--cflow-code-ink)!important;text-shadow:none!important}
+.cflow-dark main>section:first-child textarea::selection{background:#8a7650!important;color:#fffaf2!important;-webkit-text-fill-color:#fffaf2!important}
+.cflow-dark main>section:first-child [class*="text-[#171717]"]{color:#f0ece4!important;-webkit-text-fill-color:#f0ece4!important}
+.cflow-dark main>section:first-child .font-bold{color:#fff4cf!important;-webkit-text-fill-color:#fff4cf!important}
+
+/* FLOW GRAPH: explicit per-node text colors. */
 .cflow-dark [data-flow-node]{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace!important;font-weight:700!important;text-shadow:none!important;-webkit-text-fill-color:currentColor!important}
 .cflow-dark [data-flow-node].cflow-flow-node--start{color:#171717!important;-webkit-text-fill-color:#171717!important}
 .cflow-dark [data-flow-node].cflow-flow-node--operation{color:#25282b!important;-webkit-text-fill-color:#25282b!important}
@@ -35,14 +42,73 @@
 .cflow-dark [data-flow-node].cflow-flow-node--exit{color:#4a3040!important;-webkit-text-fill-color:#4a3040!important}
 .cflow-dark [data-flow-node]{border-color:var(--cflow-border)!important;box-shadow:4px 4px 0 var(--cflow-border)!important}
 .cflow-dark [data-flow-node][style*="#FFF9F0"]{background:#f3eee5!important}.cflow-dark [data-flow-node][style*="#FFFFFF"]{background:#e8e9e7!important}.cflow-dark [data-flow-node][style*="#FFE3A3"]{background:#e8c987!important}.cflow-dark [data-flow-node][style*="#DDF4EA"]{background:#c7dfd2!important}.cflow-dark [data-flow-node][style*="#FFD6E7"]{background:#e5bdcf!important}
-/* SVG flow labels/arrows remain visible against the graphite workspace. */
 .cflow-dark svg path[stroke="#171717"]{stroke:#c2c4c7!important}.cflow-dark svg path[stroke="#FFE3A3"]{stroke:#d8bc70!important}.cflow-dark svg path[fill="#171717"]{fill:#c2c4c7!important}.cflow-dark svg rect{fill:#30353a!important;stroke:#aeb2b7!important}.cflow-dark svg text{fill:#f1eee8!important}
+
+/* Memory — active execution stays visible without becoming neon. */
+.cflow-dark [data-memory]{color:#f1eee8!important;-webkit-text-fill-color:#f1eee8!important}
+.cflow-dark [data-memory] [class*="opacity-50"],.cflow-dark [data-memory] [class*="opacity-45"]{color:#b8bbc0!important;-webkit-text-fill-color:#b8bbc0!important}
+.cflow-dark [data-memory].translate-x-1{background:#62543a!important;box-shadow:7px 7px 0 var(--cflow-border)!important}
+.cflow-dark [data-memory].translate-x-1 [class*="text-"]{color:#fff4cf!important;-webkit-text-fill-color:#fff4cf!important}
+
+/* Code execution-line highlight. The editor already marks the current
+   line with font-bold in the line-number rail. :has() mirrors that
+   state onto the textarea without changing the execution engine. */
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div.font-bold) > textarea{background-repeat:no-repeat!important;background-size:100% 28px!important;background-attachment:local!important;background-image:linear-gradient(to bottom,rgba(213,189,120,.16),rgba(213,189,120,.16))!important;background-position:0 24px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(1).font-bold) > textarea{background-position:0 24px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(2).font-bold) > textarea{background-position:0 52px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(3).font-bold) > textarea{background-position:0 80px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(4).font-bold) > textarea{background-position:0 108px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(5).font-bold) > textarea{background-position:0 136px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(6).font-bold) > textarea{background-position:0 164px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(7).font-bold) > textarea{background-position:0 192px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(8).font-bold) > textarea{background-position:0 220px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(9).font-bold) > textarea{background-position:0 248px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(10).font-bold) > textarea{background-position:0 276px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(11).font-bold) > textarea{background-position:0 304px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(12).font-bold) > textarea{background-position:0 332px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(13).font-bold) > textarea{background-position:0 360px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(14).font-bold) > textarea{background-position:0 388px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(15).font-bold) > textarea{background-position:0 416px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(16).font-bold) > textarea{background-position:0 444px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(17).font-bold) > textarea{background-position:0 472px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(18).font-bold) > textarea{background-position:0 500px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(19).font-bold) > textarea{background-position:0 528px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(20).font-bold) > textarea{background-position:0 556px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(21).font-bold) > textarea{background-position:0 584px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(22).font-bold) > textarea{background-position:0 612px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(23).font-bold) > textarea{background-position:0 640px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(24).font-bold) > textarea{background-position:0 668px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(25).font-bold) > textarea{background-position:0 696px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(26).font-bold) > textarea{background-position:0 724px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(27).font-bold) > textarea{background-position:0 752px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(28).font-bold) > textarea{background-position:0 780px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(29).font-bold) > textarea{background-position:0 808px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(30).font-bold) > textarea{background-position:0 836px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(31).font-bold) > textarea{background-position:0 864px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(32).font-bold) > textarea{background-position:0 892px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(33).font-bold) > textarea{background-position:0 920px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(34).font-bold) > textarea{background-position:0 948px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(35).font-bold) > textarea{background-position:0 976px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(36).font-bold) > textarea{background-position:0 1004px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(37).font-bold) > textarea{background-position:0 1032px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(38).font-bold) > textarea{background-position:0 1060px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(39).font-bold) > textarea{background-position:0 1088px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(40).font-bold) > textarea{background-position:0 1116px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(41).font-bold) > textarea{background-position:0 1144px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(42).font-bold) > textarea{background-position:0 1172px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(43).font-bold) > textarea{background-position:0 1200px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(44).font-bold) > textarea{background-position:0 1228px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(45).font-bold) > textarea{background-position:0 1256px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(46).font-bold) > textarea{background-position:0 1284px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(47).font-bold) > textarea{background-position:0 1312px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(48).font-bold) > textarea{background-position:0 1340px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(49).font-bold) > textarea{background-position:0 1368px!important}
+.cflow-dark main>section:first-child>div:nth-child(2)>div:has(> div:first-child > div:nth-child(50).font-bold) > textarea{background-position:0 1396px!important}
+
 .cflow-dark ::-webkit-scrollbar-track{background:#292d31!important}.cflow-dark ::-webkit-scrollbar-thumb{background:#62676e!important;border-color:#292d31!important}.cflow-dark ::-webkit-scrollbar-thumb:hover{background:#7b8087!important}
-/* Theme toggle */
 .cflow-theme-toggle{position:fixed;top:16px;right:20px;z-index:10001;display:inline-flex;align-items:center;gap:9px;min-height:42px;padding:5px 9px 5px 6px;border:2px solid #171717;background:#fff9f0;color:#171717;box-shadow:3px 3px 0 #171717;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:10px;font-weight:900;letter-spacing:.12em;transition:transform 180ms ease,box-shadow 180ms ease,background 260ms ease}
 .cflow-theme-toggle:hover{transform:translateY(-1px);box-shadow:4px 4px 0 #171717}.cflow-theme-toggle:active{transform:translateY(1px);box-shadow:2px 2px 0 #171717}.cflow-theme-toggle:disabled{cursor:wait}.cflow-theme-toggle:focus-visible{outline:3px solid #b7a3e5;outline-offset:3px}
 .cflow-theme-toggle-track{position:relative;display:flex;align-items:center;justify-content:space-between;width:42px;height:24px;padding:3px;border:2px solid currentColor;border-radius:999px;overflow:hidden;background:#e8dfcf}.cflow-theme-toggle-icon{position:relative;z-index:1;display:grid;width:15px;height:15px;place-items:center;font-size:11px;line-height:1}.cflow-theme-toggle-thumb{position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#171717;transition:transform 480ms cubic-bezier(.22,1,.36,1),background 260ms ease}.cflow-dark .cflow-theme-toggle{border-color:#111315;background:#34383d;color:#eeeae2;box-shadow:3px 3px 0 #111315}.cflow-dark .cflow-theme-toggle-track{background:#202326}.cflow-dark .cflow-theme-toggle-thumb{transform:translateX(18px);background:#eeeae2}
-/* Single full-screen sheet drops from above, changes theme while covering, then leaves downward. */
 .cflow-theme-curtain{position:fixed;inset:0;z-index:10000;overflow:hidden;pointer-events:auto}.cflow-theme-curtain__screen{position:absolute;inset:0;background:#202326;transform:translateY(-100%);will-change:transform}.cflow-theme-curtain.is-target-light .cflow-theme-curtain__screen{background:#fff9f0}.cflow-theme-curtain.is-target-dark .cflow-theme-curtain__screen{background:#202326}.cflow-theme-curtain.is-closing .cflow-theme-curtain__screen{animation:cflowScreenFall 1150ms cubic-bezier(.76,0,.18,1) forwards}.cflow-theme-curtain.is-opening .cflow-theme-curtain__screen{transform:translateY(0);animation:cflowScreenReveal 1050ms cubic-bezier(.22,1,.36,1) forwards}.cflow-theme-curtain__mark{position:absolute;left:50%;top:50%;z-index:2;transform:translate(-50%,-50%);color:#eeeae2;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px;font-weight:900;letter-spacing:.34em;white-space:nowrap;opacity:0;pointer-events:none}.cflow-theme-curtain.is-target-light .cflow-theme-curtain__mark{color:#171717}.cflow-theme-curtain.is-closing .cflow-theme-curtain__mark{animation:cflowScreenMarkIn 450ms ease-out 650ms forwards}.cflow-theme-curtain.is-opening .cflow-theme-curtain__mark{animation:cflowScreenMarkOut 220ms ease-in forwards}
 @keyframes cflowScreenFall{from{transform:translateY(-100%)}to{transform:translateY(0)}}@keyframes cflowScreenReveal{from{transform:translateY(0)}to{transform:translateY(100%)}}@keyframes cflowScreenMarkIn{from{opacity:0;transform:translate(-50%,-46%)}to{opacity:.85;transform:translate(-50%,-50%)}}@keyframes cflowScreenMarkOut{from{opacity:.85}to{opacity:0}}
 @media(max-width:900px){.cflow-theme-toggle{top:10px;right:12px}}@media(prefers-reduced-motion:reduce){.cflow-theme-curtain.is-closing .cflow-theme-curtain__screen,.cflow-theme-curtain.is-opening .cflow-theme-curtain__screen,.cflow-theme-curtain.is-closing .cflow-theme-curtain__mark,.cflow-theme-curtain.is-opening .cflow-theme-curtain__mark,.cflow-theme-toggle,.cflow-theme-toggle-thumb{animation-duration:1ms!important;transition-duration:1ms!important}}
