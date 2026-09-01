@@ -96,11 +96,6 @@ body,
 
 /* ------------------------------------------------------------
    EXECUTION LINE HIGHLIGHT
-
-   The active line is identified by the existing `font-bold`
-   line-number state. The highlight is attached to that exact
-   line-number row so it stays synchronized with the editor while
-   the user scrolls.
 ------------------------------------------------------------ */
 
 [class*="w-[54px]"] {
@@ -114,15 +109,16 @@ body,
 }
 
 /*
- * The line-number row is shorter than the editor's actual code-line
- * rhythm. Offset the paint layer by one editor line so its center
- * sits on the same source line as the active number/text.
+ * The execution state currently marks the line-number one row below
+ * the source statement. Move only the visual paint layer upward by
+ * one editor row. This keeps the execution logic untouched and makes
+ * the highlight land on the actual source statement in both themes.
  */
 [class*="w-[54px]"] > div.font-bold::after {
   content: "";
   position: absolute;
   left: 54px;
-  top: 38px;
+  top: -38px;
   width: 1200px;
   height: 38px;
   pointer-events: none;
