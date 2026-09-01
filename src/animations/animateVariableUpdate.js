@@ -10,9 +10,6 @@ function findFlowSource(target) {
   const variable = String(target ?? "").trim();
   if (!variable) return null;
 
-  // Prefer the flow operation whose label contains the variable
-  // being changed. This keeps the arrow tied to the current
-  // execution operation instead of the first operation in the graph.
   const matches = nodes.filter((node) => {
     const text = node.textContent?.replace(/\s+/g, " ").trim() ?? "";
     return text.includes(variable);
@@ -26,7 +23,7 @@ function findFlowSource(target) {
       text.includes("--") ||
       text.includes("+=") ||
       text.includes("-=") ||
-      text.includes("*= ") ||
+      text.includes("*=") ||
       text.includes("/=")
     );
   });
@@ -47,23 +44,27 @@ export function animateVariableUpdate({
   const target = document.querySelector(targetSelector);
   if (!target) return;
 
+  const targetMatch = targetSelector.match(
+    /data-memory=["']([^"']+)["']/
+  );
+
+  const variableName = targetMatch?.[1] ?? "";
   const source =
-    findFlowSource(targetSelector.match(/data-memory=\\\"([^\\\"]+)/)?.[1]) ??
-    fallbackSource;
+    findFlowSource(variableName) ?? fallbackSource;
 
   if (!source) return;
 
   const sourceRect = source.getBoundingClientRect();
   const targetRect = target.getBoundingClientRect();
 
-  // The arrow lives in viewport coordinates so it can cross the
-  // FLOW → MEMORY panel gap without affecting either layout.
+  // The arrow uses viewport coordinates so it can cross the
+  // FLOW → MEMORY panel gap without changing either layout.
   const startX = sourceRect.right + 4;
   const startY = sourceRect.top + sourceRect.height / 2;
   const endX = targetRect.left - 8;
   const endY = targetRect.top + targetRect.height / 2;
 
-  const distanceX = Math.max(20, endX - startX);
+  const distanceX = endX - startX;
   const curve = Math.min(
     110,
     Math.max(35, Math.abs(distanceX) * 0.28)
