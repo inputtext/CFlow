@@ -4,8 +4,6 @@ const NODE_W = 220;
 const NODE_H = 72;
 const CONDITION_H = 88;
 const TERMINAL_H = 62;
-// Keep the large canvas for complex DSA graphs, but make the default
-// arrangement compact enough to read as one connected flow.
 const GAP_Y = 116;
 const TOP_Y = 34;
 const VIEW_W = 1400;
@@ -150,11 +148,11 @@ function makeLayout(nodes, edges) {
         assign(ordered, [LEFT_X, RIGHT_X]);
       } else {
         const ordered = [...group].sort((a, b) => (lane.get(a.id) ?? 0) - (lane.get(b.id) ?? 0));
-        assign(ordered, [18, CENTER_X, 82]);
+        assign(ordered, [22, CENTER_X, 78]);
       }
     } else {
       const ordered = [...group].sort((a, b) => (lane.get(a.id) ?? 0) - (lane.get(b.id) ?? 0));
-      assign(ordered, [14, 32, 50, 68, 86]);
+      assign(ordered, [16, 34, 50, 66, 84]);
     }
   }
   return layout;
@@ -170,6 +168,23 @@ function pointFor(node, position, side) {
   return { x: x + half, y: position.y + h / 2 };
 }
 
+function hasHorizontalBlocker(nodesById, layout, y, x1, x2, ignoredIds) {
+  const minX = Math.min(x1, x2);
+  const maxX = Math.max(x1, x2);
+  for (const [id, node] of nodesById.entries()) {
+    if (ignoredIds.has(id)) continue;
+    const pos = layout[id];
+    if (!pos) continue;
+    const top = pos.y;
+    const bottom = top + nodeHeight(node);
+    const x = (pos.x / 100) * VIEW_W;
+    const left = x - NODE_W / 2;
+    const right = x + NODE_W / 2;
+    if (y > top + 4 && y < bottom - 4 && right > minX && left < maxX) return true;
+  }
+  return false;
+}
+
 function pathFor(edge, nodesById, layout) {
   const fromNode = nodesById.get(edge.from);
   const toNode = nodesById.get(edge.to);
@@ -180,23 +195,36 @@ function pathFor(edge, nodesById, layout) {
   if (edge.type === "loop") {
     const start = pointFor(fromNode, from, "right");
     const end = pointFor(toNode, to, "left");
-    const outer = Math.max(LOOP_OUTER_X, start.x + 110);
+    const outer = Math.max(LOOP_OUTER_X, start.x + 100);
     return `M ${start.x} ${start.y} C ${outer} ${start.y}, ${outer} ${end.y}, ${end.x} ${end.y}`;
   }
 
-  const below = to.y > from.y;
-  if (!below) {
-    const start = pointFor(fromNode, from, "right");
-    const end = pointFor(toNode, to, "right");
-    const outer = Math.max(start.x, end.x) + 90;
-    return `M ${start.x} ${start.y} C ${outer} ${start.y}, ${outer} ${end.y}, ${end.x} ${end.y}`;
+  const sameRank = Math.abs(to.y - from.y) < 8;
+  if (sameRank) {
+    const targetIsLeft = to.x < from.x;
+    const start = pointFor(fromNode, from, targetIsLeft ? "left" : "right");
+    const end = pointFor(toNode, to, targetIsLeft ? "right" : "left");
+    const gap = Math.abs(end.x - start.x);
+    if (gap < 8) {
+      const offset = 42;
+      const side = targetIsLeft ? -1 : 1;
+      return `M ${start.x} ${start.y} C ${start.x + side * offset} ${start.y}, ${end.x - side * offset} ${end.y}, ${end.x} ${end.y}`;
+    }
+    return `M ${start.x} ${start.y} L ${end.x} ${end.y}`;
   }
 
   const start = pointFor(fromNode, from, "bottom");
   const end = pointFor(toNode, to, "top");
   if (Math.abs(start.x - end.x) < 3) return `M ${start.x} ${start.y} L ${end.x} ${end.y}`;
-  const mid = start.y + Math.max(32, (end.y - start.y) * 0.45);
-  return `M ${start.x} ${start.y} C ${start.x} ${mid}, ${end.x} ${mid}, ${end.x} ${end.y}`;
+
+  const channelY = start.y + Math.max(24, (end.y - start.y) * 0.5);
+  const ignored = new Set([edge.from, edge.to]);
+  if (hasHorizontalBlocker(nodesById, layout, channelY, start.x, end.x, ignored)) {
+    const outerX = end.x >= start.x ? Math.min(VIEW_W - 24, Math.max(start.x, end.x) + 120) : Math.max(24, Math.min(start.x, end.x) - 120);
+    return `M ${start.x} ${start.y} L ${outerX} ${start.y} L ${outerX} ${end.y} L ${end.x} ${end.y}`;
+  }
+
+  return `M ${start.x} ${start.y} L ${start.x} ${channelY} L ${end.x} ${channelY} L ${end.x} ${end.y}`;
 }
 
 function edgeLabel(edge, nodesById, layout) {
@@ -206,11 +234,22 @@ function edgeLabel(edge, nodesById, layout) {
   if (edge.type === "loop") return { x: VIEW_W - 105, y: Math.max(25, Math.min(from.y, to.y) + 22), text: "LOOP BACK", width: 94 };
   if (edge.type !== "true" && edge.type !== "false") return null;
   const node = nodesById.get(edge.from);
+  const target = nodesById.get(edge.to);
+  if (!node || !target) return null;
+
   const start = pointFor(node, from, "bottom");
-  const end = pointFor(nodesById.get(edge.to), to, "top");
-  const mid = start.y + Math.max(30, (end.y - start.y) * 0.42);
+  const end = pointFor(target, to, "top");
+  const sameRank = Math.abs(end.y - start.y) < 8;
   const truth = edge.type === "true";
-  return { x: truth ? start.x + 55 : start.x - 55, y: mid, text: truth ? "TRUE" : "FALSE", width: 56 };
+
+  if (sameRank) {
+    const sourceX = (from.x / 100) * VIEW_W;
+    const targetX = (to.x / 100) * VIEW_W;
+    return { x: (sourceX + targetX) / 2, y: start.y - 20, text: truth ? "TRUE" : "FALSE", width: 56 };
+  }
+
+  const channelY = start.y + Math.max(24, (end.y - start.y) * 0.5);
+  return { x: (start.x + end.x) / 2, y: channelY - 14, text: truth ? "TRUE" : "FALSE", width: 56 };
 }
 
 function FlowEdge({ edge, nodesById, layout, active }) {
@@ -219,11 +258,11 @@ function FlowEdge({ edge, nodesById, layout, active }) {
   const label = edgeLabel(edge, nodesById, layout);
   return (
     <g>
-      {active && <path d={d} fill="none" stroke="#FFE3A3" strokeWidth="10" strokeLinecap="round" />}
+      {active && <path d={d} fill="none" stroke="#FFE3A3" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />}
       <path d={d} fill="none" stroke="#171717" strokeWidth={active ? 4 : 3} strokeLinecap="round" strokeLinejoin="round" markerEnd="url(#cflow-arrow)" />
       {label && (
         <g>
-          <rect x={label.x - label.width / 2} y={label.y - 13} width={label.width} height="24" rx="12" fill="#FFF9F0" stroke="#171717" strokeWidth="2" />
+          <rect x={label.x - label.width / 2} y={label.y - 11} width={label.width} height="22" rx="11" fill="#FFF9F0" stroke="#171717" strokeWidth="2" />
           <text x={label.x} y={label.y + 3} textAnchor="middle" className="fill-[#171717] font-mono text-[9px] font-bold">{label.text}</text>
         </g>
       )}
@@ -267,7 +306,7 @@ export default function FlowGraph({ nodes = null, edges = null, activeNode = nul
   const autoLayout = useMemo(() => makeLayout(graphNodes, graphEdges), [graphNodes, graphEdges]);
   const layout = useMemo(() => Object.fromEntries(graphNodes.map((node) => [node.id, manualPositions[node.id] ?? autoLayout[node.id]])), [graphNodes, autoLayout, manualPositions]);
   const maxY = graphNodes.reduce((max, node) => Math.max(max, (layout[node.id]?.y ?? TOP_Y) + nodeHeight(node)), TOP_Y);
-  const graphHeight = Math.max(620, maxY + 120);
+  const graphHeight = Math.max(620, maxY + 100);
   const activeEdgeId = typeof activeEdge === "string" ? activeEdge : activeEdge?.id;
 
   useEffect(() => {
@@ -276,7 +315,6 @@ export default function FlowGraph({ nodes = null, edges = null, activeNode = nul
       if (!container) return;
       container.scrollLeft = Math.max(0, (container.scrollWidth - container.clientWidth) / 2);
     });
-
     return () => cancelAnimationFrame(frame);
   }, [graphNodes.length, graphHeight, isMaximized]);
 
