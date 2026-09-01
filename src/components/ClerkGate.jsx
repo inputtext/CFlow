@@ -19,7 +19,7 @@ function ClerkGate({ children }) {
           items-center
           gap-2
           font-mono
-          pr-[72px]
+          pr-[112px]
         "
       >
         <Show when="signed-out">
