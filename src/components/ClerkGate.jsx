@@ -96,6 +96,7 @@ function ClerkGate({ children }) {
         >
           <section
             className="
+              cflow-auth-card-enter
               w-full
               max-w-[620px]
               border-2
@@ -162,6 +163,13 @@ function ClerkGate({ children }) {
                     tracking-[0.12em]
                     text-[#FFF9F0]
                     shadow-[4px_4px_0_#FFE3A3]
+                    transition-[transform,box-shadow]
+                    duration-200
+                    ease-out
+                    hover:-translate-y-1
+                    hover:shadow-[5px_6px_0_#FFE3A3]
+                    active:translate-y-0
+                    active:shadow-[2px_2px_0_#FFE3A3]
                   "
                 >
                   GET STARTED →
@@ -184,6 +192,13 @@ function ClerkGate({ children }) {
                     tracking-[0.12em]
                     text-[#171717]
                     shadow-[4px_4px_0_#171717]
+                    transition-[transform,box-shadow]
+                    duration-200
+                    ease-out
+                    hover:-translate-y-1
+                    hover:shadow-[5px_6px_0_#171717]
+                    active:translate-y-0
+                    active:shadow-[2px_2px_0_#171717]
                   "
                 >
                   SIGN IN
