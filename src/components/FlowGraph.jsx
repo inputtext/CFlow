@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const NODE_W = 220;
 const NODE_H = 72;
@@ -228,15 +228,34 @@ function pathFor(edge, nodesById, layout) {
 
   if (edge.type === "loop") {
     const start = pointFor(fromNode, from, "right");
-    const end = pointFor(toNode, to, "left");
-    const outerX = VIEW_W - 28;
-    const returnY = Math.max(26, end.y - 38);
+    const end = pointFor(toNode, to, "right");
+    const outerX = VIEW_W - 74;
+    const returnY = end.y;
 
-    return `M ${start.x} ${start.y} C ${outerX} ${start.y}, ${outerX} ${returnY}, ${end.x} ${returnY} L ${end.x} ${end.y}`;
+    return `M ${start.x} ${start.y}
+      C ${outerX} ${start.y}, ${outerX} ${returnY}, ${end.x} ${returnY}`;
   }
 
   if (edge.type === "true" || edge.type === "false") {
     const truth = edge.type === "true";
+    const isLoopCondition =
+      typeOf(fromNode) === "condition" &&
+      ["for", "while", "do", "loop"].includes(fromNode.controlType);
+
+    if (isLoopCondition && to.y > from.y) {
+      const start = pointFor(fromNode, from, truth ? "bottom" : "left");
+      const end = pointFor(toNode, to, "top");
+
+      if (truth) {
+        return `M ${start.x} ${start.y} L ${end.x} ${end.y}`;
+      }
+
+      const sideX = Math.max(26, start.x - 92);
+
+      return `M ${start.x} ${start.y}
+        C ${sideX} ${start.y}, ${sideX} ${end.y}, ${end.x} ${end.y}`;
+    }
+
     const start = pointFor(fromNode, from, truth ? "right" : "left");
     const end = pointFor(toNode, to, truth ? "left" : "right");
     const horizontal = truth ? 70 : -70;
@@ -262,8 +281,8 @@ function edgeLabel(edge, nodesById, layout) {
 
   if (edge.type === "loop") {
     return {
-      x: VIEW_W - 82,
-      y: Math.max(26, to.y - 24),
+      x: VIEW_W - 148,
+      y: Math.max(28, to.y - 18),
       text: "LOOP BACK",
       width: 88,
     };
@@ -273,11 +292,17 @@ function edgeLabel(edge, nodesById, layout) {
     const fromNode = nodesById.get(edge.from);
     const toNode = nodesById.get(edge.to);
     const truth = edge.type === "true";
-    const start = pointFor(fromNode, from, truth ? "right" : "left");
-    const end = pointFor(toNode, to, truth ? "left" : "right");
+    const start = pointFor(
+      fromNode,
+      from,
+      truth ? "bottom" : "left",
+    );
+    const end = pointFor(toNode, to, "top");
 
     return {
-      x: (start.x + end.x) / 2,
+      x: truth
+        ? (start.x + end.x) / 2
+        : (start.x + end.x) / 2 - 6,
       y: (start.y + end.y) / 2 - 10,
       text: truth ? "TRUE" : "FALSE",
       width: 52,
@@ -350,6 +375,7 @@ export default function FlowGraph({
   conditionResult = null,
 }) {
   const scrollRef = useRef(null);
+  const [zoom, setZoom] = useState(1);
 
   const fallbackNodes = [
     { id: "start", label: "START", type: "start" },
@@ -420,57 +446,95 @@ export default function FlowGraph({
   }, [activeNode, graphHeight]);
 
   return (
-    <div
-      ref={scrollRef}
-      className="relative h-full w-full min-w-0 overflow-auto rounded-[18px] bg-[#FFF9F0]"
-    >
+    <div className="relative h-full w-full min-w-0">
       <div
-        className="relative mx-auto"
-        style={{
-          height: graphHeight,
-          width: "100%",
-          minWidth: 640,
-          maxWidth: 900,
-        }}
+        className="pointer-events-none absolute right-3 top-3 z-30 flex items-center gap-1 rounded-[12px] border-2 border-[#171717] bg-[#FFF9F0] p-1 shadow-[3px_3px_0_#171717]"
+        aria-label="Flowchart zoom controls"
       >
-        <svg
-          className="pointer-events-none absolute inset-0 h-full w-full"
-          viewBox={`0 0 ${VIEW_W} ${graphHeight}`}
-          preserveAspectRatio="none"
+        <button
+          type="button"
+          onClick={() => setZoom((value) => Math.max(0.8, Number((value - 0.1).toFixed(1))))}
+          className="pointer-events-auto flex h-7 w-7 items-center justify-center rounded-[8px] font-mono text-sm font-black transition-transform hover:scale-105 active:translate-y-px"
+          aria-label="Zoom out"
+          title="Zoom out"
         >
-          <defs>
-            <marker
-              id="cflow-arrow"
-              markerWidth="10"
-              markerHeight="10"
-              refX="8"
-              refY="4"
-              orient="auto"
-            >
-              <path d="M0,0 L8,4 L0,8 Z" fill="#171717" />
-            </marker>
-          </defs>
+          −
+        </button>
 
-          {graphEdges.map((edge) => (
-            <FlowEdge
-              key={edge.id || `${edge.from}-${edge.to}-${edge.type}`}
-              edge={edge}
-              nodesById={nodesById}
-              layout={layout}
-              active={edge.id === activeEdgeId}
+        <button
+          type="button"
+          onClick={() => setZoom(1)}
+          className="pointer-events-auto min-w-[52px] rounded-[8px] px-2 py-1 font-mono text-[10px] font-black tracking-wide transition-transform hover:scale-105"
+          aria-label="Reset flowchart zoom"
+          title="Reset zoom"
+        >
+          {Math.round(zoom * 100)}%
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setZoom((value) => Math.min(1.8, Number((value + 0.1).toFixed(1))))}
+          className="pointer-events-auto flex h-7 w-7 items-center justify-center rounded-[8px] font-mono text-sm font-black transition-transform hover:scale-105 active:translate-y-px"
+          aria-label="Zoom in"
+          title="Zoom in"
+        >
+          +
+        </button>
+      </div>
+
+      <div
+        ref={scrollRef}
+        className="relative h-full w-full min-w-0 overflow-auto rounded-[18px] bg-[#FFF9F0]"
+      >
+        <div
+          className="relative mx-auto origin-top"
+          style={{
+            height: graphHeight,
+            width: "100%",
+            minWidth: 640,
+            maxWidth: 900,
+            zoom,
+          }}
+        >
+          <svg
+            className="pointer-events-none absolute inset-0 h-full w-full"
+            viewBox={`0 0 ${VIEW_W} ${graphHeight}`}
+            preserveAspectRatio="none"
+          >
+            <defs>
+              <marker
+                id="cflow-arrow"
+                markerWidth="10"
+                markerHeight="10"
+                refX="8"
+                refY="4"
+                orient="auto"
+              >
+                <path d="M0,0 L8,4 L0,8 Z" fill="#171717" />
+              </marker>
+            </defs>
+
+            {graphEdges.map((edge) => (
+              <FlowEdge
+                key={edge.id || `${edge.from}-${edge.to}-${edge.type}`}
+                edge={edge}
+                nodesById={nodesById}
+                layout={layout}
+                active={edge.id === activeEdgeId}
+              />
+            ))}
+          </svg>
+
+          {graphNodes.map((node) => (
+            <NodeBox
+              key={node.id}
+              node={node}
+              position={layout[node.id]}
+              active={node.id === activeNode}
+              conditionResult={conditionResult}
             />
           ))}
-        </svg>
-
-        {graphNodes.map((node) => (
-          <NodeBox
-            key={node.id}
-            node={node}
-            position={layout[node.id]}
-            active={node.id === activeNode}
-            conditionResult={conditionResult}
-          />
-        ))}
+        </div>
       </div>
     </div>
   );
