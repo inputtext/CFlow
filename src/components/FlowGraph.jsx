@@ -8,8 +8,8 @@ const GAP_Y = 104;
 const TOP_Y = 34;
 const VIEW_W = 900;
 const CENTER_X = 50;
-const LEFT_X = 27;
-const RIGHT_X = 73;
+const LEFT_X = 20;
+const RIGHT_X = 80;
 const LOOP_OUTER_X = 835;
 
 const LOOP_TYPES = new Set(["for", "while", "do", "loop"]);
@@ -150,9 +150,6 @@ function findMergeNode(edges, yesId, noId) {
 
   if (!common.length) return null;
 
-  // The graph builder keeps nodes in execution order. Choosing the first
-  // common node gives us the nearest visual merge point instead of sending
-  // one branch all the way to the bottom of the graph.
   const index = new Map();
   for (let i = 0; i < common.length; i += 1) index.set(common[i], i);
 
@@ -170,8 +167,6 @@ function makeRanks(nodes, edges) {
 
   if (start) rank.set(start.id, 0);
 
-  // Relax only non-loop edges. A small bounded number of passes keeps this
-  // safe even when an unusual backend graph contains another cycle.
   for (let pass = 0; pass < nodes.length; pass += 1) {
     let changed = false;
 
@@ -207,9 +202,6 @@ function makeLayout(nodes, edges) {
   const ranks = makeRanks(nodes, edges);
   const laneSets = new Map(nodes.map((node) => [node.id, new Set()]));
 
-  // First allocate explicit TRUE/FALSE lanes. We stop each lane at the
-  // nearest common node so branches do not drag unrelated downstream nodes
-  // to the side of the graph.
   for (const condition of nodes) {
     if (typeOf(condition) !== "condition") continue;
     if (LOOP_TYPES.has(condition.controlType)) continue;
@@ -222,6 +214,12 @@ function makeLayout(nodes, edges) {
     const yesReachable = reachableFrom(yes.to, edges);
     const noReachable = reachableFrom(no.to, edges);
 
+    // Pin the first node of each branch to its own lane. This prevents a
+    // branch target such as RETURN from collapsing back into the center when
+    // its node is represented as a terminal/special type by the analyzer.
+    if (yes.to !== mergeId) laneSets.get(yes.to)?.add(1);
+    if (no.to !== mergeId) laneSets.get(no.to)?.add(-1);
+
     for (const node of nodes) {
       if (node.id === mergeId || node.id === condition.id) continue;
 
@@ -233,7 +231,6 @@ function makeLayout(nodes, edges) {
     }
   }
 
-  // A node reachable from both sides is a merge and must return to center.
   const rankGroups = new Map();
   for (const node of nodes) {
     const nodeRank = ranks.get(node.id) ?? 0;
@@ -263,7 +260,6 @@ function makeLayout(nodes, edges) {
       }
 
       if (typeOf(node) === "start" || typeOf(node) === "exit" || typeOf(node) === "output") {
-        // Merge/terminal nodes are visually strongest in the center.
         if (lanes.size !== 1) lane = 0;
       }
 
@@ -274,21 +270,18 @@ function makeLayout(nodes, edges) {
       if (lane < 0) x = LEFT_X;
       if (lane > 0) x = RIGHT_X;
 
-      // If the backend gives multiple nodes the same rank/lane, keep them
-      // readable without changing the overall branch geometry.
       if (count > 0) {
         const offset = Math.min(8, count * 7);
         x = lane < 0 ? LEFT_X - offset : lane > 0 ? RIGHT_X + offset : CENTER_X + (count % 2 ? 8 : -8);
       }
 
       layout[node.id] = {
-        x: Math.max(15, Math.min(85, x)),
+        x: Math.max(12, Math.min(88, x)),
         y: TOP_Y + nodeRank * GAP_Y,
       };
     });
   }
 
-  // Any nodes omitted from the ranked pass still receive a stable position.
   nodes.forEach((node, index) => {
     if (layout[node.id]) return;
     layout[node.id] = {
@@ -317,7 +310,6 @@ function branchPath(edge, fromNode, toNode, from, to) {
   const end = pointFor(toNode, to, "top");
   const direction = truth ? 1 : -1;
 
-  // If a branch points backward, route it around the appropriate side.
   if (to.y <= from.y) {
     const sideX = (truth ? RIGHT_X : LEFT_X) / 100 * VIEW_W;
     const startX = direction > 0 ? start.x + 28 : start.x - 28;
