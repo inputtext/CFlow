@@ -43,6 +43,7 @@ textarea {
 button {
   cursor: pointer;
 }
+
 /* C·FLOW scrollbars */
 ::-webkit-scrollbar {
   width: 10px;
@@ -75,6 +76,7 @@ body,
 * {
   box-sizing: border-box;
 }
+
 @keyframes codeMarkerIn {
   0% {
     opacity: 0;
@@ -93,6 +95,51 @@ body,
 }
 
 /* ------------------------------------------------------------
+   EXECUTION LINE HIGHLIGHT
+
+   The active line is identified by the existing `font-bold`
+   line-number state. The highlight is attached to that exact
+   line-number row instead of being painted on the textarea with
+   hard-coded pixel offsets. This keeps it aligned while scrolling.
+------------------------------------------------------------ */
+
+/* The line-number rail must allow its active-row highlight to
+   extend into the editor, while the editor itself still clips it. */
+[class*="w-[54px]"] {
+  overflow: visible !important;
+  z-index: 0 !important;
+}
+
+/* Active row itself remains above its highlight. */
+[class*="w-[54px]"] > div.font-bold {
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+}
+
+[class*="w-[54px]"] > div.font-bold::after {
+  content: "";
+  position: absolute;
+  left: 54px;
+  top: 0;
+  width: 1200px;
+  height: 28px;
+  pointer-events: none;
+  z-index: -1;
+  background: rgba(218, 190, 116, 0.18);
+  border-top: 1px solid rgba(145, 119, 58, 0.16);
+  border-bottom: 1px solid rgba(145, 119, 58, 0.16);
+}
+
+/* The old dark-mode implementation painted the active line on
+   the textarea using hard-coded background positions. Disable it:
+   the row-attached highlight above is now the single source of UI
+   truth and follows the actual active line while scrolling. */
+.cflow-dark main > section:first-child textarea {
+  background-image: none !important;
+}
+
+/* ------------------------------------------------------------
    DARK MODE — MEMORY CARDS
    The MemoryCard component uses inline light-mode backgrounds,
    so these scoped rules deliberately override only the memory
@@ -106,13 +153,11 @@ body,
   -webkit-text-fill-color: #F1EEE8;
 }
 
-/* Keep the type label quieter than the variable/value. */
 .cflow-dark [data-memory] > div:first-of-type {
   color: #AEB4BB !important;
   -webkit-text-fill-color: #AEB4BB;
 }
 
-/* Active execution/memory update: muted warm pastel, not neon. */
 .cflow-dark [data-memory][style] {
   color: #F4F0E8 !important;
 }
@@ -122,7 +167,6 @@ body,
   -webkit-text-fill-color: inherit;
 }
 
-/* The active card gets a soft, readable focus treatment. */
 .cflow-dark [data-memory]:has(.animate\[memoryUpdateIn_0\.35s_ease-out\]) {
   background: #D2B878 !important;
   color: #20242A !important;
@@ -137,4 +181,34 @@ body,
 .cflow-dark [data-memory]:has(.animate\[memoryUpdateIn_0\.35s_ease-out\]) span,
 .cflow-dark [data-memory]:has(.animate\[memoryUpdateIn_0\.35s_ease-out\]) div {
   -webkit-text-fill-color: inherit;
+}
+
+/* ------------------------------------------------------------
+   DARK MODE — CODE EXECUTION LINE
+------------------------------------------------------------ */
+.cflow-dark [class*="w-[54px]"] > div.font-bold {
+  color: #F6F0E5 !important;
+  -webkit-text-fill-color: #F6F0E5 !important;
+}
+
+.cflow-dark [class*="w-[54px]"] > div.font-bold::after {
+  background: rgba(210, 184, 120, 0.20);
+  border-top-color: rgba(210, 184, 120, 0.20);
+  border-bottom-color: rgba(210, 184, 120, 0.20);
+}
+
+/* Keep normal dark-mode code readable. */
+.cflow-dark main > section:first-child textarea {
+  color: #F3EFE7 !important;
+  -webkit-text-fill-color: #F3EFE7 !important;
+  text-shadow: none !important;
+  caret-color: #E8C77A !important;
+}
+
+/* Dark-mode selection is intentionally separate from execution
+   highlighting so selecting text never leaves a yellow block. */
+.cflow-dark main > section:first-child textarea::selection {
+  background: #6F6247 !important;
+  color: #FFF9F0 !important;
+  -webkit-text-fill-color: #FFF9F0 !important;
 }
