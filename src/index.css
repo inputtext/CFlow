@@ -118,9 +118,9 @@ body,
   content: "";
   position: absolute;
   left: 54px;
-  top: 0;
+  top: -20px;
   width: 1200px;
-  height: 28px;
+  height: 25px;
   pointer-events: none;
   z-index: 0;
   background: rgba(218, 190, 116, 0.72);
