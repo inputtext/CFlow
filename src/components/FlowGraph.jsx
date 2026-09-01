@@ -269,6 +269,16 @@ export default function FlowGraph({ nodes = null, edges = null, activeNode = nul
   const activeEdgeId = typeof activeEdge === "string" ? activeEdge : activeEdge?.id;
 
   useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      const container = scrollRef.current;
+      if (!container) return;
+      container.scrollLeft = Math.max(0, (container.scrollWidth - container.clientWidth) / 2);
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [graphNodes.length, graphHeight, isMaximized]);
+
+  useEffect(() => {
     if (!isMaximized) return undefined;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
