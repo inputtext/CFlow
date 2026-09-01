@@ -1,11 +1,27 @@
 import gsap from "gsap";
 
-function findFlowSource(target) {
+function findActiveFlowSource() {
   const nodes = Array.from(
     document.querySelectorAll("[data-flow-node]")
   );
 
-  if (!nodes.length) return null;
+  // FlowGraph marks the currently executing node with scale(1.025).
+  // Prefer that exact node so repeated variables and loop updates
+  // never point back to an earlier assignment.
+  const activeNode = nodes.find((node) =>
+    node.style.transform.includes("scale(1.025)")
+  );
+
+  return activeNode ?? null;
+}
+
+function findFlowSource(target) {
+  const activeNode = findActiveFlowSource();
+  if (activeNode) return activeNode;
+
+  const nodes = Array.from(
+    document.querySelectorAll("[data-flow-node]")
+  );
 
   const variable = String(target ?? "").trim();
   if (!variable) return null;
@@ -54,20 +70,24 @@ export function animateVariableUpdate({
 
   if (!source) return;
 
+  // Prevent two fast execution steps from leaving overlapping arrows.
+  document
+    .querySelectorAll("[data-cflow-memory-animation]")
+    .forEach((element) => element.remove());
+
   const sourceRect = source.getBoundingClientRect();
   const targetRect = target.getBoundingClientRect();
 
-  // The arrow uses viewport coordinates so it can cross the
-  // FLOW → MEMORY panel gap without changing either layout.
-  const startX = sourceRect.right + 4;
+  const startX = sourceRect.right + 6;
   const startY = sourceRect.top + sourceRect.height / 2;
-  const endX = targetRect.left - 8;
+  const endX = targetRect.left - 10;
   const endY = targetRect.top + targetRect.height / 2;
 
   const distanceX = endX - startX;
+  const distanceY = endY - startY;
   const curve = Math.min(
-    110,
-    Math.max(35, Math.abs(distanceX) * 0.28)
+    105,
+    Math.max(38, Math.abs(distanceX) * 0.25)
   );
 
   const pathD = `
@@ -84,6 +104,7 @@ export function animateVariableUpdate({
 
   svg.setAttribute("width", window.innerWidth);
   svg.setAttribute("height", window.innerHeight);
+  svg.setAttribute("data-cflow-memory-animation", "true");
 
   Object.assign(svg.style, {
     position: "fixed",
@@ -141,6 +162,7 @@ export function animateVariableUpdate({
   path.setAttribute("stroke", accent);
   path.setAttribute("stroke-width", "2.5");
   path.setAttribute("stroke-linecap", "round");
+  path.setAttribute("stroke-linejoin", "round");
   path.setAttribute("marker-end", `url(#${marker.id})`);
 
   const label = document.createElementNS(
@@ -149,7 +171,8 @@ export function animateVariableUpdate({
   );
 
   const labelX = startX + distanceX * 0.5;
-  const labelY = startY + (endY - startY) * 0.5 - 8;
+  const labelY =
+    startY + distanceY * 0.5 - (distanceY >= 0 ? 9 : 5);
 
   label.setAttribute("x", labelX);
   label.setAttribute("y", labelY);
@@ -185,7 +208,8 @@ export function animateVariableUpdate({
   timeline
     .to(path, {
       strokeDashoffset: 0,
-      duration: 0.55,
+      duration: 0.5,
+      delay: 0.12,
       ease: "power2.inOut",
     })
     .to(
@@ -193,15 +217,15 @@ export function animateVariableUpdate({
       {
         opacity: 1,
         y: 0,
-        duration: 0.18,
+        duration: 0.16,
         ease: "power2.out",
       },
-      "-=0.2"
+      "-=0.18"
     )
-    .to({}, { duration: 0.35 })
+    .to({}, { duration: 0.3 })
     .to([path, label], {
       opacity: 0,
-      duration: 0.22,
+      duration: 0.2,
       ease: "power2.out",
     });
 
