@@ -99,22 +99,24 @@ body,
 
    The active line is identified by the existing `font-bold`
    line-number state. The highlight is attached to that exact
-   line-number row instead of being painted on the textarea with
-   hard-coded pixel offsets. This keeps it aligned while scrolling.
+   line-number row so it stays synchronized with the editor while
+   the user scrolls.
 ------------------------------------------------------------ */
 
-/* The line-number rail must allow its active-row highlight to
-   extend into the editor, while the editor itself still clips it. */
+/*
+ * Keep the line-number rail above the transparent textarea.
+ * Its background is limited to the 54px number column, while the
+ * active-row pseudo-element extends across the code editor.
+ */
 [class*="w-[54px]"] {
   overflow: visible !important;
-  z-index: 0 !important;
+  z-index: 20 !important;
 }
 
-/* Active row itself remains above its highlight. */
+/* Active line number stays readable above its highlight. */
 [class*="w-[54px]"] > div.font-bold {
   position: relative;
-  z-index: 1;
-  isolation: isolate;
+  z-index: 2;
 }
 
 [class*="w-[54px]"] > div.font-bold::after {
@@ -125,25 +127,19 @@ body,
   width: 1200px;
   height: 28px;
   pointer-events: none;
-  z-index: -1;
-  background: rgba(218, 190, 116, 0.18);
-  border-top: 1px solid rgba(145, 119, 58, 0.16);
-  border-bottom: 1px solid rgba(145, 119, 58, 0.16);
+  z-index: 0;
+  background: rgba(218, 190, 116, 0.20);
+  border-top: 1px solid rgba(145, 119, 58, 0.18);
+  border-bottom: 1px solid rgba(145, 119, 58, 0.18);
 }
 
-/* The old dark-mode implementation painted the active line on
-   the textarea using hard-coded background positions. Disable it:
-   the row-attached highlight above is now the single source of UI
-   truth and follows the actual active line while scrolling. */
+/* Never use the textarea itself as the execution-highlight layer. */
 .cflow-dark main > section:first-child textarea {
   background-image: none !important;
 }
 
 /* ------------------------------------------------------------
    DARK MODE — MEMORY CARDS
-   The MemoryCard component uses inline light-mode backgrounds,
-   so these scoped rules deliberately override only the memory
-   cards when C·FLOW's dark theme class is active.
 ------------------------------------------------------------ */
 .cflow-dark [data-memory] {
   background: #30343A !important;
@@ -192,9 +188,9 @@ body,
 }
 
 .cflow-dark [class*="w-[54px]"] > div.font-bold::after {
-  background: rgba(210, 184, 120, 0.20);
-  border-top-color: rgba(210, 184, 120, 0.20);
-  border-bottom-color: rgba(210, 184, 120, 0.20);
+  background: rgba(210, 184, 120, 0.24);
+  border-top-color: rgba(210, 184, 120, 0.22);
+  border-bottom-color: rgba(210, 184, 120, 0.22);
 }
 
 /* Keep normal dark-mode code readable. */
@@ -205,8 +201,7 @@ body,
   caret-color: #E8C77A !important;
 }
 
-/* Dark-mode selection is intentionally separate from execution
-   highlighting so selecting text never leaves a yellow block. */
+/* Dark-mode selection remains separate from execution highlighting. */
 .cflow-dark main > section:first-child textarea::selection {
   background: #6F6247 !important;
   color: #FFF9F0 !important;
