@@ -121,17 +121,17 @@ body,
 }
 
 /*
- * Execution marker: keep the user's calibrated size/opacity,
- * but move it upward so its center sits on the actual textarea
- * glyph line instead of the line-number row's flex center.
+ * The execution marker is tied to the exact same 28px row used by
+ * both the line numbers and textarea. It begins after the 54px
+ * gutter, matching the original C·FLOW editor treatment.
  */
 [class*="w-[54px]"] > div.font-bold::after {
   content: "";
   position: absolute;
   left: 54px;
-  top: -27px;
+  top: 0;
   width: 1200px;
-  height: 25px;
+  height: 28px;
   pointer-events: none;
   z-index: 0;
   background: rgba(218, 190, 116, 0.72);
@@ -139,12 +139,10 @@ body,
   border-bottom: 1px solid rgba(145, 119, 58, 0.28);
 }
 
-/*
- * The line-number gutter and the native textarea must use exactly the
- * same typography metrics. Native textareas can otherwise render their
- * line boxes slightly differently from ordinary divs.
- */
+/* Keep the textarea's text above the transparent execution marker. */
 main > section:first-child textarea {
+  position: relative;
+  z-index: 30 !important;
   box-sizing: border-box !important;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
   font-size: 14px !important;
