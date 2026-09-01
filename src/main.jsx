@@ -6,6 +6,7 @@ import './styles/theme.css'
 import App from './App.jsx'
 import ThemeToggle from './components/ThemeToggle.jsx'
 import ClerkGate from './components/ClerkGate.jsx'
+import AnalysisUsageGuard from './components/AnalysisUsageGuard.jsx'
 
 import { ClerkProvider } from '@clerk/react'
 
@@ -19,7 +20,9 @@ createRoot(document.getElementById('root')).render(
   <>
     <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
       <ClerkGate>
-        <App />
+        <AnalysisUsageGuard>
+          <App />
+        </AnalysisUsageGuard>
       </ClerkGate>
     </ClerkProvider>
 
