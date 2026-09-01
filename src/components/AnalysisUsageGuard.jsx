@@ -133,9 +133,8 @@ export default function AnalysisUsageGuard({ children }) {
 
     const sync = () => {
       const editor = findEditor();
-      if (!editor) return false;
+      if (!editor) return;
       setLineCount(editor.value ? editor.value.split(/\r?\n/).length : 0);
-      return true;
     };
 
     sync();
@@ -147,11 +146,10 @@ export default function AnalysisUsageGuard({ children }) {
       observer.disconnect();
       document.removeEventListener("input", sync, true);
     };
-  }, [showWorkspaceKey]);
+  }, []);
 
   const remaining = Math.max(0, FREE_ATTEMPTS - used);
   const lineStatus = lineCount > MAX_LINES ? "danger" : lineCount >= 950 ? "warning" : "normal";
-  const badgeText = isSignedIn ? `${remaining}/4 FREE` : "SIGN IN";
 
   const badgeClass = useMemo(() => {
     if (lineStatus === "danger") return "bg-[#FFD6E7]";
@@ -166,7 +164,7 @@ export default function AnalysisUsageGuard({ children }) {
       {isLoaded && isSignedIn && (
         <div className="pointer-events-none fixed bottom-[92px] left-4 z-[80] flex flex-col gap-2 font-mono text-[10px] font-black uppercase tracking-[0.12em]">
           <div className={`w-fit border-2 border-[#171717] px-3 py-2 shadow-[3px_3px_0_#171717] ${badgeClass}`}>
-            {badgeText} ANALYSES
+            {remaining}/4 FREE ANALYSES
           </div>
 
           <div className="w-fit border-2 border-[#171717] bg-white px-3 py-2 shadow-[3px_3px_0_#171717]">
@@ -195,7 +193,3 @@ export default function AnalysisUsageGuard({ children }) {
     </>
   );
 }
-
-// This value only changes when the component mounts. It is intentionally
-// separate from App's workspace state so the existing visualizer is untouched.
-const showWorkspaceKey = "analysis-usage-guard";
