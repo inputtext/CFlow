@@ -4,13 +4,13 @@ const NODE_W = 220;
 const NODE_H = 72;
 const CONDITION_H = 88;
 const TERMINAL_H = 62;
-const GAP_Y = 132;
+const GAP_Y = 156;
 const TOP_Y = 34;
-const VIEW_W = 900;
+const VIEW_W = 1400;
 const CENTER_X = 50;
-const LEFT_X = 18;
-const RIGHT_X = 82;
-const LOOP_OUTER_X = 875;
+const LEFT_X = 16;
+const RIGHT_X = 84;
+const LOOP_OUTER_X = 1370;
 const LOOP_TYPES = new Set(["for", "while", "do", "loop"]);
 
 function typeOf(node) {
@@ -134,7 +134,10 @@ function makeLayout(nodes, edges) {
     const assign = (items, positions) => {
       items.forEach((node, index) => {
         const x = positions[Math.min(index, positions.length - 1)];
-        layout[node.id] = { x, y: TOP_Y + rank * GAP_Y + (index >= positions.length ? (index - positions.length + 1) * 86 : 0) };
+        layout[node.id] = {
+          x,
+          y: TOP_Y + rank * GAP_Y + (index >= positions.length ? (index - positions.length + 1) * 96 : 0),
+        };
       });
     };
 
@@ -145,11 +148,11 @@ function makeLayout(nodes, edges) {
         assign(ordered, [LEFT_X, RIGHT_X]);
       } else {
         const ordered = [...group].sort((a, b) => (lane.get(a.id) ?? 0) - (lane.get(b.id) ?? 0));
-        assign(ordered, [15, CENTER_X, 85]);
+        assign(ordered, [10, CENTER_X, 90]);
       }
     } else {
       const ordered = [...group].sort((a, b) => (lane.get(a.id) ?? 0) - (lane.get(b.id) ?? 0));
-      assign(ordered, [13, 37, 63, 87]);
+      assign(ordered, [8, 30, 50, 70, 92]);
     }
   }
   return layout;
@@ -183,14 +186,14 @@ function pathFor(edge, nodesById, layout) {
   if (!below) {
     const start = pointFor(fromNode, from, "right");
     const end = pointFor(toNode, to, "right");
-    const outer = Math.max(start.x, end.x) + 70;
+    const outer = Math.max(start.x, end.x) + 90;
     return `M ${start.x} ${start.y} C ${outer} ${start.y}, ${outer} ${end.y}, ${end.x} ${end.y}`;
   }
 
   const start = pointFor(fromNode, from, "bottom");
   const end = pointFor(toNode, to, "top");
   if (Math.abs(start.x - end.x) < 3) return `M ${start.x} ${start.y} L ${end.x} ${end.y}`;
-  const mid = start.y + Math.max(28, (end.y - start.y) * 0.45);
+  const mid = start.y + Math.max(32, (end.y - start.y) * 0.45);
   return `M ${start.x} ${start.y} C ${start.x} ${mid}, ${end.x} ${mid}, ${end.x} ${end.y}`;
 }
 
@@ -319,7 +322,7 @@ export default function FlowGraph({ nodes = null, edges = null, activeNode = nul
       const scale = rect.width / VIEW_W || zoom;
       const x = (event.clientX - rect.left) / scale - drag.dx;
       const y = (event.clientY - rect.top) / scale - drag.dy;
-      const clampedX = Math.max(12, Math.min(88, (x / VIEW_W) * 100));
+      const clampedX = Math.max(8, Math.min(92, (x / VIEW_W) * 100));
       const clampedY = Math.max(8, y);
       setManualPositions((current) => ({ ...current, [drag.id]: { x: clampedX, y: clampedY } }));
     };
