@@ -109,23 +109,23 @@ body,
 }
 
 /*
- * Keep the visual highlight aligned with the executing source line.
- * It is intentionally smaller than the editor line-height so it does
- * not bleed into the line above/below, while remaining translucent so
- * the source code stays clearly readable.
+ * The line-number row and the textarea use the same 28px line-height.
+ * Paint the marker from the active row itself instead of shifting it
+ * upward. This keeps the marker exactly behind the executing source line
+ * in both light and dark mode and prevents overlap with adjacent lines.
  */
 [class*="w-[54px]"] > div.font-bold::after {
   content: "";
   position: absolute;
   left: 54px;
-  top: -33px;
+  top: 0;
   width: 1200px;
   height: 28px;
   pointer-events: none;
   z-index: 0;
-  background: rgba(218, 190, 116, 0.55);
-  border-top: 1px solid rgba(145, 119, 58, 0.35);
-  border-bottom: 1px solid rgba(145, 119, 58, 0.35);
+  background: rgba(218, 190, 116, 0.72);
+  border-top: 1px solid rgba(145, 119, 58, 0.28);
+  border-bottom: 1px solid rgba(145, 119, 58, 0.28);
 }
 
 .cflow-dark main > section:first-child textarea {
@@ -182,9 +182,9 @@ body,
 }
 
 .cflow-dark [class*="w-[54px]"] > div.font-bold::after {
-  background: rgba(210, 184, 120, 0.55);
-  border-top-color: rgba(210, 184, 120, 0.35);
-  border-bottom-color: rgba(210, 184, 120, 0.35);
+  background: rgba(210, 184, 120, 0.72);
+  border-top-color: rgba(210, 184, 120, 0.28);
+  border-bottom-color: rgba(210, 184, 120, 0.28);
 }
 
 .cflow-dark main > section:first-child textarea {
