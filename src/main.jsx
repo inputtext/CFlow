@@ -5,6 +5,7 @@ import './styles/theme.css'
 
 import App from './App.jsx'
 import ThemeToggle from './components/ThemeToggle.jsx'
+import ClerkGate from './components/ClerkGate.jsx'
 
 import { ClerkProvider } from '@clerk/react'
 
@@ -17,7 +18,9 @@ if (!PUBLISHABLE_KEY) {
 createRoot(document.getElementById('root')).render(
   <>
     <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
-      <App />
+      <ClerkGate>
+        <App />
+      </ClerkGate>
     </ClerkProvider>
 
     <ThemeToggle />
