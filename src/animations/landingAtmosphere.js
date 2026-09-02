@@ -2,11 +2,11 @@
 (() => {
   const init = () => {
     const landing = document.querySelector('.landing')
-    if (!landing || landing.dataset.atmosphereReady === 'true') return
+    if (!landing || landing.dataset.atmosphereReady === 'true') return !!landing
     landing.dataset.atmosphereReady = 'true'
 
     const hero = landing.querySelector('.hero')
-    if (hero) {
+    if (hero && !hero.querySelector('.landing-greeting')) {
       const greeting = document.createElement('div')
       greeting.className = 'landing-greeting'
       greeting.innerHTML = '<span>HELLO, BUILDER.</span><b>READY TO TRACE?</b>'
@@ -26,7 +26,7 @@
 
     sections.forEach(([targetClass, ...words]) => {
       const section = landing.querySelector(`.${targetClass}`)
-      if (!section) return
+      if (!section || section.nextElementSibling?.classList.contains('landing-marquee--atmosphere')) return
       const marquee = document.createElement('div')
       marquee.className = 'landing-marquee landing-marquee--atmosphere'
       marquee.setAttribute('aria-hidden', 'true')
@@ -35,12 +35,20 @@
       section.insertAdjacentElement('afterend', marquee)
     })
 
-    const cursor = document.createElement('div')
-    cursor.className = 'landing-scanline'
-    cursor.setAttribute('aria-hidden', 'true')
-    landing.appendChild(cursor)
+    if (!landing.querySelector('.landing-scanline')) {
+      const cursor = document.createElement('div')
+      cursor.className = 'landing-scanline'
+      cursor.setAttribute('aria-hidden', 'true')
+      landing.appendChild(cursor)
+    }
+
+    return true
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true })
-  else setTimeout(init, 0)
+  const boot = () => {
+    if (init()) return
+    requestAnimationFrame(boot)
+  }
+
+  boot()
 })()
