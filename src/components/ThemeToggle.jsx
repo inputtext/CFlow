@@ -50,7 +50,7 @@ export default function ThemeToggle() {
     if (!pickerOpen || !pickerRef.current) return;
     if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
     gsap.fromTo(pickerRef.current,
-      { autoAlpha: 0, y: 10, scale: 0.97, transformOrigin: "bottom center" },
+      { autoAlpha: 0, y: -10, scale: 0.97, transformOrigin: "top right" },
       { autoAlpha: 1, y: 0, scale: 1, duration: 0.45, ease: "power3.out" }
     );
   }, [pickerOpen]);
@@ -97,14 +97,14 @@ export default function ThemeToggle() {
   const current = themeMeta(theme);
   return (
     <>
-      <div className="cflow-theme-control" style={{ position: "fixed", left: "50%", bottom: "12px", transform: "translateX(200px)", zIndex: 1200 }}>
+      <div className="cflow-theme-control">
         <button type="button" className="cflow-theme-palette-button" onClick={() => setPickerOpen((open) => !open)} aria-label={`Choose C·FLOW theme. Current theme: ${current.name}`} aria-expanded={pickerOpen} disabled={transition}>
           <span className="cflow-theme-palette-label">THEME</span>
           <span className="sr-only">{current.name} theme</span>
         </button>
       </div>
       {pickerOpen && !transition && (
-        <div ref={pickerRef} className="cflow-theme-picker" role="dialog" aria-label="C·FLOW themes" style={{ position: "fixed", left: "50%", bottom: "58px", transform: "translateX(200px)", zIndex: 1201 }}>
+        <div ref={pickerRef} className="cflow-theme-picker" role="dialog" aria-label="C·FLOW themes">
           <div className="cflow-theme-picker__title">Themes</div>
           <div className="cflow-theme-picker__grid">
             {THEMES.map((item) => (
