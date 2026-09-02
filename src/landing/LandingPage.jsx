@@ -31,6 +31,14 @@ function HeroCode() {
         duration: 1.8,
         ease: 'sine.inOut',
       })
+      gsap.to('.hero-code', {
+        y: -14,
+        rotate: -0.4,
+        repeat: -1,
+        yoyo: true,
+        duration: 4.5,
+        ease: 'sine.inOut',
+      })
     }, ref)
     return () => ctx.revert()
   }, [])
@@ -55,13 +63,48 @@ function HeroCode() {
         <span>y <b>20</b></span>
         <span>sum <b>30</b></span>
       </div>
+      <div className="hero-status"><span className="status-dot" /> EXECUTION LIVE <b>STEP 03 / 03</b></div>
+    </div>
+  )
+}
+
+function HeroFlowMap() {
+  return (
+    <div className="hero-flow-map" aria-hidden="true">
+      <span className="flow-map__node flow-map__node--one">CODE</span>
+      <span className="flow-map__line flow-map__line--one" />
+      <span className="flow-map__node flow-map__node--two">STATE</span>
+      <span className="flow-map__line flow-map__line--two" />
+      <span className="flow-map__node flow-map__node--three">FLOW</span>
     </div>
   )
 }
 
 function Engine() {
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.from('.engine-step', {
+        opacity: 0,
+        x: -30,
+        stagger: 0.12,
+        duration: 0.65,
+        scrollTrigger: { trigger: ref.current, start: 'top 72%' },
+      })
+      gsap.to('.engine-orbit', {
+        rotate: 360,
+        duration: 22,
+        repeat: -1,
+        ease: 'none',
+      })
+      gsap.to('.orbit-core', { rotate: -360, duration: 22, repeat: -1, ease: 'none' })
+    }, ref)
+    return () => ctx.revert()
+  }, [])
+
   return (
-    <section className="scene scene--engine" id="engine">
+    <section className="scene scene--engine" id="engine" ref={ref}>
       <div className="section-kicker">03 / THE ENGINE</div>
       <h2 className="display display--medium">FROM CODE<br />TO <span>UNDERSTANDING.</span></h2>
       <div className="engine-flow" aria-label="CFlow processing pipeline">
@@ -114,6 +157,7 @@ function ExecutionStory() {
       <div className="execution__intro">
         <div className="section-kicker">04 / SIGNATURE EXPERIENCE</div>
         <h2 className="display display--small">DON'T READ<br />THE CODE.<br /><span>WATCH IT.</span></h2>
+        <div className="execution-scroll-note">SCROLL TO EXECUTE <b>↓</b></div>
       </div>
       <div className="execution__stage">
         <div className="execution-code">
@@ -161,16 +205,41 @@ function Capabilities() {
 }
 
 function ProductPreview() {
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.from('.preview-window', {
+        y: 80,
+        rotate: 2,
+        opacity: 0,
+        duration: 1,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: ref.current, start: 'top 68%' },
+      })
+      gsap.from('.preview-flow b, .preview-flow strong', {
+        scale: 0.8,
+        opacity: 0,
+        stagger: 0.18,
+        duration: 0.55,
+        scrollTrigger: { trigger: ref.current, start: 'top 60%' },
+      })
+    }, ref)
+    return () => ctx.revert()
+  }, [])
+
   return (
-    <section className="scene scene--preview">
+    <section className="scene scene--preview" ref={ref}>
       <div className="section-kicker">07 / THE PRODUCT</div>
       <div className="preview-copy">
         <h2 className="display display--medium">THE REAL<br /><span>WORKSPACE.</span></h2>
         <p>Write C or C++. Run it. Then follow every meaningful state as your program moves.</p>
+        <div className="preview-tags"><span>CODE</span><span>MEMORY</span><span>FLOW GRAPH</span></div>
       </div>
       <div className="preview-window">
         <div className="preview-code"><span>01</span> int main() {'{'}<br /><span>02</span> &nbsp;&nbsp;int x = 10;<br /><span>03</span> &nbsp;&nbsp;return x;<br /><span>04</span> {'}'}</div>
         <div className="preview-flow"><b>main()</b><i>↓</i><b>x = 10</b><i>↓</i><strong>RETURN 10</strong></div>
+        <div className="preview-window__bar">FLOW STATE <span>● READY</span></div>
       </div>
     </section>
   )
@@ -187,6 +256,7 @@ export default function LandingPage() {
         .from('.hero__title-line', { yPercent: 110, duration: 0.8, stagger: 0.08 }, '-=0.25')
         .from('.hero__copy, .hero__actions', { opacity: 0, y: 18, duration: 0.55 }, '-=0.25')
         .from('.hero-code', { opacity: 0, x: 70, rotate: 2, duration: 0.9 }, '-=0.6')
+        .from('.hero-flow-map', { opacity: 0, scale: .9, duration: .7 }, '-=0.4')
 
       gsap.utils.toArray('.reveal-on-scroll').forEach((element) => {
         gsap.from(element, {
@@ -196,6 +266,11 @@ export default function LandingPage() {
           ease: 'power3.out',
           scrollTrigger: { trigger: element, start: 'top 82%' },
         })
+      })
+
+      gsap.to('.hero-grid', {
+        yPercent: 12,
+        scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true },
       })
     }, page)
     return () => ctx.revert()
@@ -207,8 +282,10 @@ export default function LandingPage() {
 
   return (
     <main className="landing" ref={page}>
+      <div className="hero-grid" aria-hidden="true" />
       <header className="landing-header">
         <a className="brand" href="/">C·FLOW<span>/</span></a>
+        <div className="header-center">VISUAL EXECUTION / 2026</div>
         <button className="header-link" onClick={enterApp}>SIGN IN ↗</button>
       </header>
 
@@ -226,13 +303,20 @@ export default function LandingPage() {
           </div>
         </div>
         <HeroCode />
+        <HeroFlowMap />
+        <div className="hero-scroll">SCROLL <span>↓</span></div>
       </section>
+
+      <div className="landing-marquee" aria-hidden="true">
+        <div>C·FLOW — SEE THE STATE — FOLLOW THE EXECUTION — C·FLOW — SEE THE STATE — FOLLOW THE EXECUTION —</div>
+      </div>
 
       <section className="scene problem scene--yellow reveal-on-scroll">
         <div className="section-kicker">02 / THE PROBLEM</div>
         <h2 className="display display--huge">CODE IS<br /><span>STATIC.</span></h2>
         <div className="problem-divider">EXECUTION ISN'T.</div>
         <p>Source code tells you what you wrote. C·FLOW helps you see what the machine actually does.</p>
+        <div className="problem-signal"><span /> STATE CHANGES IN REAL TIME <b>→</b></div>
       </section>
 
       <Engine />
