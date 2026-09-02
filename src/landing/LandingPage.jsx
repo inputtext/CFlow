@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
@@ -12,6 +12,7 @@ gsap.registerPlugin(ScrollTrigger)
 
 const codeLines = ['int x = 10;', 'int y = 20;', 'int sum = x + y;']
 const chapters = ['HERO', 'PROBLEM', 'ENGINE', 'EXECUTE', 'CAPABILITIES', 'PHILOSOPHY', 'PRODUCT', 'CTA']
+const chapterTargets = ['.hero', '#problem', '#engine', '.execution', '.scene--capabilities', '#philosophy', '.scene--preview', '#cta']
 
 function HeroCode() {
   const ref = useRef(null)
@@ -28,11 +29,6 @@ function HeroCode() {
 
 function HeroFlowMap() {
   return <div className="hero-flow-map" aria-hidden="true"><span className="flow-map__node flow-map__node--one">CODE</span><span className="flow-map__line flow-map__line--one" /><span className="flow-map__node flow-map__node--two">STATE</span><span className="flow-map__line flow-map__line--two" /><span className="flow-map__node flow-map__node--three">FLOW</span></div>
-}
-
-function LandingProgress() {
-  const [active, setActive] = useRef(0)
-  return null
 }
 
 function ProblemVisual() {
@@ -83,13 +79,12 @@ function ProductPreview() {
 }
 
 function ScrollNavigator() {
-  const [active, setActive] = require('react').useState(0)
+  const [active, setActive] = useState(0)
   useEffect(() => {
-    const triggers = gsap.utils.toArray('.landing .scene[id], .landing .execution')
-    const instances = triggers.map((section, index) => ScrollTrigger.create({ trigger: section, start: 'top 55%', end: 'bottom 45%', onEnter: () => setActive(Math.min(index, chapters.length - 1)), onEnterBack: () => setActive(Math.min(index, chapters.length - 1)) }))
+    const instances = chapterTargets.map((selector, index) => { const section = document.querySelector(selector); if (!section) return null; return ScrollTrigger.create({ trigger: section, start: 'top 55%', end: 'bottom 45%', onEnter: () => setActive(index), onEnterBack: () => setActive(index) }) }).filter(Boolean)
     return () => instances.forEach((instance) => instance.kill())
   }, [])
-  return <aside className="scroll-navigator" aria-label="Landing page chapters"><div className="scroll-navigator__line"><span style={{ height: `${((active + 1) / chapters.length) * 100}%` }} /></div>{chapters.map((chapter, index) => <a className={active === index ? 'is-active' : ''} href={index === 0 ? '#' : `#${['problem', 'engine', '', 'capabilities', '', 'preview', 'cta'][index - 1] || ''}`} key={chapter} onClick={(event) => { if (index === 0) return; const target = document.querySelector(['#problem', '#engine', '.execution', '#capabilities', '.philosophy', '.scene--preview', '.cta'][index - 1]); if (target) { event.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }) } }}><i>{String(index + 1).padStart(2, '0')}</i><span>{chapter}</span></a>)}</aside>
+  return <aside className="scroll-navigator" aria-label="Landing page chapters"><div className="scroll-navigator__line"><span style={{ height: `${((active + 1) / chapters.length) * 100}%` }} /></div>{chapters.map((chapter, index) => <a className={active === index ? 'is-active' : ''} href={index === 0 ? '#' : chapterTargets[index]} key={chapter} onClick={(event) => { const target = document.querySelector(chapterTargets[index]); if (target) { event.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }) } }}><i>{String(index + 1).padStart(2, '0')}</i><span>{chapter}</span></a>)}</aside>
 }
 
 export default function LandingPage() {
