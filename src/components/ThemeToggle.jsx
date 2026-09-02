@@ -98,8 +98,9 @@ export default function ThemeToggle() {
   return (
     <>
       <div className="cflow-theme-control" style={{ position: "fixed", left: "50%", bottom: "12px", transform: "translateX(200px)", zIndex: 1200 }}>
-        <button type="button" className="cflow-theme-palette-button" onClick={() => setPickerOpen((open) => !open)} aria-label="Choose C·FLOW theme" aria-expanded={pickerOpen} disabled={transition}>
-          <span /><span /><span /><span className="sr-only">{current.name} theme</span>
+        <button type="button" className="cflow-theme-palette-button" onClick={() => setPickerOpen((open) => !open)} aria-label={`Choose C·FLOW theme. Current theme: ${current.name}`} aria-expanded={pickerOpen} disabled={transition}>
+          <span className="cflow-theme-palette-label">THEME</span>
+          <span className="sr-only">{current.name} theme</span>
         </button>
       </div>
       {pickerOpen && !transition && (
