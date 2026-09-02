@@ -97,10 +97,11 @@ export default function ThemeToggle() {
         className="cflow-theme-toggle"
         style={{
           position: "fixed",
-          top: "auto",
-          right: "190px",
-          bottom: "72px",
-          left: "auto",
+          top: "18px",
+          left: "50%",
+          right: "auto",
+          bottom: "auto",
+          transform: "translateX(200px)",
           zIndex: 1200,
         }}
       >
