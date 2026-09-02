@@ -52,18 +52,24 @@ function CallStack() {
     let observer;
     let retryTimer;
 
-    const applyFrames = (nextFrames, shouldOpen = false) => {
+    const applyFrames = (nextFrames, autoOpen = false) => {
       if (!nextFrames.length) return;
       const signature = frameSignature(nextFrames);
       if (signature === signatureRef.current) return;
+
       signatureRef.current = signature;
       setFrames(nextFrames);
-      if (shouldOpen) setOpen(true);
+
+      if (autoOpen) setOpen(true);
     };
 
     const syncFromMemory = () => {
       const nextFrames = readMemoryFrames();
-      if (nextFrames.length) applyFrames(nextFrames);
+      if (nextFrames.length) {
+        // Every real memory-state change is a runtime event. Reveal the stack
+        // automatically so the user never has to hunt for it during stepping.
+        applyFrames(nextFrames, true);
+      }
     };
 
     const attachMemoryObserver = () => {
@@ -75,8 +81,13 @@ function CallStack() {
 
       const memorySection = card.closest("section") || card.parentElement;
       if (!memorySection) return;
+
       observer = new MutationObserver(syncFromMemory);
-      observer.observe(memorySection, { childList: true, subtree: true, characterData: true });
+      observer.observe(memorySection, {
+        childList: true,
+        subtree: true,
+        characterData: true,
+      });
       syncFromMemory();
     };
 
@@ -85,7 +96,6 @@ function CallStack() {
       applyFrames(nextFrames, true);
     };
 
-    syncFromMemory();
     attachMemoryObserver();
     window.addEventListener("cflow:callstack", handleStackEvent);
     window.addEventListener("cflow:memory", syncFromMemory);
@@ -100,26 +110,55 @@ function CallStack() {
 
   useEffect(() => {
     if (!panelRef.current) return;
+
     gsap.killTweensOf(panelRef.current);
+
     if (open) {
-      gsap.fromTo(panelRef.current, { x: 34, opacity: 0 }, { x: 0, opacity: 1, duration: 0.42, ease: "power3.out" });
+      gsap.fromTo(
+        panelRef.current,
+        { x: 34, opacity: 0 },
+        { x: 0, opacity: 1, duration: 0.42, ease: "power3.out" }
+      );
     } else {
-      gsap.to(panelRef.current, { x: 34, opacity: 0, duration: 0.25, ease: "power2.in" });
+      gsap.to(panelRef.current, {
+        x: 34,
+        opacity: 0,
+        duration: 0.25,
+        ease: "power2.in",
+      });
     }
   }, [open]);
 
   useEffect(() => {
     if (!listRef.current) return;
+
     const cards = listRef.current.querySelectorAll("[data-call-frame]");
     const currentIds = [...cards].map((card) => card.getAttribute("data-call-frame"));
     const previousIds = previousIdsRef.current;
 
     gsap.killTweensOf(cards);
+
     if (currentIds.join("|") !== previousIds.join("|")) {
-      gsap.fromTo(cards, { y: 14, opacity: 0, scale: 0.98 }, { y: 0, opacity: 1, scale: 1, duration: 0.38, stagger: 0.055, ease: "power3.out" });
+      gsap.fromTo(
+        cards,
+        { y: 14, opacity: 0, scale: 0.98 },
+        {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          duration: 0.38,
+          stagger: 0.055,
+          ease: "power3.out",
+        }
+      );
     } else {
-      gsap.fromTo(cards, { opacity: 0.65 }, { opacity: 1, duration: 0.24, stagger: 0.025, ease: "power2.out" });
+      gsap.fromTo(
+        cards,
+        { opacity: 0.65 },
+        { opacity: 1, duration: 0.24, stagger: 0.025, ease: "power2.out" }
+      );
     }
+
     previousIdsRef.current = currentIds;
   }, [frames]);
 
@@ -127,29 +166,55 @@ function CallStack() {
 
   return (
     <>
-      <button type="button" onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-label="Toggle call stack" className="fixed right-0 top-[92px] z-[950] border-2 border-r-0 border-[#171717] bg-[#FFE3A3] px-2 py-3 font-mono text-[9px] font-black uppercase tracking-[0.16em] shadow-[-3px_3px_0_#171717] transition-transform duration-200 hover:-translate-x-1">
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        aria-expanded={open}
+        aria-label="Toggle call stack"
+        className="fixed right-0 top-[92px] z-[950] border-2 border-r-0 border-[#171717] bg-[#FFE3A3] px-2 py-3 font-mono text-[9px] font-black uppercase tracking-[0.16em] shadow-[-3px_3px_0_#171717] transition-transform duration-200 hover:-translate-x-1"
+      >
         <span className="block [writing-mode:vertical-rl]">CALL STACK</span>
       </button>
 
-      <aside ref={panelRef} aria-label="Call stack" className="pointer-events-auto fixed right-4 top-[92px] z-[940] w-[300px] max-w-[calc(100vw-32px)] border-2 border-[#171717] bg-[#FFF9F0] shadow-[7px_7px_0_#171717]" style={{ opacity: 0 }}>
+      <aside
+        ref={panelRef}
+        aria-label="Call stack"
+        className="pointer-events-auto fixed right-4 top-[92px] z-[940] w-[300px] max-w-[calc(100vw-32px)] border-2 border-[#171717] bg-[#FFF9F0] shadow-[7px_7px_0_#171717]"
+        style={{ opacity: 0 }}
+      >
         <div className="flex items-center justify-between border-b-2 border-[#171717] bg-[#E8DFFF] px-4 py-3">
           <div>
             <div className="font-mono text-[9px] font-black uppercase tracking-[0.22em] opacity-55">Runtime</div>
             <h2 className="mt-1 font-mono text-[14px] font-black uppercase tracking-wider">Call Stack</h2>
           </div>
-          <button type="button" onClick={() => setOpen(false)} className="border-2 border-[#171717] bg-[#FFF9F0] px-2 py-1 font-mono text-[11px] font-black shadow-[2px_2px_0_#171717] transition-transform hover:-translate-y-0.5">×</button>
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            className="border-2 border-[#171717] bg-[#FFF9F0] px-2 py-1 font-mono text-[11px] font-black shadow-[2px_2px_0_#171717] transition-transform hover:-translate-y-0.5"
+          >
+            ×
+          </button>
         </div>
 
         <div ref={listRef} className="max-h-[62vh] space-y-2 overflow-y-auto p-3">
           {frames.map((frame, index) => {
             const entries = Object.entries(frame.variables || {});
+
             return (
-              <div key={frame.id} data-call-frame={frame.id} className={`border-2 border-[#171717] p-3 shadow-[3px_3px_0_#171717] ${frame.active ? "bg-[#FFE3A3]" : "bg-white"}`}>
+              <div
+                key={frame.id}
+                data-call-frame={frame.id}
+                className={`border-2 border-[#171717] p-3 shadow-[3px_3px_0_#171717] ${frame.active ? "bg-[#FFE3A3]" : "bg-white"}`}
+              >
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-mono text-[12px] font-black">{frame.name}</span>
                   <span className="font-mono text-[8px] font-bold uppercase tracking-wider opacity-45">#{index + 1}</span>
                 </div>
-                {frame.args.length > 0 && <div className="mt-1 font-mono text-[9px] opacity-55">({frame.args.join(", ")})</div>}
+
+                {frame.args.length > 0 && (
+                  <div className="mt-1 font-mono text-[9px] opacity-55">({frame.args.join(", ")})</div>
+                )}
+
                 {entries.length > 0 ? (
                   <div className="mt-2 space-y-1 border-t border-[#171717]/25 pt-2">
                     {entries.map(([name, value]) => (
@@ -167,7 +232,9 @@ function CallStack() {
           })}
         </div>
 
-        <div className="border-t-2 border-[#171717] bg-white px-3 py-2 font-mono text-[8px] uppercase tracking-[0.12em] opacity-50">Top frame = currently executing function</div>
+        <div className="border-t-2 border-[#171717] bg-white px-3 py-2 font-mono text-[8px] uppercase tracking-[0.12em] opacity-50">
+          Top frame = currently executing function
+        </div>
       </aside>
     </>
   );
