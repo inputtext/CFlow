@@ -40,12 +40,23 @@ export default function ThemeToggle() {
   const [transition, setTransition] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const timelineRef = useRef(null);
+  const pickerRef = useRef(null);
 
   useEffect(() => {
     applyTheme(theme);
   }, [theme]);
 
   useEffect(() => () => timelineRef.current?.kill(), []);
+
+  useEffect(() => {
+    if (!pickerOpen || !pickerRef.current) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    gsap.fromTo(
+      pickerRef.current,
+      { autoAlpha: 0, y: -10, scale: 0.97, transformOrigin: "top right" },
+      { autoAlpha: 1, y: 0, scale: 1, duration: 0.55, ease: "power3.out" }
+    );
+  }, [pickerOpen]);
 
   const animateThemeChange = (nextTheme) => {
     if (transition || nextTheme === theme) return;
@@ -91,8 +102,8 @@ export default function ThemeToggle() {
         setTheme(nextTheme);
         gsap.to([paper, shadow], {
           clipPath: "polygon(120% -5%, 120% 105%, 100% 105%, 100% -5%)",
-          duration: 0.68,
-          ease: "power4.inOut",
+          duration: 1.15,
+          ease: "power3.inOut",
           onComplete: () => {
             wipe.remove();
             setTransition(false);
@@ -108,19 +119,19 @@ export default function ThemeToggle() {
       rotation: -0.2,
       transformOrigin: "50% 50%",
     });
-    gsap.set(mark, { opacity: 0, y: 12 });
+    gsap.set(mark, { opacity: 0, y: 16 });
     gsap.set(grain, { opacity: 0 });
 
     timeline
       .to([paper, shadow], {
         clipPath: "polygon(-18% -5%, 100% -5%, 112% 105%, -30% 105%)",
-        duration: 0.72,
-        ease: "power4.inOut",
+        duration: 1.2,
+        ease: "power3.inOut",
       })
-      .to(grain, { opacity: 0.08, duration: 0.18 }, "-=0.35")
-      .to(mark, { opacity: 1, y: 0, duration: 0.18, ease: "power2.out" }, "-=0.26")
-      .to({}, { duration: 0.12 })
-      .to(mark, { opacity: 0, y: -7, duration: 0.15, ease: "power2.in" });
+      .to(grain, { opacity: 0.08, duration: 0.35 }, "-=0.55")
+      .to(mark, { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }, "-=0.35")
+      .to({}, { duration: 0.3 })
+      .to(mark, { opacity: 0, y: -8, duration: 0.28, ease: "power2.in" });
   };
 
   const current = themeMeta(theme);
@@ -153,7 +164,7 @@ export default function ThemeToggle() {
       </div>
 
       {pickerOpen && !transition && (
-        <div className="cflow-theme-picker" role="dialog" aria-label="C·FLOW themes">
+        <div ref={pickerRef} className="cflow-theme-picker" role="dialog" aria-label="C·FLOW themes">
           <div className="cflow-theme-picker__title">Themes</div>
           <div className="cflow-theme-picker__grid">
             {THEMES.map((item) => (
