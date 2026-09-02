@@ -1,0 +1,46 @@
+/* C·FLOW THEME CONTROL — clear label instead of the old dotted palette mark. */
+.cflow-theme-palette-button {
+  width: 72px !important;
+  height: 34px !important;
+  padding: 0 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0 !important;
+  border: 2px solid var(--cflow-palette-border) !important;
+  background: var(--cflow-palette-bg) !important;
+  box-shadow: 3px 3px 0 var(--cflow-palette-border) !important;
+  color: var(--cflow-palette-ink) !important;
+  font: 800 10px/1 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  letter-spacing: .18em !important;
+  transition: transform .22s ease, box-shadow .22s ease, background-color .4s ease !important;
+}
+
+.cflow-theme-palette-button span:not(.sr-only) {
+  display: inline !important;
+  width: auto !important;
+  height: auto !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  opacity: 1 !important;
+}
+
+.cflow-theme-palette-button .cflow-theme-palette-label {
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.cflow-theme-palette-button:hover {
+  transform: translate(-1px, -1px) !important;
+  box-shadow: 4px 4px 0 var(--cflow-palette-border) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cflow-theme-palette-button {
+    transition: none !important;
+  }
+
+  .cflow-theme-palette-button:hover {
+    transform: none !important;
+  }
+}
