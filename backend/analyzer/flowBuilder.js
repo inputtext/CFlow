@@ -42,7 +42,6 @@ function buildFlow(program) {
     const control = statements[index];
     const first = statements[index + 1];
     if (!first || first.depth <= control.depth) return null;
-
     let end = index + 1;
     while (end + 1 < statements.length && statements[end + 1].depth > control.depth) end += 1;
     return { start: index + 1, end };
@@ -55,22 +54,19 @@ function buildFlow(program) {
     return -1;
   };
 
-  const enclosingControl = (index, depth) => {
+  const directParentControl = (index, depth) => {
     for (let i = index - 1; i >= 0; i -= 1) {
       const candidate = statements[i];
-      if (candidate.depth >= depth || !isControl(candidate)) continue;
+      if (!isControl(candidate) || candidate.depth >= depth) continue;
       const range = bodyRange(i);
       if (range && index >= range.start && index <= range.end) return i;
     }
     return -1;
   };
 
-  // Resolve a branch's merge point. If the lexical next statement is outside
-  // an enclosing loop, the branch must re-enter that loop instead of escaping
-  // to a later RETURN/EXIT node.
-  const joinTarget = (index, depth) => {
+  const resolveJoin = (index, depth) => {
     const next = nextAtOrAbove(index, depth);
-    const parent = enclosingControl(index, depth);
+    const parent = directParentControl(index, depth);
 
     if (parent >= 0) {
       const parentStatement = statements[parent];
@@ -79,10 +75,9 @@ function buildFlow(program) {
       }
     }
 
-    return next >= 0 ? statements[next].id : "exit";
+    return next >= 0 ? statements[next].id : (parent >= 0 ? statements[parent].id : "exit");
   };
 
-  // Ordinary sequential edges stay inside the same lexical block.
   for (let i = 0; i < statements.length - 1; i += 1) {
     const current = statements[i];
     const next = statements[i + 1];
@@ -93,9 +88,6 @@ function buildFlow(program) {
   for (let i = 0; i < statements.length; i += 1) {
     const s = statements[i];
 
-    // --------------------------------------------------------
-    // FOR / WHILE
-    // --------------------------------------------------------
     if (loopTypes.has(s.type)) {
       const range = bodyRange(i);
       const after = range ? nextAtOrAbove(range.end, s.depth) : nextAtOrAbove(i, s.depth);
@@ -114,13 +106,10 @@ function buildFlow(program) {
       continue;
     }
 
-    // --------------------------------------------------------
-    // IF / ELSE IF
-    // --------------------------------------------------------
     if (s.type === "condition" || s.type === "else_if") {
       const range = bodyRange(i);
       if (!range) {
-        addEdge(s.id, joinTarget(i, s.depth), "false", `edge_${s.id}_false`);
+        addEdge(s.id, resolveJoin(i, s.depth), "false", `edge_${s.id}_false`);
         continue;
       }
 
@@ -138,17 +127,17 @@ function buildFlow(program) {
         if (elseRange) {
           const elseFirst = statements[elseRange.start];
           const elseLast = statements[elseRange.end];
-          const joinId = joinTarget(elseRange.end, s.depth);
+          const joinId = resolveJoin(elseRange.end, s.depth);
           addEdge(elseNode.id, elseFirst.id, "normal", `edge_${elseNode.id}_body`);
-          addEdge(bodyLast.id, joinTarget(range.end, s.depth), "normal", `edge_${bodyLast.id}_join`);
+          addEdge(bodyLast.id, joinId, "normal", `edge_${bodyLast.id}_join`);
           addEdge(elseLast.id, joinId, "normal", `edge_${elseLast.id}_join`);
         } else {
-          const joinId = joinTarget(nextIndex, s.depth);
+          const joinId = resolveJoin(nextIndex, s.depth);
           addEdge(elseNode.id, joinId, "normal", `edge_${elseNode.id}_join`);
           addEdge(bodyLast.id, joinId, "normal", `edge_${bodyLast.id}_join`);
         }
       } else {
-        const joinId = joinTarget(range.end, s.depth);
+        const joinId = resolveJoin(range.end, s.depth);
         addEdge(s.id, joinId, "false", `edge_${s.id}_false`);
         addEdge(bodyLast.id, joinId, "normal", `edge_${bodyLast.id}_join`);
       }
