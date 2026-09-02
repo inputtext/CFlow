@@ -28,9 +28,7 @@
 
 /* ============================================================
    INK HOME — surface-aware contrast only
-   IMPORTANT: #root itself carries cflow-theme-ink. The previous
-   '.cflow-theme-ink #root ...' selector could never match the home
-   tree, so the Ink home overrides were being skipped. */
+   IMPORTANT: #root itself carries cflow-theme-ink. */
 
 #root.cflow-theme-ink > div:not(:has(.cflow-flow-shell)){
   background:#202326!important;
@@ -84,8 +82,7 @@
   border-color:#111416!important;
 }
 
-/* Ink bottom action row stays the same graphite as the home page.
-   Only the Continue control itself remains a light surface. */
+/* Ink bottom action row stays graphite. Only Continue is light. */
 #root.cflow-theme-ink > div:not(:has(.cflow-flow-shell)) :is([class*="border-t-2"][class*="bg-[#FFF9F0"], [class*="border-t-2"][class*="bg-white"]){
   background:#202326!important;
   color:#BFC1BF!important;
@@ -96,7 +93,36 @@
   -webkit-text-fill-color:#BFC1BF!important;
 }
 
-/* Continue button only: light surface -> black text in Ink. */
+/* ============================================================
+   CONTINUE BUTTON — THEME-SPECIFIC SURFACE + THEME GLOW
+   All non-Ink themes: black button + light text.
+   Ink: light button + black text.
+   ============================================================ */
+
+.cflow-theme-stone #root > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"],
+.cflow-theme-moss #root > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"],
+.cflow-theme-mist #root > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"],
+.cflow-theme-clay #root > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"],
+.cflow-theme-dusk #root > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"],
+.cflow-theme-sakura #root > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"]{
+  background:#171717!important;
+  color:var(--cflow-palette-bg)!important;
+  -webkit-text-fill-color:var(--cflow-palette-bg)!important;
+  border-color:#171717!important;
+  box-shadow:4px 4px 0 var(--cflow-accent)!important;
+}
+
+.cflow-theme-stone #root > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"] * ,
+.cflow-theme-moss #root > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"] * ,
+.cflow-theme-mist #root > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"] * ,
+.cflow-theme-clay #root > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"] * ,
+.cflow-theme-dusk #root > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"] * ,
+.cflow-theme-sakura #root > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"] * {
+  color:var(--cflow-palette-bg)!important;
+  -webkit-text-fill-color:var(--cflow-palette-bg)!important;
+}
+
+/* Ink Continue: white/light button + black text, with the existing gold glow. */
 #root.cflow-theme-ink > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"]{
   background:#F1EEE8!important;
   color:#111416!important;
@@ -123,5 +149,5 @@
 .cflow-theme-clay #root > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"],
 .cflow-theme-dusk #root > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"],
 .cflow-theme-sakura #root > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"]{
-  background:var(--cflow-palette-ink)!important;color:var(--cflow-palette-bg)!important;box-shadow:4px 4px 0 var(--cflow-accent)!important
+  box-shadow:4px 4px 0 var(--cflow-accent)!important;
 }
