@@ -26,30 +26,96 @@
 }
 #root > div:not(:has(.cflow-flow-shell)) :is([class*="border-[#171717"]){border-color:var(--cflow-palette-border)!important}
 
-/* Reference-like home treatment for Ink: graphite surfaces + warm ivory type. */
-.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)){
-  background:#23272A!important;
+/* ============================================================
+   INK HOME — surface-aware contrast only
+   IMPORTANT: #root itself carries cflow-theme-ink. The previous
+   '.cflow-theme-ink #root ...' selector could never match the home
+   tree, so the Ink home overrides were being skipped. */
+
+#root.cflow-theme-ink > div:not(:has(.cflow-flow-shell)){
+  background:#202326!important;
   color:#F4F0E8!important;
 }
-.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) :is(h1,h2,h3,h4,h5,h6,p,span,div){border-color:#111416}
-.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) :is(h1,h2,h3,h4,h5,h6){color:#F4F0E8!important;-webkit-text-fill-color:#F4F0E8!important;opacity:1!important}
-.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) p{color:#BFC1BF!important;-webkit-text-fill-color:#BFC1BF!important;opacity:1!important}
-.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) > div > div:first-child{border-color:#111416!important}
-.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) :is([class*="text-[#171717"],[class*="text-black"],[class*="text-white"],[class*="text-gray"]){color:#F4F0E8!important;-webkit-text-fill-color:#F4F0E8!important}
-.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) :is([class*="bg-[#FFF9F0"],[class*="bg-white"]){background:#34383C!important;color:#F4F0E8!important}
-.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) button{
-  border-color:#111416!important;color:#F4F0E8!important;
+
+#root.cflow-theme-ink > div:not(:has(.cflow-flow-shell)) :is(h1,h2,h3,h4,h5,h6){
+  color:#F4F0E8!important;
+  -webkit-text-fill-color:#F4F0E8!important;
+  opacity:1!important;
+}
+
+#root.cflow-theme-ink > div:not(:has(.cflow-flow-shell)) p{
+  color:#BFC1BF!important;
+  -webkit-text-fill-color:#BFC1BF!important;
+  opacity:1!important;
+}
+
+#root.cflow-theme-ink > div:not(:has(.cflow-flow-shell)) :is([class*="text-[#171717"],[class*="text-black"],[class*="text-white"],[class*="text-gray"]){
+  color:#F4F0E8!important;
+  -webkit-text-fill-color:#F4F0E8!important;
+}
+
+/* Language cards: dark graphite surfaces -> ivory text. */
+#root.cflow-theme-ink > div:not(:has(.cflow-flow-shell)) :is([class*="bg-white"],[class*="bg-[#FFF9F0"],[class*="bg-[#DDF4FF"],[class*="bg-[#E8DFFF"]){
+  background:#34383C!important;
+  color:#F4F0E8!important;
+  border-color:#111416!important;
   box-shadow:4px 4px 0 #111416!important;
 }
-.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) button:hover{background:#3B4044!important}
-.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) button[disabled]{background:#292D30!important;color:#777B7B!important;opacity:1!important}
-.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) button span:first-child{background:#202326!important;color:#F4F0E8!important;border-color:#111416!important;box-shadow:2px 2px 0 #111416!important}
-.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) button span:nth-child(2){color:#F4F0E8!important}
-.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"]{background:#F4F0E8!important;color:#202326!important;box-shadow:4px 4px 0 #C9B77C!important}
-.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"] :is(span){color:#202326!important;-webkit-text-fill-color:#202326!important}
-.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) [class*="bg-[#FFE3A3"]{background:#C9B77C!important;color:#202326!important}
 
-/* Other palettes retain their own ink, but all surfaces are theme-derived. */
+#root.cflow-theme-ink > div:not(:has(.cflow-flow-shell)) :is([class*="bg-white"],[class*="bg-[#FFF9F0"],[class*="bg-[#DDF4FF"],[class*="bg-[#E8DFFF"]) :is(h1,h2,h3,h4,h5,h6,p,span,div){
+  color:#F4F0E8!important;
+  -webkit-text-fill-color:#F4F0E8!important;
+}
+
+/* Small language icon blocks are dark -> ivory labels. */
+#root.cflow-theme-ink > div:not(:has(.cflow-flow-shell)) button span[class*="bg-[#FFF9F0"]{
+  background:#202326!important;
+  color:#F4F0E8!important;
+  -webkit-text-fill-color:#F4F0E8!important;
+  border-color:#111416!important;
+  box-shadow:2px 2px 0 #111416!important;
+}
+
+/* Selected badge: warm light surface -> black text. */
+#root.cflow-theme-ink > div:not(:has(.cflow-flow-shell)) button span[class*="bg-[#FFE3A3"]{
+  background:#C9B77C!important;
+  color:#111416!important;
+  -webkit-text-fill-color:#111416!important;
+  border-color:#111416!important;
+}
+
+/* Continue row stays light in Ink, with black controls/text on the light surface. */
+#root.cflow-theme-ink > div:not(:has(.cflow-flow-shell)) :is([class*="border-t-2"][class*="bg-[#FFF9F0"], [class*="border-t-2"][class*="bg-white"]){
+  background:#F1EEE8!important;
+  color:#111416!important;
+  border-color:#111416!important;
+}
+#root.cflow-theme-ink > div:not(:has(.cflow-flow-shell)) :is([class*="border-t-2"][class*="bg-[#FFF9F0"], [class*="border-t-2"][class*="bg-white"]) :is(p,span,div){
+  color:#111416!important;
+  -webkit-text-fill-color:#111416!important;
+}
+
+/* Continue button: white/light surface -> black text. */
+#root.cflow-theme-ink > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"]{
+  background:#F1EEE8!important;
+  color:#111416!important;
+  -webkit-text-fill-color:#111416!important;
+  border-color:#111416!important;
+  box-shadow:4px 4px 0 #C9B77C!important;
+}
+#root.cflow-theme-ink > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"] *{
+  color:#111416!important;
+  -webkit-text-fill-color:#111416!important;
+}
+
+/* Keep the general Ink home shadows crisp without changing geometry. */
+#root.cflow-theme-ink > div:not(:has(.cflow-flow-shell)) [class*="shadow-[4px_4px_0_#171717"],
+#root.cflow-theme-ink > div:not(:has(.cflow-flow-shell)) [class*="shadow-[6px_6px_0_#171717"],
+#root.cflow-theme-ink > div:not(:has(.cflow-flow-shell)) [class*="shadow-[8px_8px_0_#171717"]{
+  box-shadow:4px 4px 0 #111416!important;
+}
+
+/* Other palettes retain their own ink. */
 .cflow-theme-stone #root > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"],
 .cflow-theme-moss #root > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"],
 .cflow-theme-mist #root > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"],
@@ -57,24 +123,4 @@
 .cflow-theme-dusk #root > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"],
 .cflow-theme-sakura #root > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"]{
   background:var(--cflow-palette-ink)!important;color:var(--cflow-palette-bg)!important;box-shadow:4px 4px 0 var(--cflow-accent)!important
-}
-
-/* The home page should not inherit the legacy light-only shadows. */
-.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) [class*="shadow-[4px_4px_0_#171717"],
-.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) [class*="shadow-[6px_6px_0_#171717"],
-.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) [class*="shadow-[8px_8px_0_#171717"]{box-shadow:4px 4px 0 #111416!important}
-
-/* Restore the original Continue control: white surface with dark text.
-   This targets only the Continue button and leaves every other home control
-   and every other theme untouched. */
-#root > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"]{
-  background:#FFFFFF!important;
-  color:#171717!important;
-  -webkit-text-fill-color:#171717!important;
-  border-color:#171717!important;
-  box-shadow:4px 4px 0 #171717!important;
-}
-#root > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"] :is(span){
-  color:#171717!important;
-  -webkit-text-fill-color:#171717!important;
 }
