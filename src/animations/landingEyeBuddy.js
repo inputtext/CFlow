@@ -2,9 +2,6 @@ import { createElement } from 'react'
 import { createRoot } from 'react-dom/client'
 import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 
-const MAX_PUPIL_X = 7
-const MAX_PUPIL_Y = 5
-
 function EyeBuddy() {
   return createElement(
     'div',
@@ -19,10 +16,6 @@ function EyeBuddy() {
         style: { width: '100%', height: '100%' },
       })
     ),
-    createElement('span', { className: 'landing-eye-buddy__pupil landing-eye-buddy__pupil--left' }),
-    createElement('span', { className: 'landing-eye-buddy__pupil landing-eye-buddy__pupil--right' }),
-    createElement('span', { className: 'landing-eye-buddy__cheek landing-eye-buddy__cheek--left' }),
-    createElement('span', { className: 'landing-eye-buddy__cheek landing-eye-buddy__cheek--right' }),
     createElement('span', { className: 'landing-eye-buddy__hello' }, 'HELLO 👋')
   )
 }
@@ -49,42 +42,34 @@ function EyeBuddy() {
     root = createRoot(host)
     root.render(createElement(EyeBuddy))
 
-    const buddy = host
-    const leftPupil = () => buddy.querySelector('.landing-eye-buddy__pupil--left')
-    const rightPupil = () => buddy.querySelector('.landing-eye-buddy__pupil--right')
-
     const tick = () => {
-      currentX += (targetX - currentX) * 0.12
-      currentY += (targetY - currentY) * 0.12
-      const lx = leftPupil()
-      const rx = rightPupil()
-      if (lx && rx) {
-        lx.style.transform = `translate(${currentX}px, ${currentY}px)`
-        rx.style.transform = `translate(${currentX}px, ${currentY}px)`
-      }
+      currentX += (targetX - currentX) * 0.1
+      currentY += (targetY - currentY) * 0.1
+      host.style.setProperty('--buddy-look-x', `${currentX}px`)
+      host.style.setProperty('--buddy-look-y', `${currentY}px`)
       raf = requestAnimationFrame(tick)
     }
     raf = requestAnimationFrame(tick)
 
     const onPointerMove = (event) => {
-      const rect = buddy.getBoundingClientRect()
+      const rect = host.getBoundingClientRect()
       const cx = rect.left + rect.width / 2
       const cy = rect.top + rect.height / 2
-      const dx = Math.max(-1, Math.min(1, (event.clientX - cx) / Math.max(rect.width, 1)))
-      const dy = Math.max(-1, Math.min(1, (event.clientY - cy) / Math.max(rect.height, 1)))
-      targetX = dx * MAX_PUPIL_X
-      targetY = dy * MAX_PUPIL_Y
+      const dx = Math.max(-1, Math.min(1, (event.clientX - cx) / Math.max(window.innerWidth * 0.45, 1)))
+      const dy = Math.max(-1, Math.min(1, (event.clientY - cy) / Math.max(window.innerHeight * 0.45, 1)))
+      targetX = dx * 7
+      targetY = dy * 5
     }
 
     const onScroll = () => {
       const y = window.scrollY
       const delta = y - lastScrollY
       lastScrollY = y
-      buddy.style.setProperty('--buddy-scroll-tilt', `${Math.max(-3, Math.min(3, delta * 0.25))}deg`)
+      host.style.setProperty('--buddy-scroll-tilt', `${Math.max(-3, Math.min(3, delta * 0.2))}deg`)
 
       const max = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1)
       const progress = y / max
-      buddy.classList.toggle('is-near-end', progress > 0.92)
+      host.classList.toggle('is-near-end', progress > 0.92)
     }
 
     window.addEventListener('pointermove', onPointerMove, { passive: true })
