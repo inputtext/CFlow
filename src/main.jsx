@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import './styles/theme.css'
 import './styles/theme-palettes.css'
+import './styles/theme-refinement.css'
 
 import App from './App.jsx'
 import ThemeToggle from './components/ThemeToggle.jsx'
