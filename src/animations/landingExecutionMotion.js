@@ -4,10 +4,10 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 gsap.registerPlugin(ScrollTrigger)
 
 const steps = [
-  { id: '01', label: 'DECLARE X', value: 'x = 10', target: '.memory-card:nth-child(1)' },
-  { id: '02', label: 'DECLARE Y', value: 'y = 20', target: '.memory-card:nth-child(2)' },
-  { id: '03', label: 'COMPUTE SUM', value: '10 + 20 → 30', target: '.memory-card:nth-child(3)' },
-  { id: '04', label: 'EMIT OUTPUT', value: '30', target: '.exec-result' },
+  { id: '01', label: 'DECLARE X', value: 'x = 10' },
+  { id: '02', label: 'DECLARE Y', value: 'y = 20' },
+  { id: '03', label: 'COMPUTE SUM', value: '10 + 20 → 30' },
+  { id: '04', label: 'EMIT OUTPUT', value: '30' },
 ]
 
 function makeSvg() {
@@ -52,7 +52,7 @@ function initExecutionMotion() {
     <div class="exec-fx__chip exec-fx__chip--y">y = 20</div>
     <div class="exec-fx__chip exec-fx__chip--sum">10 + 20</div>
     <div class="exec-fx__chip exec-fx__chip--result">30</div>
-    <div class="exec-fx__pulse" />
+    <div class="exec-fx__pulse"></div>
     <div class="exec-fx__caption">SOURCE → MEMORY → COMPUTE → OUTPUT</div>
   `
   fx.prepend(makeSvg())
