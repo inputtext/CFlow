@@ -1,6 +1,12 @@
 // ============================================================
 // C·FLOW FLOW BUILDER
 // ============================================================
+//
+// Builds a structural control-flow graph from parser statements.
+// Branches are explicitly merged after the complete IF/ELSE block so
+// the execution engine never falls through from the TRUE branch into
+// ELSE. Loop bodies retain their dedicated back-edge.
+// ============================================================
 
 function buildFlow(program) {
   const statements = Array.isArray(program?.statements) ? program.statements : [];
@@ -64,30 +70,62 @@ function buildFlow(program) {
     return -1;
   };
 
-  const resolveJoin = (index, depth) => {
-    const next = nextAtOrAbove(index, depth);
-    const parent = directParentControl(index, depth);
+  // Find an ELSE belonging directly to this condition.
+  const directElse = (conditionIndex) => {
+    const condition = statements[conditionIndex];
+    const range = bodyRange(conditionIndex);
+    if (!range) return -1;
 
-    if (parent >= 0) {
-      const parentStatement = statements[parent];
-      if (next < 0 || statements[next].depth <= parentStatement.depth) {
-        return parentStatement.id;
-      }
+    const candidateIndex = range.end + 1;
+    if (
+      candidateIndex < statements.length &&
+      statements[candidateIndex].type === "else" &&
+      statements[candidateIndex].depth === condition.depth
+    ) {
+      return candidateIndex;
     }
-
-    return next >= 0 ? statements[next].id : (parent >= 0 ? statements[parent].id : "exit");
+    return -1;
   };
 
+  // Find the first statement after the entire IF/ELSE construct. If the
+  // branch is the final construct inside a loop, continue at that loop.
+  const branchContinuation = (conditionIndex, branchEndIndex, elseIndex = -1) => {
+    const condition = statements[conditionIndex];
+    let endIndex = branchEndIndex;
+
+    if (elseIndex >= 0) {
+      const elseRange = bodyRange(elseIndex);
+      endIndex = elseRange ? elseRange.end : elseIndex;
+    }
+
+    const next = nextAtOrAbove(endIndex, condition.depth);
+    if (next >= 0) return statements[next].id;
+
+    const parent = directParentControl(conditionIndex, condition.depth);
+    if (parent >= 0 && loopTypes.has(statements[parent].type)) {
+      return statements[parent].id;
+    }
+
+    return "exit";
+  };
+
+  // Only connect ordinary sibling statements. Branches and loops are wired
+  // explicitly below, preventing accidental TRUE -> ELSE fall-through.
   for (let i = 0; i < statements.length - 1; i += 1) {
     const current = statements[i];
     const next = statements[i + 1];
     if (current.type === "return" || isControl(current)) continue;
-    if (current.depth === next.depth) addEdge(current.id, next.id, "normal", `edge_${current.id}_next`);
+    if (current.depth === next.depth) {
+      addEdge(current.id, next.id, "normal", `edge_${current.id}_next`);
+    }
   }
 
   for (let i = 0; i < statements.length; i += 1) {
     const s = statements[i];
 
+    // --------------------------------------------------------
+    // FOR / WHILE
+    // --------------------------------------------------------
     if (loopTypes.has(s.type)) {
       const range = bodyRange(i);
       const after = range ? nextAtOrAbove(range.end, s.depth) : nextAtOrAbove(i, s.depth);
@@ -106,40 +144,54 @@ function buildFlow(program) {
       continue;
     }
 
+    // --------------------------------------------------------
+    // IF / ELSE IF
+    // --------------------------------------------------------
     if (s.type === "condition" || s.type === "else_if") {
       const range = bodyRange(i);
+
       if (!range) {
-        addEdge(s.id, resolveJoin(i, s.depth), "false", `edge_${s.id}_false`);
+        const continuation = branchContinuation(i, i);
+        addEdge(s.id, continuation, "true", `edge_${s.id}_true`);
+        addEdge(s.id, continuation, "false", `edge_${s.id}_false`);
         continue;
       }
 
       const bodyFirst = statements[range.start];
       const bodyLast = statements[range.end];
-      const nextIndex = nextAtOrAbove(range.end, s.depth);
-      const nextStatement = nextIndex >= 0 ? statements[nextIndex] : null;
+      const elseIndex = directElse(i);
+
+      // TRUE enters only the IF body.
       addEdge(s.id, bodyFirst.id, "true", `edge_${s.id}_true`);
 
-      if (nextStatement && nextStatement.type === "else" && nextStatement.depth === s.depth) {
-        const elseRange = bodyRange(nextIndex);
-        const elseNode = nextStatement;
+      if (elseIndex >= 0) {
+        const elseNode = statements[elseIndex];
+        const elseRange = bodyRange(elseIndex);
+
+        // FALSE enters ELSE.
         addEdge(s.id, elseNode.id, "false", `edge_${s.id}_false`);
 
+        // Both arms merge AFTER the ELSE body. This is the key fix: the TRUE
+        // arm never points to ELSE and therefore cannot execute both branches.
         if (elseRange) {
           const elseFirst = statements[elseRange.start];
           const elseLast = statements[elseRange.end];
-          const joinId = resolveJoin(elseRange.end, s.depth);
+          const continuation = branchContinuation(i, range.end, elseIndex);
+
+          addEdge(bodyLast.id, continuation, "normal", `edge_${bodyLast.id}_join`);
           addEdge(elseNode.id, elseFirst.id, "normal", `edge_${elseNode.id}_body`);
-          addEdge(bodyLast.id, joinId, "normal", `edge_${bodyLast.id}_join`);
-          addEdge(elseLast.id, joinId, "normal", `edge_${elseLast.id}_join`);
+          addEdge(elseLast.id, continuation, "normal", `edge_${elseLast.id}_join`);
         } else {
-          const joinId = resolveJoin(nextIndex, s.depth);
-          addEdge(elseNode.id, joinId, "normal", `edge_${elseNode.id}_join`);
-          addEdge(bodyLast.id, joinId, "normal", `edge_${bodyLast.id}_join`);
+          const continuation = branchContinuation(i, range.end, elseIndex);
+          addEdge(bodyLast.id, continuation, "normal", `edge_${bodyLast.id}_join`);
+          addEdge(elseNode.id, continuation, "normal", `edge_${elseNode.id}_join`);
         }
       } else {
-        const joinId = resolveJoin(range.end, s.depth);
-        addEdge(s.id, joinId, "false", `edge_${s.id}_false`);
-        addEdge(bodyLast.id, joinId, "normal", `edge_${bodyLast.id}_join`);
+        const continuation = branchContinuation(i, range.end);
+
+        // No ELSE: TRUE runs the body, FALSE skips it. Both continue after IF.
+        addEdge(s.id, continuation, "false", `edge_${s.id}_false`);
+        addEdge(bodyLast.id, continuation, "normal", `edge_${bodyLast.id}_join`);
       }
     }
   }
@@ -147,11 +199,15 @@ function buildFlow(program) {
   nodes.push({ id: "exit", label: "EXIT", type: "exit" });
 
   statements.forEach((s) => {
-    if (s.type === "return") addEdge(s.id, "exit", "normal", `edge_${s.id}_exit`);
+    if (s.type === "return") {
+      addEdge(s.id, "exit", "normal", `edge_${s.id}_exit`);
+    }
   });
 
   const last = statements[statements.length - 1];
-  if (last && last.type !== "return" && !loopTypes.has(last.type)) addEdge(last.id, "exit", "normal", "edge_exit");
+  if (last && last.type !== "return" && !loopTypes.has(last.type)) {
+    addEdge(last.id, "exit", "normal", "edge_exit");
+  }
 
   return { nodes, edges };
 }
