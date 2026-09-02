@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 
 const STORAGE_KEY = "cflow-theme";
+const READING_MODE_KEY = "cflow-reading-mode";
 const THEME_CLASSES = ["stone", "moss", "mist", "clay", "dusk", "sakura", "ink"];
 const THEMES = [
   { id: "stone", name: "Stone", color: "#E3D9CC", ink: "#292724" },
@@ -22,6 +23,14 @@ function readStoredTheme() {
   }
 }
 
+function readStoredReadingMode() {
+  try {
+    return window.localStorage.getItem(READING_MODE_KEY) === "on";
+  } catch {
+    return false;
+  }
+}
+
 function applyTheme(themeId) {
   const root = document.getElementById("root");
   const elements = [root, document.documentElement, document.body].filter(Boolean);
@@ -32,18 +41,26 @@ function applyTheme(themeId) {
   });
 }
 
+function applyReadingMode(enabled) {
+  const root = document.getElementById("root");
+  const elements = [root, document.documentElement, document.body].filter(Boolean);
+  elements.forEach((element) => element.classList.toggle("cflow-reading-mode", enabled));
+}
+
 function themeMeta(id) {
   return THEMES.find((item) => item.id === id) ?? THEMES[0];
 }
 
 export default function ThemeToggle() {
   const [theme, setTheme] = useState(readStoredTheme);
+  const [readingMode, setReadingMode] = useState(readStoredReadingMode);
   const [transition, setTransition] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const timelineRef = useRef(null);
   const pickerRef = useRef(null);
 
   useEffect(() => { applyTheme(theme); }, [theme]);
+  useEffect(() => { applyReadingMode(readingMode); }, [readingMode]);
   useEffect(() => () => timelineRef.current?.kill(), []);
 
   useEffect(() => {
@@ -54,6 +71,13 @@ export default function ThemeToggle() {
       { autoAlpha: 1, y: 0, scale: 1, duration: 0.45, ease: "power3.out" }
     );
   }, [pickerOpen]);
+
+  const toggleReadingMode = () => {
+    const next = !readingMode;
+    setReadingMode(next);
+    applyReadingMode(next);
+    try { window.localStorage.setItem(READING_MODE_KEY, next ? "on" : "off"); } catch {}
+  };
 
   const animateThemeChange = (nextTheme) => {
     if (transition || nextTheme === theme) return;
@@ -97,6 +121,23 @@ export default function ThemeToggle() {
   const current = themeMeta(theme);
   return (
     <>
+      <div className="cflow-reading-control">
+        <button
+          type="button"
+          className={`cflow-reading-button ${readingMode ? "is-active" : ""}`}
+          onClick={toggleReadingMode}
+          aria-label={readingMode ? "Turn off reading mode" : "Turn on reading mode"}
+          aria-pressed={readingMode}
+          title={readingMode ? "Reading mode on" : "Reading mode"}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M9 18h6M10 21h4M8.4 14.7A6.5 6.5 0 1 1 15.6 14.7c-.9.8-1.6 1.7-1.8 3.3h-3.6c-.2-1.6-.9-2.5-1.8-3.3Z" />
+            <path d="M12 2v2M4.9 4.9l1.4 1.4M2 12h2M19.1 4.9l-1.4 1.4M20 12h2" />
+          </svg>
+          <span className="sr-only">Reading mode</span>
+        </button>
+      </div>
+
       <div className="cflow-theme-control">
         <button type="button" className="cflow-theme-palette-button" onClick={() => setPickerOpen((open) => !open)} aria-label={`Choose C·FLOW theme. Current theme: ${current.name}`} aria-expanded={pickerOpen} disabled={transition}>
           <span className="cflow-theme-palette-label">THEME</span>
