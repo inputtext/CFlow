@@ -4,8 +4,8 @@
 //
 // Builds a structural control-flow graph from parser statements.
 // Branches explicitly merge after the complete IF/ELSE block. When a
-// branch is the final construct inside a loop, both arms continue at
-// the enclosing loop condition instead of escaping the loop.
+// branch or nested loop reaches the end of an enclosing loop body, the
+// continuation returns to the enclosing loop condition instead of EXIT.
 // ============================================================
 
 function buildFlow(program) {
@@ -86,9 +86,6 @@ function buildFlow(program) {
     return -1;
   };
 
-  // Resolve the statement after an entire IF/ELSE construct. If the IF is
-  // inside a loop and the next lexical statement is outside that loop, the
-  // correct continuation is the loop condition, not the statement after it.
   const branchContinuation = (conditionIndex, branchEndIndex, elseIndex = -1) => {
     const condition = statements[conditionIndex];
     let endIndex = branchEndIndex;
@@ -103,21 +100,13 @@ function buildFlow(program) {
 
     if (parent >= 0) {
       const parentStatement = statements[parent];
-
-      // A sibling at the parent's depth is outside the parent body. For an
-      // IF inside a loop, that means the loop must run its update/back-edge.
       if (next < 0 || statements[next].depth <= parentStatement.depth) {
         if (loopTypes.has(parentStatement.type)) return parentStatement.id;
       }
     }
 
     if (next >= 0) return statements[next].id;
-
-    // No lexical sibling: continue through an enclosing loop if present.
-    if (parent >= 0 && loopTypes.has(statements[parent].type)) {
-      return statements[parent].id;
-    }
-
+    if (parent >= 0 && loopTypes.has(statements[parent].type)) return statements[parent].id;
     return "exit";
   };
 
@@ -141,7 +130,15 @@ function buildFlow(program) {
     if (loopTypes.has(s.type)) {
       const range = bodyRange(i);
       const after = range ? nextAtOrAbove(range.end, s.depth) : nextAtOrAbove(i, s.depth);
-      const afterId = after >= 0 ? statements[after].id : "exit";
+
+      // If this loop is nested and there is no lexical sibling after its
+      // body, its FALSE path must return to the enclosing loop condition.
+      const parent = directParentControl(i, s.depth);
+      const afterId = after >= 0
+        ? statements[after].id
+        : (parent >= 0 && loopTypes.has(statements[parent].type)
+            ? statements[parent].id
+            : "exit");
 
       if (!range) {
         addEdge(s.id, afterId, "false", `edge_${s.id}_false`);
@@ -178,8 +175,6 @@ function buildFlow(program) {
       if (elseIndex >= 0) {
         const elseNode = statements[elseIndex];
         const elseRange = bodyRange(elseIndex);
-
-        // FALSE enters ELSE; TRUE never enters ELSE.
         addEdge(s.id, elseNode.id, "false", `edge_${s.id}_false`);
 
         if (elseRange) {
@@ -187,7 +182,6 @@ function buildFlow(program) {
           const elseLast = statements[elseRange.end];
           const continuation = branchContinuation(i, range.end, elseIndex);
 
-          // Both arms merge after the complete IF/ELSE construct.
           addEdge(bodyLast.id, continuation, "normal", `edge_${bodyLast.id}_join`);
           addEdge(elseNode.id, elseFirst.id, "normal", `edge_${elseNode.id}_body`);
           addEdge(elseLast.id, continuation, "normal", `edge_${elseLast.id}_join`);
