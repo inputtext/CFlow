@@ -8,9 +8,8 @@
 .cflow-theme-clay{--cflow-palette-bg:#F5EFE8;--cflow-palette-code:#E8D9C8;--cflow-palette-flow:#E7DDD4;--cflow-palette-memory:#E0E3D9;--cflow-palette-exec:#DEC7A9;--cflow-palette-special:#E8D1C9;--cflow-palette-ink:#352B25;--cflow-palette-muted:#796E65;--cflow-palette-border:#352B25}
 .cflow-theme-dusk{--cflow-palette-bg:#F0EDF4;--cflow-palette-code:#DCDCE8;--cflow-palette-flow:#DCD5E8;--cflow-palette-memory:#DCE4E1;--cflow-palette-exec:#DDD2C2;--cflow-palette-special:#E5D6DF;--cflow-palette-ink:#302B38;--cflow-palette-muted:#756E7C;--cflow-palette-border:#302B38}
 .cflow-theme-sakura{--cflow-palette-bg:#F7F0EF;--cflow-palette-code:#E9DDE0;--cflow-palette-flow:#E5DCE7;--cflow-palette-memory:#DFE7DF;--cflow-palette-exec:#E9D6C8;--cflow-palette-special:#EACFD8;--cflow-palette-ink:#392D31;--cflow-palette-muted:#806F74;--cflow-palette-border:#392D31}
-.cflow-theme-ink{--cflow-palette-bg:#202326;--cflow-palette-code:#2B302F;--cflow-palette-flow:#302B38;--cflow-palette-memory:#293733;--cflow-palette-exec:#4B402E;--cflow-palette-special:#4B3540;--cflow-palette-ink:#F4F0E8;--cflow-palette-muted:#B8BAB7;--cflow-palette-border:#0E1011}
+.cflow-theme-ink{--cflow-palette-bg:#202326;--cflow-palette-code:#2B302F;--cflow-palette-flow:#302B38;--cflow-palette-memory:#293733;--cflow-palette-exec:#4B402E;--cflow-palette-special:#4B3540;--cflow-palette-ink:#000000;--cflow-palette-muted:#000000;--cflow-palette-border:#0E1011}
 
-/* Base surface remapping */
 .cflow-theme-stone body,.cflow-theme-moss body,.cflow-theme-mist body,.cflow-theme-clay body,.cflow-theme-dusk body,.cflow-theme-sakura body,.cflow-theme-ink body,
 .cflow-theme-stone #root,.cflow-theme-moss #root,.cflow-theme-mist #root,.cflow-theme-clay #root,.cflow-theme-dusk #root,.cflow-theme-sakura #root,.cflow-theme-ink #root{background:var(--cflow-palette-bg);color:var(--cflow-palette-ink)}
 .cflow-theme-stone header,.cflow-theme-moss header,.cflow-theme-mist header,.cflow-theme-clay header,.cflow-theme-dusk header,.cflow-theme-sakura header,.cflow-theme-ink header,
@@ -21,38 +20,51 @@
 .cflow-theme-stone main>section:nth-child(3),.cflow-theme-moss main>section:nth-child(3),.cflow-theme-mist main>section:nth-child(3),.cflow-theme-clay main>section:nth-child(3),.cflow-theme-dusk main>section:nth-child(3),.cflow-theme-sakura main>section:nth-child(3),.cflow-theme-ink main>section:nth-child(3){background:var(--cflow-palette-memory)!important}
 .cflow-theme-stone [data-memory],.cflow-theme-moss [data-memory],.cflow-theme-mist [data-memory],.cflow-theme-clay [data-memory],.cflow-theme-dusk [data-memory],.cflow-theme-sakura [data-memory],.cflow-theme-ink [data-memory]{background:color-mix(in srgb,var(--cflow-palette-memory) 70%,white)!important;color:var(--cflow-palette-ink)!important;border-color:var(--cflow-palette-border)!important}
 
-/* -------------------------------------------------------------------------- */
-/* INK: intentionally dark, high-contrast surfaces.                           */
-/* Inline graph colors are overridden here only for the Ink palette.           */
-/* -------------------------------------------------------------------------- */
-.cflow-theme-ink :is(h1,h2,h3,h4,h5,h6,p,span,label,button,small,strong,em,code,pre,div){color:var(--cflow-palette-ink)}
-.cflow-theme-ink :is(input,textarea,select){background:#25292A!important;color:#F4F0E8!important;border-color:#747A77!important}
-.cflow-theme-ink :is(button){border-color:#8D918D}
-.cflow-theme-ink .cflow-flow-shell{background:var(--cflow-palette-flow)!important;color:#F4F0E8!important}
-.cflow-theme-ink .cflow-flow-shell [data-flow-node]{color:#F4F0E8!important;border-color:#0E1011!important}
-.cflow-theme-ink .cflow-flow-shell [data-flow-node].cflow-flow-node--start{background:#363B3B!important;color:#F4F0E8!important}
-.cflow-theme-ink .cflow-flow-shell [data-flow-node].cflow-flow-node--operation{background:#39403F!important;color:#F4F0E8!important}
-.cflow-theme-ink .cflow-flow-shell [data-flow-node].cflow-flow-node--condition{background:#735E34!important;color:#FFF6DD!important}
-.cflow-theme-ink .cflow-flow-shell [data-flow-node].cflow-flow-node--output{background:#3D5A4F!important;color:#F0FFF8!important}
-.cflow-theme-ink .cflow-flow-shell [data-flow-node].cflow-flow-node--exit{background:#633F4D!important;color:#FFF0F4!important}
-.cflow-theme-ink .cflow-flow-shell svg path[stroke="#171717"]{stroke:#EDE8DE!important}
-.cflow-theme-ink .cflow-flow-shell svg marker path{fill:#EDE8DE!important}
-.cflow-theme-ink .cflow-flow-shell svg rect[fill="#FFF9F0"]{fill:#25292A!important;stroke:#EDE8DE!important}
-.cflow-theme-ink .cflow-flow-shell svg text{fill:#F4F0E8!important}
-.cflow-theme-ink .cflow-flow-shell .fill-\[\#171717\]{color:#F4F0E8!important;fill:#F4F0E8!important}
-.cflow-theme-ink .cflow-flow-shell [class*="border-[#171717]"]{border-color:#0E1011!important}
-.cflow-theme-ink .cflow-flow-shell [class*="bg-[#FFF9F0]"]{background:#25292A!important;color:#F4F0E8!important}
-.cflow-theme-ink [data-memory]{background:#35413E!important;color:#F4F0E8!important;border-color:#111514!important}
-.cflow-theme-ink [data-memory] *{color:#F4F0E8!important}
-.cflow-theme-ink .cflow-theme-picker{background:#242827;color:#F4F0E8;border-color:#A9ADA8;box-shadow:8px 8px 0 #0E1011}
-.cflow-theme-ink .cflow-theme-picker__title,.cflow-theme-ink .cflow-theme-picker__meta{color:#C8CDC8!important}
-.cflow-theme-ink .cflow-theme-palette-button{background:#242827;color:#F4F0E8;border-color:#A9ADA8;box-shadow:2px 2px 0 #0E1011}
-.cflow-theme-ink .cflow-theme-swatch{color:#F4F0E8}
-.cflow-theme-ink .cflow-theme-swatch__name{color:#F4F0E8!important}
-.cflow-theme-ink .cflow-theme-swatch.is-active{background:#313735;border-color:#F4F0E8}
-.cflow-theme-ink .cflow-theme-wipe__grain{mix-blend-mode:screen}
+/* INK: graphite surfaces + BLACK typography, as requested. */
+.cflow-theme-ink :is(h1,h2,h3,h4,h5,h6,p,span,label,button,small,strong,em,code,pre,div,a,li){color:#000000!important;-webkit-text-fill-color:#000000!important;text-shadow:none!important}
+.cflow-theme-ink :is(input,textarea,select){background:#F1EEE8!important;color:#000000!important;border-color:#000000!important}
+.cflow-theme-ink :is(button){border-color:#000000!important}
+.cflow-theme-ink .cflow-flow-shell{background:var(--cflow-palette-flow)!important;color:#000000!important}
+.cflow-theme-ink .cflow-flow-shell [data-flow-node]{color:#000000!important;border-color:#000000!important}
+.cflow-theme-ink .cflow-flow-shell [data-flow-node].cflow-flow-node--start{background:#D8D5CB!important;color:#000000!important}
+.cflow-theme-ink .cflow-flow-shell [data-flow-node].cflow-flow-node--operation{background:#D5D8D5!important;color:#000000!important}
+.cflow-theme-ink .cflow-flow-shell [data-flow-node].cflow-flow-node--condition{background:#D8C58D!important;color:#000000!important}
+.cflow-theme-ink .cflow-flow-shell [data-flow-node].cflow-flow-node--output{background:#BFD5CA!important;color:#000000!important}
+.cflow-theme-ink .cflow-flow-shell [data-flow-node].cflow-flow-node--exit{background:#D5B9C2!important;color:#000000!important}
+.cflow-theme-ink .cflow-flow-shell svg path[stroke="#171717"]{stroke:#000000!important}
+.cflow-theme-ink .cflow-flow-shell svg marker path{fill:#000000!important}
+.cflow-theme-ink .cflow-flow-shell svg rect[fill="#FFF9F0"]{fill:#F1EEE8!important;stroke:#000000!important}
+.cflow-theme-ink .cflow-flow-shell svg text{fill:#000000!important}
+.cflow-theme-ink .cflow-flow-shell .fill-\[\#171717\]{color:#000000!important;fill:#000000!important}
+.cflow-theme-ink .cflow-flow-shell [class*="border-[#171717]"]{border-color:#000000!important}
+.cflow-theme-ink .cflow-flow-shell [class*="bg-[#FFF9F0]"]{background:#F1EEE8!important;color:#000000!important}
+.cflow-theme-ink [data-memory]{background:#D6DED9!important;color:#000000!important;border-color:#000000!important}
+.cflow-theme-ink [data-memory] *{color:#000000!important;-webkit-text-fill-color:#000000!important}
+.cflow-theme-ink .cflow-theme-picker{background:#242827;color:#000000;border-color:#000000;box-shadow:8px 8px 0 #000000}
+.cflow-theme-ink .cflow-theme-picker__title,.cflow-theme-ink .cflow-theme-picker__meta{color:#000000!important}
+.cflow-theme-ink .cflow-theme-palette-button{background:#F1EEE8;color:#000000;border-color:#000000;box-shadow:2px 2px 0 #000000}
+.cflow-theme-ink .cflow-theme-swatch{color:#000000}
+.cflow-theme-ink .cflow-theme-swatch__name{color:#000000!important}
+.cflow-theme-ink .cflow-theme-swatch.is-active{background:#D9D6CC;border-color:#000000}
+.cflow-theme-ink .cflow-theme-wipe__grain{mix-blend-mode:multiply}
 
-/* Palette control/picker */
+/* Header/navbar: every visible label is black in Ink. */
+.cflow-theme-ink header,
+.cflow-theme-ink header *{color:#000000!important;-webkit-text-fill-color:#000000!important}
+.cflow-theme-ink header [class*="bg-[#202326"],
+.cflow-theme-ink header [class*="bg-[#171717"]{background:#F1EEE8!important;color:#000000!important}
+.cflow-theme-ink header :is(button,[role="button"]){background:#F1EEE8!important;border-color:#000000!important;color:#000000!important}
+.cflow-theme-ink footer,
+.cflow-theme-ink footer *{color:#000000!important;-webkit-text-fill-color:#000000!important}
+.cflow-theme-ink footer button{background:#F1EEE8!important;color:#000000!important;border-color:#000000!important}
+
+/* Home screen typography and controls. */
+.cflow-theme-stone main:not(:has(.cflow-flow-shell)),.cflow-theme-moss main:not(:has(.cflow-flow-shell)),.cflow-theme-mist main:not(:has(.cflow-flow-shell)),.cflow-theme-clay main:not(:has(.cflow-flow-shell)),.cflow-theme-dusk main:not(:has(.cflow-flow-shell)),.cflow-theme-sakura main:not(:has(.cflow-flow-shell)),.cflow-theme-ink main:not(:has(.cflow-flow-shell)){background:var(--cflow-palette-bg)!important;color:var(--cflow-palette-ink)!important}
+.cflow-theme-stone main:not(:has(.cflow-flow-shell)) :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,em,code),.cflow-theme-moss main:not(:has(.cflow-flow-shell)) :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,em,code),.cflow-theme-mist main:not(:has(.cflow-flow-shell)) :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,em,code),.cflow-theme-clay main:not(:has(.cflow-flow-shell)) :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,em,code),.cflow-theme-dusk main:not(:has(.cflow-flow-shell)) :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,em,code),.cflow-theme-sakura main:not(:has(.cflow-flow-shell)) :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,em,code),.cflow-theme-ink main:not(:has(.cflow-flow-shell)) :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,em,code){color:var(--cflow-palette-ink)!important;-webkit-text-fill-color:var(--cflow-palette-ink)!important;text-shadow:none!important}
+.cflow-theme-ink main:not(:has(.cflow-flow-shell)) :is([class*="text-[#171717"],[class*="text-black"],[class*="text-white"],[class*="text-gray"]){color:#000000!important;-webkit-text-fill-color:#000000!important}
+.cflow-theme-ink main:not(:has(.cflow-flow-shell)) [class*="bg-white"]{background:#F1EEE8!important;color:#000000!important;border-color:#000000!important}
+
+/* Shared palette control/picker. */
 .cflow-theme-control{display:flex;align-items:center;gap:4px}
 .cflow-theme-palette-button{width:26px;height:36px;padding:6px 5px;display:flex;flex-direction:column;justify-content:center;gap:3px;border:2px solid var(--cflow-palette-border);background:var(--cflow-palette-bg);box-shadow:2px 2px 0 var(--cflow-palette-border);color:var(--cflow-palette-ink);cursor:pointer}
 .cflow-theme-palette-button span{display:block;width:3px;height:3px;border-radius:50%;background:currentColor;box-shadow:6px 0 currentColor}
@@ -67,7 +79,6 @@
 .cflow-theme-swatch__dot{display:block;width:34px;height:34px;margin:auto;border:2px solid rgba(23,23,23,.14);border-radius:9px;box-shadow:2px 2px 0 rgba(23,23,23,.16)}
 .cflow-theme-swatch__name{display:block;margin-top:6px;font:700 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.03em}
 
-/* AE-style diagonal paper wipe. GSAP owns the animation. */
 .cflow-theme-wipe{position:fixed;inset:0;z-index:2000;pointer-events:none;overflow:hidden}
 .cflow-theme-wipe__paper,.cflow-theme-wipe__shadow{position:absolute;inset:-12%;clip-path:polygon(-20% 0,-5% 0,-20% 100%,-35% 100%);will-change:clip-path,transform}
 .cflow-theme-wipe__paper{background:var(--wipe-color,#FFF9F0)}
