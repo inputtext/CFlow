@@ -1,0 +1,65 @@
+/* C·FLOW HOME THEMES
+   Home-only palette layer. The workspace/FlowGraph is deliberately excluded. */
+
+#root > div:not(:has(.cflow-flow-shell)){
+  background:var(--cflow-palette-bg)!important;
+  color:var(--cflow-palette-ink)!important;
+}
+
+/* Keep every home-page text element tied to the active palette instead of
+   the old hard-coded Tailwind light colors. */
+#root > div:not(:has(.cflow-flow-shell)) :is(h1,h2,h3,h4,h5,h6,p,span,div){
+  border-color:var(--cflow-palette-border);
+}
+#root > div:not(:has(.cflow-flow-shell)) :is(h1,h2,h3,h4,h5,h6){
+  color:var(--cflow-palette-ink)!important;
+  -webkit-text-fill-color:var(--cflow-palette-ink)!important;
+  opacity:1!important;
+}
+#root > div:not(:has(.cflow-flow-shell)) p{color:var(--cflow-palette-ink)!important;-webkit-text-fill-color:var(--cflow-palette-ink)!important}
+#root > div:not(:has(.cflow-flow-shell)) :is([class*="text-[#171717"],[class*="text-black"],[class*="text-white"],[class*="text-gray"]){
+  color:var(--cflow-palette-ink)!important;-webkit-text-fill-color:var(--cflow-palette-ink)!important;
+}
+#root > div:not(:has(.cflow-flow-shell)) :is([class*="bg-[#FFF9F0"],[class*="bg-white"]){
+  background:color-mix(in srgb,var(--cflow-palette-bg) 88%,var(--cflow-palette-ink) 12%)!important;
+  color:var(--cflow-palette-ink)!important;
+}
+#root > div:not(:has(.cflow-flow-shell)) :is([class*="border-[#171717"]){border-color:var(--cflow-palette-border)!important}
+
+/* Reference-like home treatment for Ink: graphite surfaces + warm ivory type. */
+.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)){
+  background:#23272A!important;
+  color:#F4F0E8!important;
+}
+.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) :is(h1,h2,h3,h4,h5,h6,p,span,div){border-color:#111416}
+.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) :is(h1,h2,h3,h4,h5,h6){color:#F4F0E8!important;-webkit-text-fill-color:#F4F0E8!important;opacity:1!important}
+.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) p{color:#BFC1BF!important;-webkit-text-fill-color:#BFC1BF!important;opacity:1!important}
+.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) > div > div:first-child{border-color:#111416!important}
+.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) :is([class*="text-[#171717"],[class*="text-black"],[class*="text-white"],[class*="text-gray"]){color:#F4F0E8!important;-webkit-text-fill-color:#F4F0E8!important}
+.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) :is([class*="bg-[#FFF9F0"],[class*="bg-white"]){background:#34383C!important;color:#F4F0E8!important}
+.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) button{
+  border-color:#111416!important;color:#F4F0E8!important;
+  box-shadow:4px 4px 0 #111416!important;
+}
+.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) button:hover{background:#3B4044!important}
+.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) button[disabled]{background:#292D30!important;color:#777B7B!important;opacity:1!important}
+.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) button span:first-child{background:#202326!important;color:#F4F0E8!important;border-color:#111416!important;box-shadow:2px 2px 0 #111416!important}
+.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) button span:nth-child(2){color:#F4F0E8!important}
+.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"]{background:#F4F0E8!important;color:#202326!important;box-shadow:4px 4px 0 #C9B77C!important}
+.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"] :is(span){color:#202326!important;-webkit-text-fill-color:#202326!important}
+.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) [class*="bg-[#FFE3A3"]{background:#C9B77C!important;color:#202326!important}
+
+/* Other palettes retain their own ink, but all surfaces are theme-derived. */
+.cflow-theme-stone #root > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"],
+.cflow-theme-moss #root > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"],
+.cflow-theme-mist #root > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"],
+.cflow-theme-clay #root > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"],
+.cflow-theme-dusk #root > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"],
+.cflow-theme-sakura #root > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"]{
+  background:var(--cflow-palette-ink)!important;color:var(--cflow-palette-bg)!important;box-shadow:4px 4px 0 var(--cflow-accent)!important
+}
+
+/* The home page should not inherit the legacy light-only shadows. */
+.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) [class*="shadow-[4px_4px_0_#171717"],
+.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) [class*="shadow-[6px_6px_0_#171717"],
+.cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) [class*="shadow-[8px_8px_0_#171717"]{box-shadow:4px 4px 0 #111416!important}
