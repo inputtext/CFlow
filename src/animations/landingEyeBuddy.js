@@ -52,7 +52,6 @@ function EyeBuddy() {
     const buddy = host
     const leftPupil = () => buddy.querySelector('.landing-eye-buddy__pupil--left')
     const rightPupil = () => buddy.querySelector('.landing-eye-buddy__pupil--right')
-    const hello = () => buddy.querySelector('.landing-eye-buddy__hello')
 
     const tick = () => {
       currentX += (targetX - currentX) * 0.12
