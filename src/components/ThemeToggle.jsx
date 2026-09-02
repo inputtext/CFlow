@@ -27,6 +27,7 @@ function applyTheme(themeId) {
   const elements = [root, document.documentElement, document.body].filter(Boolean);
   elements.forEach((element) => {
     THEME_CLASSES.forEach((id) => element.classList.remove(`cflow-theme-${id}`));
+    element.classList.remove("cflow-dark");
     element.classList.add(`cflow-theme-${themeId}`);
   });
 }
