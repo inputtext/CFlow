@@ -1,0 +1,210 @@
+/* INK CONTRAST ONLY
+   Ink is the one graphite/night palette. Text follows the surface:
+   dark surfaces -> warm white; light surfaces -> near-black.
+   Other palettes are intentionally not touched. */
+
+.cflow-theme-ink {
+  --cflow-ink-light: #F4F0E8;
+  --cflow-ink-muted: #BFC1BF;
+  --cflow-ink-dark: #111416;
+  --cflow-ink-paper: #F1EEE8;
+}
+
+/* Default Ink foreground: dark graphite surfaces get light typography. */
+.cflow-theme-ink :is(header, footer, .cflow-flow-shell) {
+  color: var(--cflow-ink-light) !important;
+  -webkit-text-fill-color: var(--cflow-ink-light) !important;
+}
+
+.cflow-theme-ink :is(header, footer, .cflow-flow-shell) :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,em,a,li,code,pre) {
+  color: var(--cflow-ink-light) !important;
+  -webkit-text-fill-color: var(--cflow-ink-light) !important;
+  text-shadow: none !important;
+}
+
+/* Header: C·FLOW, filename, READY and status copy are on graphite. */
+.cflow-theme-ink header :is(h1,span,p,label,small,strong) {
+  color: var(--cflow-ink-light) !important;
+  -webkit-text-fill-color: var(--cflow-ink-light) !important;
+}
+
+/* Light header badges/cards intentionally switch back to dark type. */
+.cflow-theme-ink header :is([class*="bg-[#DDF4FF"], [class*="bg-white"], [class*="bg-[#FFF9F0"], [class*="bg-[#DFF7E8"], [class*="bg-[#FFE3A3"]) :is(*,span) {
+  color: var(--cflow-ink-dark) !important;
+  -webkit-text-fill-color: var(--cflow-ink-dark) !important;
+}
+
+.cflow-theme-ink header :is([class*="bg-[#DDF4FF"], [class*="bg-white"], [class*="bg-[#FFF9F0"], [class*="bg-[#DFF7E8"], [class*="bg-[#FFE3A3"]) {
+  color: var(--cflow-ink-dark) !important;
+  -webkit-text-fill-color: var(--cflow-ink-dark) !important;
+}
+
+/* Code panel header is graphite; editor surface is light. */
+.cflow-theme-ink main > section:first-child > :first-child {
+  color: var(--cflow-ink-light) !important;
+}
+.cflow-theme-ink main > section:first-child > :first-child :is(h1,h2,h3,h4,h5,h6,p,span,label,small) {
+  color: var(--cflow-ink-light) !important;
+  -webkit-text-fill-color: var(--cflow-ink-light) !important;
+}
+.cflow-theme-ink textarea,
+.cflow-theme-ink input,
+.cflow-theme-ink select {
+  color: var(--cflow-ink-dark) !important;
+  -webkit-text-fill-color: var(--cflow-ink-dark) !important;
+  background: var(--cflow-ink-paper) !important;
+  border-color: var(--cflow-ink-dark) !important;
+}
+
+/* Analyze button is dark in Ink -> white text. */
+.cflow-theme-ink main button[class*="bg-[#171717"] {
+  background: var(--cflow-ink-dark) !important;
+  color: var(--cflow-ink-light) !important;
+  -webkit-text-fill-color: var(--cflow-ink-light) !important;
+}
+.cflow-theme-ink main button[class*="bg-[#171717"] :is(span) {
+  color: var(--cflow-ink-light) !important;
+  -webkit-text-fill-color: var(--cflow-ink-light) !important;
+}
+
+/* Flow canvas itself is dark -> white headings/control labels. */
+.cflow-theme-ink .cflow-flow-shell > :first-child {
+  color: var(--cflow-ink-light) !important;
+}
+.cflow-theme-ink .cflow-flow-shell > :first-child :is(button,span) {
+  color: var(--cflow-ink-dark) !important;
+  -webkit-text-fill-color: var(--cflow-ink-dark) !important;
+}
+
+/* Flow nodes are intentionally pale -> black node labels. */
+.cflow-theme-ink .cflow-flow-shell .cflow-flow-node,
+.cflow-theme-ink .cflow-flow-shell .cflow-flow-node * {
+  color: var(--cflow-ink-dark) !important;
+  -webkit-text-fill-color: var(--cflow-ink-dark) !important;
+  text-shadow: none !important;
+}
+
+/* SVG branch labels are pale -> black. Graph arrows stay black. */
+.cflow-theme-ink .cflow-flow-shell svg text {
+  fill: var(--cflow-ink-dark) !important;
+}
+.cflow-theme-ink .cflow-flow-shell svg rect {
+  stroke: var(--cflow-ink-dark) !important;
+}
+.cflow-theme-ink .cflow-flow-shell svg path[stroke="#171717"] {
+  stroke: var(--cflow-ink-dark) !important;
+}
+.cflow-theme-ink .cflow-flow-shell svg marker path {
+  fill: var(--cflow-ink-dark) !important;
+}
+
+/* Memory panel is dark; its light variable cards use black type. */
+.cflow-theme-ink main > section:nth-child(3) {
+  color: var(--cflow-ink-light) !important;
+  -webkit-text-fill-color: var(--cflow-ink-light) !important;
+}
+.cflow-theme-ink main > section:nth-child(3) > :first-child :is(h1,h2,h3,h4,h5,h6,p,span,label,small) {
+  color: var(--cflow-ink-light) !important;
+  -webkit-text-fill-color: var(--cflow-ink-light) !important;
+}
+.cflow-theme-ink [data-memory],
+.cflow-theme-ink [data-memory] * {
+  color: var(--cflow-ink-dark) !important;
+  -webkit-text-fill-color: var(--cflow-ink-dark) !important;
+}
+
+/* Call Stack: dark/graphite chrome gets white; pale frame cards get black. */
+.cflow-theme-ink :is(.cflow-call-stack, [class*="call-stack"], [class*="CallStack"]) {
+  color: var(--cflow-ink-light) !important;
+  -webkit-text-fill-color: var(--cflow-ink-light) !important;
+}
+.cflow-theme-ink :is(.cflow-call-stack, [class*="call-stack"], [class*="CallStack"]) :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong) {
+  color: var(--cflow-ink-light) !important;
+  -webkit-text-fill-color: var(--cflow-ink-light) !important;
+}
+.cflow-theme-ink :is(.cflow-call-stack, [class*="call-stack"], [class*="CallStack"]) :is([class*="bg-white"],[class*="bg-[#FFF9F0"],[class*="bg-[#FFE3A3"]) :is(*) {
+  color: var(--cflow-ink-dark) !important;
+  -webkit-text-fill-color: var(--cflow-ink-dark) !important;
+}
+
+/* Execution navbar is dark brown -> light type. Pale controls -> dark type. */
+.cflow-theme-ink footer {
+  color: var(--cflow-ink-light) !important;
+  -webkit-text-fill-color: var(--cflow-ink-light) !important;
+}
+.cflow-theme-ink footer :is(button,span,p,label,small,strong) {
+  color: var(--cflow-ink-light) !important;
+  -webkit-text-fill-color: var(--cflow-ink-light) !important;
+}
+.cflow-theme-ink footer :is(button[class*="bg-white"],button[class*="bg-[#FFF9F0"],button[class*="bg-[#FFE3A3"]) {
+  color: var(--cflow-ink-dark) !important;
+  -webkit-text-fill-color: var(--cflow-ink-dark) !important;
+}
+
+/* Home in Ink: graphite page + graphite cards, with deliberate light/dark pairing. */
+.cflow-theme-ink main:not(:has(.cflow-flow-shell)),
+.cflow-theme-ink main:not(:has(.cflow-flow-shell)) > div {
+  color: var(--cflow-ink-light) !important;
+  -webkit-text-fill-color: var(--cflow-ink-light) !important;
+}
+.cflow-theme-ink main:not(:has(.cflow-flow-shell)) :is(h1,h2,h3,h4,h5,h6) {
+  color: var(--cflow-ink-light) !important;
+  -webkit-text-fill-color: var(--cflow-ink-light) !important;
+}
+.cflow-theme-ink main:not(:has(.cflow-flow-shell)) p,
+.cflow-theme-ink main:not(:has(.cflow-flow-shell)) :is(.font-mono) {
+  color: var(--cflow-ink-muted) !important;
+  -webkit-text-fill-color: var(--cflow-ink-muted) !important;
+}
+.cflow-theme-ink main:not(:has(.cflow-flow-shell)) :is([class*="bg-white"],[class*="bg-[#FFF9F0"]) {
+  background: #34383C !important;
+  color: var(--cflow-ink-light) !important;
+  border-color: #111416 !important;
+}
+.cflow-theme-ink main:not(:has(.cflow-flow-shell)) :is([class*="bg-white"],[class*="bg-[#FFF9F0"]) :is(h1,h2,h3,h4,h5,h6,p,span,div) {
+  color: var(--cflow-ink-light) !important;
+  -webkit-text-fill-color: var(--cflow-ink-light) !important;
+}
+.cflow-theme-ink main:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"] {
+  background: var(--cflow-ink-paper) !important;
+  color: var(--cflow-ink-dark) !important;
+  -webkit-text-fill-color: var(--cflow-ink-dark) !important;
+  box-shadow: 4px 4px 0 #111416 !important;
+}
+.cflow-theme-ink main:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"] * {
+  color: var(--cflow-ink-dark) !important;
+  -webkit-text-fill-color: var(--cflow-ink-dark) !important;
+}
+
+/* Theme picker: dark Ink chrome -> ivory typography; swatch labels remain visible. */
+.cflow-theme-ink .cflow-theme-picker {
+  background: #242827 !important;
+  color: var(--cflow-ink-light) !important;
+  border-color: #BFC1BF !important;
+  box-shadow: 7px 7px 0 #111416 !important;
+}
+.cflow-theme-ink .cflow-theme-picker :is(.cflow-theme-picker__title,.cflow-theme-swatch,.cflow-theme-swatch__name) {
+  color: var(--cflow-ink-light) !important;
+  -webkit-text-fill-color: var(--cflow-ink-light) !important;
+}
+.cflow-theme-ink .cflow-theme-swatch.is-active {
+  background: #3A3E3C !important;
+  border-color: var(--cflow-ink-light) !important;
+}
+
+/* Theme trigger is a light control -> black dots/icon. */
+.cflow-theme-ink .cflow-theme-palette-button {
+  background: var(--cflow-ink-paper) !important;
+  color: var(--cflow-ink-dark) !important;
+  border-color: #111416 !important;
+  box-shadow: 2px 2px 0 #111416 !important;
+}
+
+/* Keep the theme picker/trigger inside the execution navbar, slightly higher. */
+.cflow-theme-picker {
+  top: auto !important;
+  bottom: 104px !important;
+}
+.cflow-theme-control {
+  bottom: 46px !important;
+}
