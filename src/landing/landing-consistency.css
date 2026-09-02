@@ -4,7 +4,7 @@
 .landing .section-kicker{display:inline-flex;align-items:center;gap:10px;min-height:18px;color:var(--lf-ink);opacity:.72}
 .landing .section-kicker::before{content:"";width:22px;height:2px;background:currentColor;display:inline-block}
 .landing .problem .section-kicker,.landing .scene--engine .section-kicker,.landing .scene--capabilities .section-kicker,.landing .philosophy .section-kicker,.landing .scene--preview>.section-kicker,.landing .cta .section-kicker{margin-bottom:24px}
-.landing .problem .display,.landing .scene--engine .display,.landing .scene--capabilities .display,.landing .philosophy .display,.landing .scene--preview .display,.landing .cta .display{max-width:100%;}
+.landing .problem .display,.landing .scene--engine .display,.landing .scene--capabilities .display,.landing .philosophy .display,.landing .scene--preview .display,.landing .cta .display{max-width:100%}
 .landing .display span{-webkit-text-stroke-width:2px;text-shadow:none}
 .landing .problem,.landing .scene--engine,.landing .scene--capabilities,.landing .philosophy,.landing .scene--preview,.landing .cta{isolation:isolate}
 .landing .problem-signal,.landing .problem-visual,.landing .engine-lottie-frame,.landing .capability-system__card,.landing .preview-window,.landing .primary-button{border-width:2px}
@@ -17,7 +17,14 @@
 .landing .engine-step:last-child,.landing .capability:last-child{border-bottom:0}
 .landing .capability.is-live strong{position:relative}
 .landing .capability.is-live strong::after{content:"";display:inline-block;width:7px;height:7px;margin:0 0 5px 10px;border:2px solid var(--lf-ink);border-radius:50%;background:var(--lf-yellow);box-shadow:2px 2px 0 var(--lf-ink)}
-.landing .preview-copy .display{max-width:620px}
+/* Engine: reserve a clean right column for the Lottie so it never collides with the headline. */
+.landing .scene--engine>.display,.landing .scene--engine>.engine-flow{max-width:calc(100% - 350px);position:relative;z-index:1}
+.landing .engine-lottie-frame{right:clamp(22px,5vw,78px);top:17%;width:300px;height:300px;z-index:3}
+.landing .engine-lottie-frame dotlottie-wc,.landing .engine-lottie-frame canvas,.landing .engine-lottie-frame svg{display:block;width:100%!important;height:100%!important}
+/* Product copy: give the oversized headline a deliberate breathing space before its description/tags. */
+.landing .preview-copy .display{max-width:620px;margin-bottom:0}
+.landing .preview-copy p{max-width:470px;margin:38px 0 0;line-height:1.45}
+.landing .preview-tags{margin-top:24px}
 .landing .preview-window{border-width:2px;box-shadow:10px 10px 0 var(--lf-ink)}
 .landing .preview-window__top{border-bottom-width:2px}
 .landing .preview-code{border-right-width:1.5px}
@@ -26,5 +33,6 @@
 .landing .landing-footer{border-top-width:2px}
 .landing .landing-footer nav a{opacity:.72;transition:opacity .18s ease}
 .landing .landing-footer nav a:hover{opacity:1}
-@media(max-width:900px){.landing .section-kicker{margin-bottom:18px}.landing .problem .section-kicker,.landing .scene--engine .section-kicker,.landing .scene--capabilities .section-kicker,.landing .philosophy .section-kicker,.landing .scene--preview>.section-kicker,.landing .cta .section-kicker{margin-bottom:18px}.landing .preview-code{border-right:0}}
+@media(max-width:900px){.landing .section-kicker{margin-bottom:18px}.landing .problem .section-kicker,.landing .scene--engine .section-kicker,.landing .scene--capabilities .section-kicker,.landing .philosophy .section-kicker,.landing .scene--preview>.section-kicker,.landing .cta .section-kicker{margin-bottom:18px}.landing .preview-code{border-right:0}.landing .scene--engine>.display,.landing .scene--engine>.engine-flow{max-width:100%}.landing .engine-lottie-frame{position:relative;right:auto;top:auto;width:min(300px,100%);height:300px;margin:42px 0 0 auto}.landing .preview-copy p{margin-top:28px}}
+@media(max-width:560px){.landing .preview-metrics{grid-template-columns:1fr}.landing .preview-metrics span{border-right:0;border-bottom:2px solid var(--lf-ink)}.landing .preview-metrics span:last-child{border-bottom:0}.landing .engine-lottie-frame{height:min(300px,80vw);margin-left:0;margin-right:auto}}
 @media(prefers-reduced-motion:reduce){.landing .landing-footer nav a{transition:none}}
