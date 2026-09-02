@@ -14,6 +14,7 @@ import './animations/landingProductMotion.js'
 import './animations/landingExecutionMotion.js'
 import './animations/landingPreviewUpgrade.js'
 import './animations/landingCapabilitiesMotion.js'
+import './animations/landingClosingMotion.js'
 
 import App from './App.jsx'
 import ThemeToggle from './components/ThemeToggle.jsx'
