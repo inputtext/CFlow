@@ -25,12 +25,13 @@ const init = () => {
       .from('.philosophy .display', { y: 110, opacity: 0, scale: .94, duration: 1 })
       .from('.philosophy-line', { x: 80, opacity: 0, duration: .6 }, .35)
 
+    // ProductPreview owns the preview-window entrance animation. Do not animate
+    // the same element here; two ScrollTriggers fighting over its transform/
+    // opacity can make the workspace appear to vanish or jump off-screen.
     gsap.timeline({
       scrollTrigger: { trigger: preview, start: 'top 75%', end: 'bottom 25%', scrub: 1 }
     })
       .from('.scene--preview .preview-copy', { x: -80, opacity: 0, duration: .8 })
-      .from('.preview-window', { x: 100, rotateY: -12, rotateZ: 2, opacity: 0, duration: 1 }, .05)
-      .to('.preview-window', { rotateY: 0, rotateZ: 0, duration: 1 }, .8)
       .from('.preview-flow__connector', { scaleY: 0, transformOrigin: 'top', stagger: .15, duration: .35 }, .55)
 
     gsap.timeline({
