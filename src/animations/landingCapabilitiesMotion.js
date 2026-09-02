@@ -15,11 +15,7 @@ function initCapabilitiesMotion() {
   const overlay = document.createElement('div')
   overlay.className = 'capability-trace'
   overlay.innerHTML = `
-    <div class="capability-trace__hud">
-      <span class="capability-trace__step">STATE 01 / 04</span>
-      <b class="capability-trace__type">VARIABLE</b>
-      <small class="capability-trace__caption">PROGRAM STATE TRACE</small>
-    </div>
+    <div class="capability-trace__hud"><span class="capability-trace__step">STATE 01 / 04</span><b class="capability-trace__type">VARIABLE</b><small class="capability-trace__caption">PROGRAM STATE TRACE</small></div>
     <svg class="capability-trace__svg" viewBox="0 0 900 520" preserveAspectRatio="none" aria-hidden="true">
       <path class="capability-trace__path" d="M40 90 C210 90 210 90 390 170 S650 250 850 250" />
       <path class="capability-trace__path capability-trace__path--branch" d="M390 170 C390 300 560 320 850 340" />
@@ -37,7 +33,7 @@ function initCapabilitiesMotion() {
   const paths = gsap.utils.toArray('.capability-trace__path', overlay)
 
   if (reduced) {
-    rows.forEach((row) => row.classList.add('is-active'))
+    rows.forEach((row, index) => row.classList.toggle('is-active', index === 0))
     return
   }
 
@@ -53,38 +49,36 @@ function initCapabilitiesMotion() {
     gsap.set(path, { strokeDasharray: length, strokeDashoffset: length })
   })
 
-  const tl = gsap.timeline({
+  const updateState = (progress) => {
+    const index = Math.min(states.length - 1, Math.floor(progress * states.length))
+    const current = states[index]
+    step.textContent = current[0]
+    type.textContent = current[1]
+    state.textContent = current[2]
+    rows.forEach((row, rowIndex) => row.classList.toggle('is-active', rowIndex === index))
+  }
+
+  const timeline = gsap.timeline({
     scrollTrigger: {
       trigger: stage,
       start: 'top 68%',
       end: 'bottom 32%',
       scrub: 1,
-      onUpdate: (self) => {
-        const index = Math.min(states.length - 1, Math.floor(self.progress * states.length))
-        const current = states[index]
-        step.textContent = current[0]
-        type.textContent = current[1]
-        state.textContent = current[2]
-        rows.forEach((row, rowIndex) => row.classList.toggle('is-active', rowIndex === index))
-      }
+      onUpdate: (self) => updateState(self.progress)
     }
   })
 
   paths.forEach((path, index) => {
-    tl.to(path, { strokeDashoffset: 0, duration: 1.1, ease: 'none' }, index * 1.05)
+    timeline.to(path, { strokeDashoffset: 0, duration: 1.1, ease: 'none' }, index * 1.05)
   })
 
-  tl.to(packet, { x: 310, y: 70, duration: .8, ease: 'none' }, 0)
+  timeline.to(packet, { x: 310, y: 70, duration: .8, ease: 'none' }, 0)
     .to(packet, { x: 560, y: 165, duration: .8, ease: 'none' }, .8)
     .to(packet, { x: 760, y: 270, duration: .8, ease: 'none' }, 1.6)
     .to(packet, { x: 470, y: 390, duration: .9, ease: 'none' }, 2.5)
     .to(packet, { x: 700, y: 315, duration: .8, ease: 'none' }, 3.4)
 
-  return () => {
-    tl.scrollTrigger?.kill()
-    tl.kill()
-    overlay.remove()
-  }
+  updateState(0)
 }
 
 if (document.readyState === 'loading') {
