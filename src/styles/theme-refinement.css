@@ -1,0 +1,50 @@
+/* C·FLOW THEME REFINEMENT
+   Visual polish only. No graph geometry, execution state, or layout rules. */
+
+.cflow-theme-control{display:flex;align-items:center;gap:6px}
+.cflow-theme-palette-button{width:34px;height:34px;padding:7px;display:grid;grid-template-columns:repeat(2,1fr);gap:3px;border:2px solid var(--cflow-palette-border);background:var(--cflow-palette-bg);box-shadow:3px 3px 0 var(--cflow-palette-border);color:var(--cflow-palette-ink);transition:transform .22s ease,box-shadow .22s ease,background-color .4s ease}
+.cflow-theme-palette-button:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--cflow-palette-border)}
+.cflow-theme-palette-button span:not(.sr-only){display:block;width:4px;height:4px;border-radius:50%;background:currentColor;opacity:.82}
+
+.cflow-theme-picker{overflow:hidden;border-radius:12px!important;box-shadow:9px 9px 0 color-mix(in srgb,var(--cflow-palette-border) 28%,transparent),0 18px 45px color-mix(in srgb,var(--cflow-palette-border) 16%,transparent)!important;backdrop-filter:blur(8px);background:color-mix(in srgb,var(--cflow-palette-bg) 94%,white)!important}
+.cflow-theme-picker::before{content:"";display:block;height:3px;margin:-16px -16px 15px;background:var(--cflow-accent,var(--cflow-palette-border));opacity:.65}
+.cflow-theme-picker__title{font-size:11px!important;letter-spacing:.24em!important;margin-bottom:15px!important}
+.cflow-theme-picker__grid{gap:10px!important}
+.cflow-theme-swatch{border-radius:9px;padding:5px 3px!important;transition:transform .28s cubic-bezier(.22,1,.36,1),background-color .3s ease,border-color .3s ease}
+.cflow-theme-swatch:hover{transform:translateY(-4px)!important;background:color-mix(in srgb,var(--cflow-palette-ink) 5%,transparent)}
+.cflow-theme-swatch.is-active{background:color-mix(in srgb,var(--cflow-palette-ink) 7%,transparent)!important}
+.cflow-theme-swatch__dot{width:34px!important;height:34px!important;border-radius:10px!important;transition:transform .35s cubic-bezier(.22,1,.36,1),box-shadow .35s ease!important}
+.cflow-theme-swatch:hover .cflow-theme-swatch__dot{transform:scale(1.08);box-shadow:3px 4px 0 color-mix(in srgb,var(--cflow-palette-border) 28%,transparent)!important}
+.cflow-theme-swatch.is-active .cflow-theme-swatch__dot{box-shadow:0 0 0 2px var(--cflow-palette-bg),0 0 0 4px var(--cflow-palette-border),3px 4px 0 color-mix(in srgb,var(--cflow-palette-border) 28%,transparent)!important}
+.cflow-theme-swatch__name{font-size:8px!important;letter-spacing:.06em!important}
+
+/* Each theme gets its own visual atmosphere. */
+.cflow-theme-stone{--cflow-accent:#A9957B}
+.cflow-theme-moss{--cflow-accent:#657B58}
+.cflow-theme-mist{--cflow-accent:#718B95}
+.cflow-theme-clay{--cflow-accent:#A66F4E}
+.cflow-theme-dusk{--cflow-accent:#756B9A}
+.cflow-theme-sakura{--cflow-accent:#A97878}
+.cflow-theme-ink{--cflow-accent:#C9B77C}
+
+.cflow-theme-stone .cflow-theme-picker{background:linear-gradient(145deg,#F7F3EC,#EDE7DD)!important}
+.cflow-theme-moss .cflow-theme-picker{background:linear-gradient(145deg,#F5F6EA,#E8EDDF)!important}
+.cflow-theme-mist .cflow-theme-picker{background:linear-gradient(145deg,#F4F6F6,#E7ECEE)!important}
+.cflow-theme-clay .cflow-theme-picker{background:linear-gradient(145deg,#F8F0E8,#EDE0D4)!important}
+.cflow-theme-dusk .cflow-theme-picker{background:linear-gradient(145deg,#F4F0F7,#E5DFF0)!important}
+.cflow-theme-sakura .cflow-theme-picker{background:linear-gradient(145deg,#FBF2F1,#F0E1E3)!important}
+.cflow-theme-ink .cflow-theme-picker{background:linear-gradient(145deg,#2A2D30,#202326)!important;color:#F1EEE8!important}
+
+/* Atmospheric accents inside the picker. */
+.cflow-theme-moss .cflow-theme-picker::after{content:"BOTANICAL / EARTH";display:block;margin-top:14px;font:700 7px/1 ui-monospace,monospace;letter-spacing:.18em;opacity:.35}
+.cflow-theme-dusk .cflow-theme-picker::after{content:"TWILIGHT / VIOLET HOUR";display:block;margin-top:14px;font:700 7px/1 ui-monospace,monospace;letter-spacing:.18em;opacity:.38}
+.cflow-theme-sakura .cflow-theme-picker::after{content:"BLOSSOM / SOFT LIGHT";display:block;margin-top:14px;font:700 7px/1 ui-monospace,monospace;letter-spacing:.18em;opacity:.38}
+.cflow-theme-clay .cflow-theme-picker::after{content:"TERRACOTTA / EARTH";display:block;margin-top:14px;font:700 7px/1 ui-monospace,monospace;letter-spacing:.18em;opacity:.38}
+.cflow-theme-mist .cflow-theme-picker::after{content:"FOG / COOL AIR";display:block;margin-top:14px;font:700 7px/1 ui-monospace,monospace;letter-spacing:.18em;opacity:.38}
+.cflow-theme-stone .cflow-theme-picker::after{content:"PAPER / WARM NEUTRAL";display:block;margin-top:14px;font:700 7px/1 ui-monospace,monospace;letter-spacing:.18em;opacity:.38}
+.cflow-theme-ink .cflow-theme-picker::after{content:"GRAPHITE / NIGHT";display:block;margin-top:14px;font:700 7px/1 ui-monospace,monospace;letter-spacing:.18em;opacity:.45}
+
+/* Slow, cinematic theme wipe. */
+.cflow-theme-wipe__paper,.cflow-theme-wipe__shadow{will-change:clip-path,transform}
+
+@media(prefers-reduced-motion:reduce){.cflow-theme-picker,.cflow-theme-swatch,.cflow-theme-swatch__dot,.cflow-theme-palette-button{transition:none!important}.cflow-theme-swatch:hover,.cflow-theme-palette-button:hover{transform:none!important}}
