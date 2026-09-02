@@ -18,5 +18,10 @@
 .landing .hero-code{transition:box-shadow .25s ease}
 .landing .hero-code:hover{box-shadow:13px 13px 0 var(--lf-ink)}
 .landing .landing-marquee--atmosphere div{will-change:transform}
-@media(pointer:coarse),(max-width:900px){.landing-cursor{display:none}.landing .capability:hover{padding-left:0;background:transparent}.landing .capability:hover code{transform:none}.landing .preview-flow__node:hover{transform:none;box-shadow:5px 5px 0 var(--lf-ink)}}
-@media(prefers-reduced-motion:reduce){.landing-cursor,.landing .primary-button,.landing .header-link,.landing .scroll-navigator a,.landing .landing-footer a,.landing .capability,.landing .capability code,.landing .preview-flow__node,.landing .flow-map__node,.landing .orbit-node,.landing .hero-code{transition:none}}
+.landing-micro-lottie-host{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;width:44px;height:28px;overflow:hidden;vertical-align:middle;margin-left:auto;opacity:.88;border-left:1px solid rgba(23,23,23,.28);padding-left:7px}
+.landing-micro-lottie{width:34px;height:28px;display:block;overflow:hidden}
+.landing-micro-lottie canvas{display:block!important;width:100%!important;height:100%!important}
+.preview-window__signal .landing-micro-lottie-host{width:30px;height:22px;margin:0 2px 0 0;border-left:0;padding-left:0}
+.preview-window__signal .landing-micro-lottie{width:26px;height:22px}
+@media(pointer:coarse),(max-width:900px){.landing-cursor{display:none}.landing .capability:hover{padding-left:0;background:transparent}.landing .capability:hover code{transform:none}.landing .preview-flow__node:hover{transform:none;box-shadow:5px 5px 0 var(--lf-ink)}.landing-micro-lottie-host{width:40px}}
+@media(prefers-reduced-motion:reduce){.landing-cursor,.landing .primary-button,.landing .header-link,.landing .scroll-navigator a,.landing .landing-footer a,.landing .capability,.landing .capability code,.landing .preview-flow__node,.landing .flow-map__node,.landing .orbit-node,.landing .hero-code{transition:none}.landing-micro-lottie-host{display:none}}
