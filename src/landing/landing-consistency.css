@@ -1,0 +1,30 @@
+/* Visual consistency pass — presentation only. No component behavior changes. */
+.landing{--lf-radius:0px;--lf-section-x:clamp(22px,7vw,110px)}
+.landing .scene-kicker,.landing .section-kicker,.landing .hero__eyebrow{font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;line-height:1;text-transform:uppercase}
+.landing .section-kicker{display:inline-flex;align-items:center;gap:10px;min-height:18px;color:var(--lf-ink);opacity:.72}
+.landing .section-kicker::before{content:"";width:22px;height:2px;background:currentColor;display:inline-block}
+.landing .problem .section-kicker,.landing .scene--engine .section-kicker,.landing .scene--capabilities .section-kicker,.landing .philosophy .section-kicker,.landing .scene--preview>.section-kicker,.landing .cta .section-kicker{margin-bottom:24px}
+.landing .problem .display,.landing .scene--engine .display,.landing .scene--capabilities .display,.landing .philosophy .display,.landing .scene--preview .display,.landing .cta .display{max-width:100%;}
+.landing .display span{-webkit-text-stroke-width:2px;text-shadow:none}
+.landing .problem,.landing .scene--engine,.landing .scene--capabilities,.landing .philosophy,.landing .scene--preview,.landing .cta{isolation:isolate}
+.landing .problem-signal,.landing .problem-visual,.landing .engine-lottie-frame,.landing .capability-system__card,.landing .preview-window,.landing .primary-button{border-width:2px}
+.landing .problem-signal,.landing .problem-visual,.landing .engine-lottie-frame,.landing .capability-system__card{box-shadow:6px 6px 0 var(--lf-ink)}
+.landing .primary-button{box-shadow:6px 6px 0 var(--lf-ink)}
+.landing .primary-button:hover{box-shadow:2px 2px 0 var(--lf-ink)}
+.landing .landing-marquee{border-width:2px}
+.landing .engine-flow,.landing .capability-list{border-top-width:2px;border-bottom-width:2px}
+.landing .engine-step,.landing .capability{border-bottom-width:1.5px}
+.landing .engine-step:last-child,.landing .capability:last-child{border-bottom:0}
+.landing .capability.is-live strong{position:relative}
+.landing .capability.is-live strong::after{content:"";display:inline-block;width:7px;height:7px;margin:0 0 5px 10px;border:2px solid var(--lf-ink);border-radius:50%;background:var(--lf-yellow);box-shadow:2px 2px 0 var(--lf-ink)}
+.landing .preview-copy .display{max-width:620px}
+.landing .preview-window{border-width:2px;box-shadow:10px 10px 0 var(--lf-ink)}
+.landing .preview-window__top{border-bottom-width:2px}
+.landing .preview-code{border-right-width:1.5px}
+.landing .preview-metrics{border-top-width:2px}
+.landing .preview-metrics span{border-right-width:1.5px}
+.landing .landing-footer{border-top-width:2px}
+.landing .landing-footer nav a{opacity:.72;transition:opacity .18s ease}
+.landing .landing-footer nav a:hover{opacity:1}
+@media(max-width:900px){.landing .section-kicker{margin-bottom:18px}.landing .problem .section-kicker,.landing .scene--engine .section-kicker,.landing .scene--capabilities .section-kicker,.landing .philosophy .section-kicker,.landing .scene--preview>.section-kicker,.landing .cta .section-kicker{margin-bottom:18px}.landing .preview-code{border-right:0}}
+@media(prefers-reduced-motion:reduce){.landing .landing-footer nav a{transition:none}}
