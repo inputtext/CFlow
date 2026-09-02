@@ -21,41 +21,39 @@
 .cflow-theme-sakura{ --cflow-palette-bg:#F7F0EF; --cflow-palette-code:#E9DDE0; --cflow-palette-flow:#E5DCE7; --cflow-palette-memory:#DFE7DF; --cflow-palette-exec:#E9D6C8; --cflow-palette-special:#EACFD8; --cflow-palette-ink:#392D31; --cflow-palette-muted:#806F74; --cflow-palette-border:#392D31; }
 .cflow-theme-ink   { --cflow-palette-bg:#202326; --cflow-palette-code:#4A4A42; --cflow-palette-flow:#46404F; --cflow-palette-memory:#3C4B45; --cflow-palette-exec:#62543A; --cflow-palette-special:#5A414B; --cflow-palette-ink:#F1EEE8; --cflow-palette-muted:#B8BBC0; --cflow-palette-border:#111315; }
 
-/* The existing C·FLOW layout uses intentionally strong pastel Tailwind
-   classes. These selectors remap only colors, leaving dimensions and flow
-   geometry untouched. */
-[class^="cflow-theme-"] body,
-[class*=" cflow-theme-"] body { background:var(--cflow-palette-bg); color:var(--cflow-palette-ink); }
+/* Color remapping only: dimensions and graph geometry are untouched. */
+.cflow-theme-stone body, .cflow-theme-moss body, .cflow-theme-mist body, .cflow-theme-clay body, .cflow-theme-dusk body, .cflow-theme-sakura body, .cflow-theme-ink body,
+.cflow-theme-stone #root, .cflow-theme-moss #root, .cflow-theme-mist #root, .cflow-theme-clay #root, .cflow-theme-dusk #root, .cflow-theme-sakura #root, .cflow-theme-ink #root { background:var(--cflow-palette-bg); color:var(--cflow-palette-ink); }
 
-.cflow-theme-stone main > section:nth-child(1), .cflow-theme-moss main > section:nth-child(1), .cflow-theme-mist main > section:nth-child(1), .cflow-theme-clay main > section:nth-child(1), .cflow-theme-dusk main > section:nth-child(1), .cflow-theme-sakura main > section:nth-child(1), .cflow-theme-ink main > section:nth-child(1) { background:var(--cflow-palette-code)!important; }
-.cflow-theme-stone main > section:nth-child(2), .cflow-theme-moss main > section:nth-child(2), .cflow-theme-mist main > section:nth-child(2), .cflow-theme-clay main > section:nth-child(2), .cflow-theme-dusk main > section:nth-child(2), .cflow-theme-sakura main > section:nth-child(2), .cflow-theme-ink main > section:nth-child(2) { background:var(--cflow-palette-flow)!important; }
-.cflow-theme-stone main > section:nth-child(3), .cflow-theme-moss main > section:nth-child(3), .cflow-theme-mist main > section:nth-child(3), .cflow-theme-clay main > section:nth-child(3), .cflow-theme-dusk main > section:nth-child(3), .cflow-theme-sakura main > section:nth-child(3), .cflow-theme-ink main > section:nth-child(3) { background:var(--cflow-palette-memory)!important; }
+.cflow-theme-stone header,.cflow-theme-moss header,.cflow-theme-mist header,.cflow-theme-clay header,.cflow-theme-dusk header,.cflow-theme-sakura header,.cflow-theme-ink header,
+.cflow-theme-stone main,.cflow-theme-moss main,.cflow-theme-mist main,.cflow-theme-clay main,.cflow-theme-dusk main,.cflow-theme-sakura main,.cflow-theme-ink main { background:var(--cflow-palette-bg)!important; color:var(--cflow-palette-ink)!important; }
+.cflow-theme-stone footer,.cflow-theme-moss footer,.cflow-theme-mist footer,.cflow-theme-clay footer,.cflow-theme-dusk footer,.cflow-theme-sakura footer,.cflow-theme-ink footer { background:var(--cflow-palette-exec)!important; color:var(--cflow-palette-ink)!important; }
 
-.cflow-theme-stone main > section:first-child > div, .cflow-theme-moss main > section:first-child > div, .cflow-theme-mist main > section:first-child > div, .cflow-theme-clay main > section:first-child > div, .cflow-theme-dusk main > section:first-child > div, .cflow-theme-sakura main > section:first-child > div, .cflow-theme-ink main > section:first-child > div { background:var(--cflow-palette-code)!important; }
-.cflow-theme-stone main > section:nth-child(2) > div:nth-child(2), .cflow-theme-moss main > section:nth-child(2) > div:nth-child(2), .cflow-theme-mist main > section:nth-child(2) > div:nth-child(2), .cflow-theme-clay main > section:nth-child(2) > div:nth-child(2), .cflow-theme-dusk main > section:nth-child(2) > div:nth-child(2), .cflow-theme-sakura main > section:nth-child(2) > div:nth-child(2), .cflow-theme-ink main > section:nth-child(2) > div:nth-child(2) { background:var(--cflow-palette-flow)!important; }
-.cflow-theme-stone main > section:nth-child(3) > div:nth-child(2), .cflow-theme-moss main > section:nth-child(3) > div:nth-child(2), .cflow-theme-mist main > section:nth-child(3) > div:nth-child(2), .cflow-theme-clay main > section:nth-child(3) > div:nth-child(2), .cflow-theme-dusk main > section:nth-child(3) > div:nth-child(2), .cflow-theme-sakura main > section:nth-child(3) > div:nth-child(2), .cflow-theme-ink main > section:nth-child(3) > div:nth-child(2) { background:var(--cflow-palette-memory)!important; }
+.cflow-theme-stone main > section:nth-child(1),.cflow-theme-moss main > section:nth-child(1),.cflow-theme-mist main > section:nth-child(1),.cflow-theme-clay main > section:nth-child(1),.cflow-theme-dusk main > section:nth-child(1),.cflow-theme-sakura main > section:nth-child(1),.cflow-theme-ink main > section:nth-child(1){background:var(--cflow-palette-code)!important}
+.cflow-theme-stone main > section:nth-child(2),.cflow-theme-moss main > section:nth-child(2),.cflow-theme-mist main > section:nth-child(2),.cflow-theme-clay main > section:nth-child(2),.cflow-theme-dusk main > section:nth-child(2),.cflow-theme-sakura main > section:nth-child(2),.cflow-theme-ink main > section:nth-child(2){background:var(--cflow-palette-flow)!important}
+.cflow-theme-stone main > section:nth-child(3),.cflow-theme-moss main > section:nth-child(3),.cflow-theme-mist main > section:nth-child(3),.cflow-theme-clay main > section:nth-child(3),.cflow-theme-dusk main > section:nth-child(3),.cflow-theme-sakura main > section:nth-child(3),.cflow-theme-ink main > section:nth-child(3){background:var(--cflow-palette-memory)!important}
 
-.cflow-theme-stone [data-memory], .cflow-theme-moss [data-memory], .cflow-theme-mist [data-memory], .cflow-theme-clay [data-memory], .cflow-theme-dusk [data-memory], .cflow-theme-sakura [data-memory], .cflow-theme-ink [data-memory] { background:color-mix(in srgb,var(--cflow-palette-memory) 70%,white)!important; color:var(--cflow-palette-ink)!important; border-color:var(--cflow-palette-border)!important; }
+.cflow-theme-stone [data-memory],.cflow-theme-moss [data-memory],.cflow-theme-mist [data-memory],.cflow-theme-clay [data-memory],.cflow-theme-dusk [data-memory],.cflow-theme-sakura [data-memory],.cflow-theme-ink [data-memory]{background:color-mix(in srgb,var(--cflow-palette-memory) 70%,white)!important;color:var(--cflow-palette-ink)!important;border-color:var(--cflow-palette-border)!important}
 
-.cflow-theme-stone [class*="bg-[#FFF9F0]"], .cflow-theme-moss [class*="bg-[#FFF9F0]"], .cflow-theme-mist [class*="bg-[#FFF9F0]"], .cflow-theme-clay [class*="bg-[#FFF9F0]"], .cflow-theme-dusk [class*="bg-[#FFF9F0]"], .cflow-theme-sakura [class*="bg-[#FFF9F0]"], .cflow-theme-ink [class*="bg-[#FFF9F0]"] { background:var(--cflow-palette-bg)!important; }
+.cflow-theme-stone [class*="bg-[#FFF9F0]"],.cflow-theme-moss [class*="bg-[#FFF9F0]"],.cflow-theme-mist [class*="bg-[#FFF9F0]"],.cflow-theme-clay [class*="bg-[#FFF9F0]"],.cflow-theme-dusk [class*="bg-[#FFF9F0]"],.cflow-theme-sakura [class*="bg-[#FFF9F0]"],.cflow-theme-ink [class*="bg-[#FFF9F0]"]{background:var(--cflow-palette-bg)!important}
 
 /* Palette picker */
-.cflow-theme-picker { position:fixed; top:78px; left:50%; transform:translateX(105px); z-index:1250; width:318px; padding:16px; border:2px solid var(--cflow-palette-border); background:var(--cflow-palette-bg); color:var(--cflow-palette-ink); box-shadow:7px 7px 0 var(--cflow-palette-border); }
-.cflow-theme-picker__title { margin-bottom:12px; font:900 10px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.22em; text-transform:uppercase; opacity:.65; }
-.cflow-theme-picker__grid { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; }
-.cflow-theme-swatch { border:2px solid transparent; background:transparent; padding:0; color:inherit; }
-.cflow-theme-swatch:hover { transform:translateY(-2px); }
-.cflow-theme-swatch.is-active { border-color:var(--cflow-palette-border); }
-.cflow-theme-swatch__dot { display:block; width:32px; height:32px; margin:auto; border:2px solid rgba(23,23,23,.12); border-radius:9px; box-shadow:2px 2px 0 rgba(23,23,23,.16); }
-.cflow-theme-swatch__name { display:block; margin-top:6px; font:700 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.03em; }
+.cflow-theme-picker{position:fixed;top:78px;left:50%;transform:translateX(105px);z-index:1250;width:318px;padding:16px;border:2px solid var(--cflow-palette-border);background:var(--cflow-palette-bg);color:var(--cflow-palette-ink);box-shadow:7px 7px 0 var(--cflow-palette-border)}
+.cflow-theme-picker__title{margin-bottom:12px;font:900 10px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.22em;text-transform:uppercase;opacity:.65}
+.cflow-theme-picker__grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.cflow-theme-swatch{border:2px solid transparent;background:transparent;padding:0;color:inherit}
+.cflow-theme-swatch:hover{transform:translateY(-2px)}
+.cflow-theme-swatch.is-active{border-color:var(--cflow-palette-border)}
+.cflow-theme-swatch__dot{display:block;width:32px;height:32px;margin:auto;border:2px solid rgba(23,23,23,.12);border-radius:9px;box-shadow:2px 2px 0 rgba(23,23,23,.16)}
+.cflow-theme-swatch__name{display:block;margin-top:6px;font:700 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.03em}
 
-/* AE-style paper wipe. GSAP animates clip-path; CSS only supplies the paper. */
-.cflow-theme-wipe { position:fixed; inset:0; z-index:2000; pointer-events:none; overflow:hidden; }
-.cflow-theme-wipe__paper, .cflow-theme-wipe__shadow { position:absolute; inset:-12%; clip-path:polygon(-20% 0,-5% 0,-20% 100%,-35% 100%); will-change:clip-path,transform; }
-.cflow-theme-wipe__paper { background:var(--wipe-color,#FFF9F0); }
-.cflow-theme-wipe__shadow { background:rgba(23,23,23,.14); transform:translate(-14px,14px); filter:blur(1px); }
-.cflow-theme-wipe__grain { position:absolute; inset:0; opacity:.08; background-image:repeating-linear-gradient(0deg,rgba(23,23,23,.5) 0,rgba(23,23,23,.5) 1px,transparent 1px,transparent 4px); mix-blend-mode:multiply; }
-.cflow-theme-wipe__mark { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); font:900 13px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.24em; color:var(--wipe-ink,#171717); white-space:nowrap; opacity:0; }
+/* AE-style diagonal paper wipe. GSAP owns the animation. */
+.cflow-theme-wipe{position:fixed;inset:0;z-index:2000;pointer-events:none;overflow:hidden}
+.cflow-theme-wipe__paper,.cflow-theme-wipe__shadow{position:absolute;inset:-12%;clip-path:polygon(-20% 0,-5% 0,-20% 100%,-35% 100%);will-change:clip-path,transform}
+.cflow-theme-wipe__paper{background:var(--wipe-color,#FFF9F0)}
+.cflow-theme-wipe__shadow{background:rgba(23,23,23,.14);transform:translate(-14px,14px);filter:blur(1px)}
+.cflow-theme-wipe__grain{position:absolute;inset:0;opacity:.08;background-image:repeating-linear-gradient(0deg,rgba(23,23,23,.5) 0,rgba(23,23,23,.5) 1px,transparent 1px,transparent 4px);mix-blend-mode:multiply}
+.cflow-theme-wipe__mark{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font:900 13px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.24em;color:var(--wipe-ink,#171717);white-space:nowrap;opacity:0}
 
-@media (max-width:900px) { .cflow-theme-picker { left:auto; right:16px; transform:none; } }
-@media (prefers-reduced-motion:reduce) { .cflow-theme-swatch:hover { transform:none; } }
+@media(max-width:900px){.cflow-theme-picker{left:auto;right:16px;transform:none}}
+@media(prefers-reduced-motion:reduce){.cflow-theme-swatch:hover{transform:none}}
