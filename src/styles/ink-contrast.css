@@ -15,14 +15,11 @@
 .cflow-theme-ink header :is(h1,span,p,label,small,strong) { color:var(--cflow-ink-light)!important; -webkit-text-fill-color:var(--cflow-ink-light)!important; }
 .cflow-theme-ink header :is([class*="bg-[#DDF4FF"],[class*="bg-white"],[class*="bg-[#FFF9F0"],[class*="bg-[#DFF7E8"],[class*="bg-[#FFE3A3"]) :is(*,span),
 .cflow-theme-ink header :is([class*="bg-[#DDF4FF"],[class*="bg-white"],[class*="bg-[#FFF9F0"],[class*="bg-[#DFF7E8"],[class*="bg-[#FFE3A3"]) { color:var(--cflow-ink-dark)!important; -webkit-text-fill-color:var(--cflow-ink-dark)!important; }
-
 .cflow-theme-ink main > section:first-child > :first-child { color:var(--cflow-ink-light)!important; }
 .cflow-theme-ink main > section:first-child > :first-child :is(h1,h2,h3,h4,h5,h6,p,span,label,small) { color:var(--cflow-ink-light)!important; -webkit-text-fill-color:var(--cflow-ink-light)!important; }
 .cflow-theme-ink textarea,.cflow-theme-ink input,.cflow-theme-ink select { color:var(--cflow-ink-dark)!important; -webkit-text-fill-color:var(--cflow-ink-dark)!important; background:var(--cflow-ink-paper)!important; border-color:var(--cflow-ink-dark)!important; }
-
 .cflow-theme-ink main button[class*="bg-[#171717"] { background:var(--cflow-ink-dark)!important; color:var(--cflow-ink-light)!important; -webkit-text-fill-color:var(--cflow-ink-light)!important; }
 .cflow-theme-ink main button[class*="bg-[#171717"] :is(span) { color:var(--cflow-ink-light)!important; -webkit-text-fill-color:var(--cflow-ink-light)!important; }
-
 .cflow-theme-ink .cflow-flow-shell > :first-child { color:var(--cflow-ink-light)!important; }
 .cflow-theme-ink .cflow-flow-shell > :first-child :is(button,span) { color:var(--cflow-ink-dark)!important; -webkit-text-fill-color:var(--cflow-ink-dark)!important; }
 .cflow-theme-ink .cflow-flow-shell .cflow-flow-node,.cflow-theme-ink .cflow-flow-shell .cflow-flow-node * { color:var(--cflow-ink-dark)!important; -webkit-text-fill-color:var(--cflow-ink-dark)!important; text-shadow:none!important; }
@@ -30,54 +27,23 @@
 .cflow-theme-ink .cflow-flow-shell svg rect { stroke:var(--cflow-ink-dark)!important; }
 .cflow-theme-ink .cflow-flow-shell svg path[stroke="#171717"] { stroke:var(--cflow-ink-dark)!important; }
 .cflow-theme-ink .cflow-flow-shell svg marker path { fill:var(--cflow-ink-dark)!important; }
-
 .cflow-theme-ink main > section:nth-child(3) { color:var(--cflow-ink-light)!important; -webkit-text-fill-color:var(--cflow-ink-light)!important; }
 .cflow-theme-ink main > section:nth-child(3) > :first-child :is(h1,h2,h3,h4,h5,h6,p,span,label,small) { color:var(--cflow-ink-light)!important; -webkit-text-fill-color:var(--cflow-ink-light)!important; }
 .cflow-theme-ink [data-memory],.cflow-theme-ink [data-memory] * { color:var(--cflow-ink-dark)!important; -webkit-text-fill-color:var(--cflow-ink-dark)!important; }
-
 .cflow-theme-ink :is(.cflow-call-stack,[class*="call-stack"],[class*="CallStack"]) { color:var(--cflow-ink-light)!important; -webkit-text-fill-color:var(--cflow-ink-light)!important; }
 .cflow-theme-ink :is(.cflow-call-stack,[class*="call-stack"],[class*="CallStack"]) :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong) { color:var(--cflow-ink-light)!important; -webkit-text-fill-color:var(--cflow-ink-light)!important; }
 .cflow-theme-ink :is(.cflow-call-stack,[class*="call-stack"],[class*="CallStack"]) :is([class*="bg-white"],[class*="bg-[#FFF9F0"],[class*="bg-[#FFE3A3"]) :is(*) { color:var(--cflow-ink-dark)!important; -webkit-text-fill-color:var(--cflow-ink-dark)!important; }
 
 /* INK EXECUTION BAR — visual correction only. React handlers/state remain untouched. */
 .cflow-theme-ink footer { color:var(--cflow-ink-light)!important; -webkit-text-fill-color:var(--cflow-ink-light)!important; }
-
-/* BACK: muted ink-gray surface, warm-white text. */
-.cflow-theme-ink footer > div:first-child > button:nth-child(1) {
-  background:#85837D!important;
-  border-color:#111416!important;
-  color:#F4F0E8!important;
-  -webkit-text-fill-color:#F4F0E8!important;
-  box-shadow:3px 3px 0 #111416!important;
-}
+.cflow-theme-ink footer > div:first-child > button:nth-child(1) { background:#85837D!important; border-color:#111416!important; color:#F4F0E8!important; -webkit-text-fill-color:#F4F0E8!important; box-shadow:3px 3px 0 #111416!important; }
 .cflow-theme-ink footer > div:first-child > button:nth-child(1) * { color:#F4F0E8!important; -webkit-text-fill-color:#F4F0E8!important; }
-
-/* RESET: ivory surface, black text. */
-.cflow-theme-ink footer > div:first-child > button:nth-child(2) {
-  background:#F1EEE8!important;
-  border-color:#111416!important;
-  color:#111416!important;
-  -webkit-text-fill-color:#111416!important;
-  box-shadow:3px 3px 0 #111416!important;
-}
+.cflow-theme-ink footer > div:first-child > button:nth-child(2) { background:#F1EEE8!important; border-color:#111416!important; color:#111416!important; -webkit-text-fill-color:#111416!important; box-shadow:3px 3px 0 #111416!important; }
 .cflow-theme-ink footer > div:first-child > button:nth-child(2) * { color:#111416!important; -webkit-text-fill-color:#111416!important; }
-
-/* NEXT: ivory surface, black text with the existing execution-gold accent. */
-.cflow-theme-ink footer > div:first-child > button:nth-child(3) {
-  background:#F1EEE8!important;
-  border-color:#111416!important;
-  color:#111416!important;
-  -webkit-text-fill-color:#111416!important;
-  box-shadow:3px 3px 0 #D2B878!important;
-}
+.cflow-theme-ink footer > div:first-child > button:nth-child(3) { background:#F1EEE8!important; border-color:#111416!important; color:#111416!important; -webkit-text-fill-color:#111416!important; box-shadow:3px 3px 0 #D2B878!important; }
 .cflow-theme-ink footer > div:first-child > button:nth-child(3) * { color:#111416!important; -webkit-text-fill-color:#111416!important; }
-
-/* Preserve the existing React disabled behaviour; only soften its Ink appearance. */
 .cflow-theme-ink footer > div:first-child > button:disabled { opacity:.42!important; cursor:default!important; }
-
-/* Keep progress/current copy on the dark Ink chrome. */
-.cflow-theme-ink footer > div:first-child > div:nth-child(4),
-.cflow-theme-ink footer > div:first-child > div:nth-child(4) :is(span) { color:#F4F0E8!important; -webkit-text-fill-color:#F4F0E8!important; }
+.cflow-theme-ink footer > div:first-child > div:nth-child(4),.cflow-theme-ink footer > div:first-child > div:nth-child(4) :is(span) { color:#F4F0E8!important; -webkit-text-fill-color:#F4F0E8!important; }
 .cflow-theme-ink footer > div:first-child > div:nth-child(4) > div:last-child { border-color:#111416!important; background:#F1EEE8!important; }
 .cflow-theme-ink footer > div:first-child > div:nth-child(4) > div:last-child > div:first-child { background:#D2B878!important; }
 .cflow-theme-ink footer > div:first-child > div:nth-child(4) > div:last-child > div:last-child { border-color:#F1EEE8!important; background:#111416!important; box-shadow:0 0 0 1px #111416!important; }
@@ -100,5 +66,7 @@
 .cflow-theme-ink .cflow-theme-picker :is(.cflow-theme-picker__title,.cflow-theme-swatch,.cflow-theme-swatch__name) { color:var(--cflow-ink-light)!important; -webkit-text-fill-color:var(--cflow-ink-light)!important; }
 .cflow-theme-ink .cflow-theme-swatch.is-active { background:#3A3E3C!important; border-color:var(--cflow-ink-light)!important; }
 .cflow-theme-ink .cflow-theme-palette-button { background:var(--cflow-ink-paper)!important; color:var(--cflow-ink-dark)!important; border-color:#111416!important; box-shadow:2px 2px 0 #111416!important; }
-.cflow-theme-picker { top:auto!important; bottom:104px!important; }
-.cflow-theme-control { bottom:46px!important; }
+
+/* Theme control now lives in the header for every palette. */
+.cflow-theme-ink .cflow-theme-control { top:18px!important; right:24px!important; left:auto!important; bottom:auto!important; }
+.cflow-theme-ink .cflow-theme-picker { top:64px!important; right:24px!important; left:auto!important; bottom:auto!important; }
