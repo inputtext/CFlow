@@ -13,6 +13,7 @@ import ThemeToggle from './components/ThemeToggle.jsx'
 import ClerkGate from './components/ClerkGate.jsx'
 import AnalysisUsageGuard from './components/AnalysisUsageGuard.jsx'
 import LandingPage from './landing/LandingPage.jsx'
+import { initLandingSmoothScroll } from './animations/landingSmoothScroll.js'
 
 import { ClerkProvider } from '@clerk/react'
 
@@ -32,6 +33,20 @@ function Workspace() {
       </AnalysisUsageGuard>
     </ClerkGate>
   )
+}
+
+// The existing workspace intentionally owns the viewport scroll. The landing
+// page is a document-scrolling experience, so switch the global shell only
+// when the landing route is active. This keeps the existing app untouched.
+if (isLanding) {
+  document.documentElement.style.overflow = 'auto'
+  document.body.style.overflow = 'auto'
+  const root = document.getElementById('root')
+  if (root) {
+    root.style.height = 'auto'
+    root.style.minHeight = '100%'
+  }
+  initLandingSmoothScroll()
 }
 
 document.addEventListener('click', (event) => {
