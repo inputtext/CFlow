@@ -8,6 +8,7 @@ import './styles/home-themes.css'
 import './styles/ink-contrast.css'
 import './styles/theme-control.css'
 import './landing/landing-product.css'
+import './animations/landingProductMotion.js'
 
 import App from './App.jsx'
 import ThemeToggle from './components/ThemeToggle.jsx'
