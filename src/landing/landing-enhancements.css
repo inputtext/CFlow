@@ -19,6 +19,8 @@
 .problem-visual__path { height:2px; background:var(--lf-ink); margin:18px 0; transform-origin:left; animation:lf-path-pulse 2.2s ease-in-out infinite; }
 .problem-visual__tokens{display:flex;gap:7px;flex-wrap:wrap}.problem-visual__tokens i{font-style:normal;border:2px solid var(--lf-ink);padding:5px 7px;font:900 .58rem/1 monospace;background:var(--lf-blue)}.problem-visual__tokens i:nth-child(2){background:var(--lf-pink)}.problem-visual__tokens i:nth-child(3){background:var(--lf-mint)}
 
+/* Keep the engine artwork in its own visual lane so it never competes with the headline. */
+.scene--engine>.display{max-width:68%;}
 .engine-lottie-frame { position:absolute; right:clamp(22px,7vw,110px); top:18%; width:min(280px,25vw); height:280px; border:3px solid var(--lf-ink); background:rgba(255,249,240,.72); box-shadow:8px 8px 0 var(--lf-ink); overflow:hidden; z-index:2; }
 .engine-lottie-frame__label{position:absolute;z-index:3;left:12px;top:10px;font:900 .52rem/1 monospace;letter-spacing:.08em}.engine-lottie-frame__index{position:absolute;z-index:3;right:12px;bottom:10px;font:900 .52rem/1 monospace;opacity:.55}
 
@@ -30,6 +32,6 @@
 
 @keyframes lf-transfer{0%,12%{transform:translateX(0);opacity:0}20%{opacity:1}72%{transform:translateX(calc(100% - 12px));opacity:1}86%,100%{transform:translateX(calc(100% - 12px));opacity:0}}@keyframes lf-path-pulse{0%,100%{transform:scaleX(.25);opacity:.3}50%{transform:scaleX(1);opacity:1}}@keyframes lf-core-breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}@keyframes lf-pulse{0%,100%{opacity:.35;transform:scale(.85)}50%{opacity:1;transform:scale(1.2)}}
 
-@media(max-width:900px){.scroll-navigator{display:none}.problem-visual,.engine-lottie-frame{position:relative;right:auto;top:auto;transform:none;width:min(100%,520px);margin:45px 0 0}.problem-visual{grid-column:1/-1}.capability-system{grid-template-columns:1fr}.capability-system__core{margin:auto}.hero-telemetry{position:relative;left:auto;bottom:auto;margin-top:25px}}
+@media(max-width:900px){.scroll-navigator{display:none}.problem-visual,.engine-lottie-frame{position:relative;right:auto;top:auto;transform:none;width:min(100%,520px);margin:45px 0 0}.problem-visual{grid-column:1/-1}.scene--engine>.display{max-width:100%}.capability-system{grid-template-columns:1fr}.capability-system__core{margin:auto}.hero-telemetry{position:relative;left:auto;bottom:auto;margin-top:25px}}
 @media(max-width:560px){.preview-metrics{grid-template-columns:1fr}.preview-metrics span{border-right:0;border-bottom:2px solid var(--lf-ink)}.preview-metrics span:last-child{border-bottom:0}}
 @media(prefers-reduced-motion:reduce){.exec-transfer__dot,.problem-visual__path,.capability-system__core{animation:none}.scroll-navigator a{transition:none}}
