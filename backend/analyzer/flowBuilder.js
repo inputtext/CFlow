@@ -3,9 +3,9 @@
 // ============================================================
 //
 // Builds a structural control-flow graph from parser statements.
-// Branches are explicitly merged after the complete IF/ELSE block so
-// the execution engine never falls through from the TRUE branch into
-// ELSE. Loop bodies retain their dedicated back-edge.
+// Branches explicitly merge after the complete IF/ELSE block. When a
+// branch is the final construct inside a loop, both arms continue at
+// the enclosing loop condition instead of escaping the loop.
 // ============================================================
 
 function buildFlow(program) {
@@ -70,7 +70,6 @@ function buildFlow(program) {
     return -1;
   };
 
-  // Find an ELSE belonging directly to this condition.
   const directElse = (conditionIndex) => {
     const condition = statements[conditionIndex];
     const range = bodyRange(conditionIndex);
@@ -87,8 +86,9 @@ function buildFlow(program) {
     return -1;
   };
 
-  // Find the first statement after the entire IF/ELSE construct. If the
-  // branch is the final construct inside a loop, continue at that loop.
+  // Resolve the statement after an entire IF/ELSE construct. If the IF is
+  // inside a loop and the next lexical statement is outside that loop, the
+  // correct continuation is the loop condition, not the statement after it.
   const branchContinuation = (conditionIndex, branchEndIndex, elseIndex = -1) => {
     const condition = statements[conditionIndex];
     let endIndex = branchEndIndex;
@@ -99,9 +99,21 @@ function buildFlow(program) {
     }
 
     const next = nextAtOrAbove(endIndex, condition.depth);
+    const parent = directParentControl(conditionIndex, condition.depth);
+
+    if (parent >= 0) {
+      const parentStatement = statements[parent];
+
+      // A sibling at the parent's depth is outside the parent body. For an
+      // IF inside a loop, that means the loop must run its update/back-edge.
+      if (next < 0 || statements[next].depth <= parentStatement.depth) {
+        if (loopTypes.has(parentStatement.type)) return parentStatement.id;
+      }
+    }
+
     if (next >= 0) return statements[next].id;
 
-    const parent = directParentControl(conditionIndex, condition.depth);
+    // No lexical sibling: continue through an enclosing loop if present.
     if (parent >= 0 && loopTypes.has(statements[parent].type)) {
       return statements[parent].id;
     }
@@ -109,8 +121,8 @@ function buildFlow(program) {
     return "exit";
   };
 
-  // Only connect ordinary sibling statements. Branches and loops are wired
-  // explicitly below, preventing accidental TRUE -> ELSE fall-through.
+  // Ordinary sequential edges only connect true lexical siblings. Control
+  // nodes are wired explicitly so there is no accidental branch fall-through.
   for (let i = 0; i < statements.length - 1; i += 1) {
     const current = statements[i];
     const next = statements[i + 1];
@@ -161,23 +173,21 @@ function buildFlow(program) {
       const bodyLast = statements[range.end];
       const elseIndex = directElse(i);
 
-      // TRUE enters only the IF body.
       addEdge(s.id, bodyFirst.id, "true", `edge_${s.id}_true`);
 
       if (elseIndex >= 0) {
         const elseNode = statements[elseIndex];
         const elseRange = bodyRange(elseIndex);
 
-        // FALSE enters ELSE.
+        // FALSE enters ELSE; TRUE never enters ELSE.
         addEdge(s.id, elseNode.id, "false", `edge_${s.id}_false`);
 
-        // Both arms merge AFTER the ELSE body. This is the key fix: the TRUE
-        // arm never points to ELSE and therefore cannot execute both branches.
         if (elseRange) {
           const elseFirst = statements[elseRange.start];
           const elseLast = statements[elseRange.end];
           const continuation = branchContinuation(i, range.end, elseIndex);
 
+          // Both arms merge after the complete IF/ELSE construct.
           addEdge(bodyLast.id, continuation, "normal", `edge_${bodyLast.id}_join`);
           addEdge(elseNode.id, elseFirst.id, "normal", `edge_${elseNode.id}_body`);
           addEdge(elseLast.id, continuation, "normal", `edge_${elseLast.id}_join`);
@@ -188,8 +198,6 @@ function buildFlow(program) {
         }
       } else {
         const continuation = branchContinuation(i, range.end);
-
-        // No ELSE: TRUE runs the body, FALSE skips it. Both continue after IF.
         addEdge(s.id, continuation, "false", `edge_${s.id}_false`);
         addEdge(bodyLast.id, continuation, "normal", `edge_${bodyLast.id}_join`);
       }
