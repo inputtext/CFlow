@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 
 const EMPTY_STACK = [];
-const AUTO_HIDE_MS = 3000;
 
 function normalizeFrames(detail) {
   if (!Array.isArray(detail)) return EMPTY_STACK;
@@ -48,25 +47,15 @@ function CallStack() {
   const listRef = useRef(null);
   const previousIdsRef = useRef([]);
   const signatureRef = useRef("");
-  const autoHideTimerRef = useRef(null);
+  const hideTimerRef = useRef(null);
 
   useEffect(() => {
     let observer;
     let retryTimer;
 
-    const clearAutoHide = () => {
-      if (autoHideTimerRef.current) {
-        window.clearTimeout(autoHideTimerRef.current);
-        autoHideTimerRef.current = null;
-      }
-    };
-
-    const scheduleAutoHide = () => {
-      clearAutoHide();
-      autoHideTimerRef.current = window.setTimeout(() => {
-        setOpen(false);
-        autoHideTimerRef.current = null;
-      }, AUTO_HIDE_MS);
+    const restartAutoHide = () => {
+      if (hideTimerRef.current) window.clearTimeout(hideTimerRef.current);
+      hideTimerRef.current = window.setTimeout(() => setOpen(false), 3000);
     };
 
     const applyFrames = (nextFrames, autoOpen = false) => {
@@ -78,19 +67,14 @@ function CallStack() {
       setFrames(nextFrames);
 
       if (autoOpen) {
-        // Every runtime update gets its own fresh 3-second spotlight.
-        // Re-opening the panel also retriggers the GSAP entrance animation.
-        setOpen(false);
-        window.requestAnimationFrame(() => setOpen(true));
-        scheduleAutoHide();
+        setOpen(true);
+        restartAutoHide();
       }
     };
 
     const syncFromMemory = () => {
       const nextFrames = readMemoryFrames();
-      if (nextFrames.length) {
-        applyFrames(nextFrames, true);
-      }
+      if (nextFrames.length) applyFrames(nextFrames, true);
     };
 
     const attachMemoryObserver = () => {
@@ -124,7 +108,7 @@ function CallStack() {
     return () => {
       if (observer) observer.disconnect();
       if (retryTimer) window.clearTimeout(retryTimer);
-      clearAutoHide();
+      if (hideTimerRef.current) window.clearTimeout(hideTimerRef.current);
       window.removeEventListener("cflow:callstack", handleStackEvent);
       window.removeEventListener("cflow:memory", syncFromMemory);
     };
@@ -138,14 +122,15 @@ function CallStack() {
     if (open) {
       gsap.fromTo(
         panelRef.current,
-        { x: 34, opacity: 0 },
-        { x: 0, opacity: 1, duration: 0.42, ease: "power3.out" }
+        { x: 42, opacity: 0, scale: 0.98 },
+        { x: 0, opacity: 1, scale: 1, duration: 0.42, ease: "power3.out" }
       );
     } else {
       gsap.to(panelRef.current, {
-        x: 34,
+        x: 42,
         opacity: 0,
-        duration: 0.32,
+        scale: 0.98,
+        duration: 0.28,
         ease: "power2.in",
       });
     }
@@ -164,14 +149,7 @@ function CallStack() {
       gsap.fromTo(
         cards,
         { y: 14, opacity: 0, scale: 0.98 },
-        {
-          y: 0,
-          opacity: 1,
-          scale: 1,
-          duration: 0.38,
-          stagger: 0.055,
-          ease: "power3.out",
-        }
+        { y: 0, opacity: 1, scale: 1, duration: 0.38, stagger: 0.055, ease: "power3.out" }
       );
     } else {
       gsap.fromTo(
@@ -190,10 +168,16 @@ function CallStack() {
     <>
       <button
         type="button"
-        onClick={() => setOpen((value) => !value)}
+        onClick={() => {
+          setOpen((value) => !value);
+          if (!open) {
+            if (hideTimerRef.current) window.clearTimeout(hideTimerRef.current);
+            hideTimerRef.current = window.setTimeout(() => setOpen(false), 3000);
+          }
+        }}
         aria-expanded={open}
         aria-label="Toggle call stack"
-        className="fixed right-0 top-[92px] z-[950] border-2 border-r-0 border-[#171717] bg-[#FFE3A3] px-2 py-3 font-mono text-[9px] font-black uppercase tracking-[0.16em] shadow-[-3px_3px_0_#171717] transition-transform duration-200 hover:-translate-x-1"
+        className="fixed right-0 top-1/2 z-[950] -translate-y-1/2 border-2 border-r-0 border-[#171717] bg-[#FFE3A3] px-2 py-3 font-mono text-[9px] font-black uppercase tracking-[0.16em] shadow-[-3px_3px_0_#171717] transition-transform duration-200 hover:-translate-x-1"
       >
         <span className="block [writing-mode:vertical-rl]">CALL STACK</span>
       </button>
@@ -201,7 +185,7 @@ function CallStack() {
       <aside
         ref={panelRef}
         aria-label="Call stack"
-        className="pointer-events-auto fixed right-4 top-[92px] z-[940] w-[300px] max-w-[calc(100vw-32px)] border-2 border-[#171717] bg-[#FFF9F0] shadow-[7px_7px_0_#171717]"
+        className="pointer-events-auto fixed bottom-[112px] right-4 z-[940] w-[260px] max-w-[calc(100vw-32px)] border-2 border-[#171717] bg-[#FFF9F0] shadow-[7px_7px_0_#171717]"
         style={{ opacity: 0 }}
       >
         <div className="flex items-center justify-between border-b-2 border-[#171717] bg-[#E8DFFF] px-4 py-3">
@@ -211,14 +195,17 @@ function CallStack() {
           </div>
           <button
             type="button"
-            onClick={() => setOpen(false)}
+            onClick={() => {
+              if (hideTimerRef.current) window.clearTimeout(hideTimerRef.current);
+              setOpen(false);
+            }}
             className="border-2 border-[#171717] bg-[#FFF9F0] px-2 py-1 font-mono text-[11px] font-black shadow-[2px_2px_0_#171717] transition-transform hover:-translate-y-0.5"
           >
             ×
           </button>
         </div>
 
-        <div ref={listRef} className="max-h-[62vh] space-y-2 overflow-y-auto p-3">
+        <div ref={listRef} className="max-h-[38vh] space-y-2 overflow-y-auto p-3">
           {frames.map((frame, index) => {
             const entries = Object.entries(frame.variables || {});
 
