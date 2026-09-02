@@ -1,125 +1,198 @@
 import { useEffect, useRef, useState } from "react";
+import gsap from "gsap";
 
 const STORAGE_KEY = "cflow-theme";
 const DARK_CLASS = "cflow-dark";
-const TRANSITION_FALLBACK_MS = 1500;
+const THEME_CLASSES = ["stone", "moss", "mist", "clay", "dusk", "sakura", "ink"];
+const THEMES = [
+  { id: "stone", name: "Stone", color: "#E3D9CC", ink: "#292724" },
+  { id: "moss", name: "Moss", color: "#AEBFA5", ink: "#253025" },
+  { id: "mist", name: "Mist", color: "#C9CED0", ink: "#283033" },
+  { id: "clay", name: "Clay", color: "#D5BA99", ink: "#352B25" },
+  { id: "dusk", name: "Dusk", color: "#B9B1CC", ink: "#302B38" },
+  { id: "sakura", name: "Sakura", color: "#D8B8AA", ink: "#392D31" },
+  { id: "ink", name: "Ink", color: "#85837D", ink: "#F1EEE8" },
+];
 
 function readStoredTheme() {
   try {
-    return window.localStorage.getItem(STORAGE_KEY) === "dark";
+    const stored = window.localStorage.getItem(STORAGE_KEY);
+    return THEMES.some((theme) => theme.id === stored) ? stored : "stone";
   } catch {
-    return false;
+    return "stone";
   }
 }
 
-function applyTheme(dark) {
+function applyTheme(themeId) {
   const root = document.getElementById("root");
-  root?.classList.toggle(DARK_CLASS, dark);
-  document.documentElement.classList.toggle(DARK_CLASS, dark);
-  document.body.classList.toggle(DARK_CLASS, dark);
+  const elements = [root, document.documentElement, document.body].filter(Boolean);
+
+  elements.forEach((element) => {
+    THEME_CLASSES.forEach((id) => element.classList.remove(`cflow-theme-${id}`));
+    element.classList.add(`cflow-theme-${themeId}`);
+    element.classList.toggle(DARK_CLASS, themeId === "ink");
+  });
+}
+
+function themeMeta(id) {
+  return THEMES.find((theme) => theme.id === id) ?? THEMES[0];
 }
 
 export default function ThemeToggle() {
-  const [dark, setDark] = useState(readStoredTheme);
+  const [theme, setTheme] = useState(readStoredTheme);
   const [transition, setTransition] = useState(null);
-  const fallbackTimerRef = useRef(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const timelineRef = useRef(null);
+  const transitionRef = useRef(null);
+  const panelRef = useRef(null);
+
+  const dark = theme === "ink";
 
   useEffect(() => {
-    applyTheme(dark);
-  }, [dark]);
+    applyTheme(theme);
+  }, [theme]);
 
   useEffect(() => {
-    return () => {
-      if (fallbackTimerRef.current) window.clearTimeout(fallbackTimerRef.current);
-    };
+    return () => timelineRef.current?.kill();
   }, []);
 
-  const clearFallback = () => {
-    if (fallbackTimerRef.current) {
-      window.clearTimeout(fallbackTimerRef.current);
-      fallbackTimerRef.current = null;
-    }
+  const finishTransition = () => {
+    setTransition(null);
+    transitionRef.current = null;
   };
 
-  const changeTheme = () => {
-    const nextDark = !dark;
-    try {
-      window.localStorage.setItem(STORAGE_KEY, nextDark ? "dark" : "light");
-    } catch {
-      // Keep the selected theme for the current session if storage is unavailable.
-    }
+  const animateThemeChange = (nextTheme) => {
+    if (transition || nextTheme === theme) return;
 
-    setDark(nextDark);
-    applyTheme(nextDark);
-    setTransition("opening");
-  };
+    const nextMeta = themeMeta(nextTheme);
+    const wipe = document.createElement("div");
+    wipe.className = "cflow-theme-wipe";
+    wipe.style.setProperty("--wipe-color", nextMeta.id === "ink" ? "#202326" : nextMeta.color);
+    wipe.style.setProperty("--wipe-ink", nextMeta.ink);
+    wipe.innerHTML = `
+      <div class="cflow-theme-wipe__shadow"></div>
+      <div class="cflow-theme-wipe__paper"></div>
+      <div class="cflow-theme-wipe__grain"></div>
+      <div class="cflow-theme-wipe__mark">C·FLOW&nbsp;&nbsp;/&nbsp;&nbsp;${nextMeta.name.toUpperCase()}</div>
+    `;
+    document.body.appendChild(wipe);
 
-  const handleAnimationEnd = (event) => {
-    if (event.target !== event.currentTarget) return;
-    clearFallback();
+    const paper = wipe.querySelector(".cflow-theme-wipe__paper");
+    const shadow = wipe.querySelector(".cflow-theme-wipe__shadow");
+    const grain = wipe.querySelector(".cflow-theme-wipe__grain");
+    const mark = wipe.querySelector(".cflow-theme-wipe__mark");
 
-    if (transition === "closing") {
-      changeTheme();
+    transitionRef.current = wipe;
+    setTransition(nextTheme);
+    setPickerOpen(false);
+
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+      applyTheme(nextTheme);
+      setTheme(nextTheme);
+      wipe.remove();
+      finishTransition();
       return;
     }
 
-    if (transition === "opening") setTransition(null);
+    gsap.set([paper, shadow], {
+      clipPath: "polygon(-18% -5%, 0 -5%, -12% 105%, -30% 105%)",
+    });
+    gsap.set([paper, shadow], { rotation: -0.2, transformOrigin: "50% 50%" });
+    gsap.set(mark, { opacity: 0, y: 12 });
+    gsap.set(grain, { opacity: 0 });
+
+    timelineRef.current?.kill();
+    const timeline = gsap.timeline({
+      onComplete: () => {
+        applyTheme(nextTheme);
+        setTheme(nextTheme);
+
+        gsap.to([paper, shadow], {
+          clipPath: "polygon(120% -5%, 120% 105%, 100% 105%, 100% -5%)",
+          duration: 0.68,
+          ease: "power4.inOut",
+          onComplete: () => {
+            wipe.remove();
+            finishTransition();
+          },
+        });
+      },
+    });
+
+    timeline
+      .to([paper, shadow], {
+        clipPath: "polygon(-18% -5%, 100% -5%, 112% 105%, -30% 105%)",
+        duration: 0.72,
+        ease: "power4.inOut",
+      })
+      .to(grain, { opacity: 0.08, duration: 0.18 }, "-=0.35")
+      .to(mark, { opacity: 1, y: 0, duration: 0.18, ease: "power2.out" }, "-=0.26")
+      .to({}, { duration: 0.12 })
+      .to(mark, { opacity: 0, y: -7, duration: 0.15, ease: "power2.in" });
   };
 
-  const toggle = () => {
-    if (transition) return;
+  const toggleLightDark = () => animateThemeChange(dark ? "stone" : "ink");
 
-    clearFallback();
-    setTransition("closing");
-
-    fallbackTimerRef.current = window.setTimeout(() => {
-      setTransition((current) => {
-        if (current === "closing") {
-          changeTheme();
-          return "opening";
-        }
-        if (current === "opening") return null;
-        return current;
-      });
-    }, TRANSITION_FALLBACK_MS);
-  };
-
-  const targetDark = !dark;
+  const current = themeMeta(theme);
 
   return (
     <>
-      <button
-        type="button"
-        onClick={toggle}
-        disabled={Boolean(transition)}
-        aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
-        aria-pressed={dark}
-        className="cflow-theme-toggle"
+      <div
+        className="cflow-theme-control"
         style={{
           position: "fixed",
           top: "18px",
           left: "50%",
-          right: "auto",
-          bottom: "auto",
           transform: "translateX(200px)",
           zIndex: 1200,
         }}
       >
-        <span className="cflow-theme-toggle-track" aria-hidden="true">
-          <span className="cflow-theme-toggle-icon">{dark ? "☾" : "☀"}</span>
-          <span className="cflow-theme-toggle-thumb" />
-        </span>
-        <span className="cflow-theme-toggle-label">{dark ? "DARK" : "LIGHT"}</span>
-      </button>
-
-      {transition && (
-        <div
-          className={`cflow-theme-curtain is-${transition} ${targetDark ? "is-target-dark" : "is-target-light"}`}
-          aria-hidden="true"
+        <button
+          type="button"
+          onClick={toggleLightDark}
+          disabled={Boolean(transition)}
+          aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
+          aria-pressed={dark}
+          className="cflow-theme-toggle"
         >
-          <div className="cflow-theme-curtain__screen" onAnimationEnd={handleAnimationEnd} />
-          <div className="cflow-theme-curtain__mark">
-            C·FLOW&nbsp;&nbsp;/&nbsp;&nbsp;{targetDark ? "DARK" : "LIGHT"}
+          <span className="cflow-theme-toggle-track" aria-hidden="true">
+            <span className="cflow-theme-toggle-icon">{dark ? "☾" : "☀"}</span>
+            <span className="cflow-theme-toggle-thumb" />
+          </span>
+          <span className="cflow-theme-toggle-label">{current.name.toUpperCase()}</span>
+        </button>
+
+        <button
+          type="button"
+          className="cflow-theme-palette-button"
+          onClick={() => setPickerOpen((open) => !open)}
+          aria-label="Choose C·FLOW theme"
+          aria-expanded={pickerOpen}
+          disabled={Boolean(transition)}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
+      </div>
+
+      {pickerOpen && !transition && (
+        <div ref={panelRef} className="cflow-theme-picker" role="dialog" aria-label="C·FLOW themes">
+          <div className="cflow-theme-picker__title">Themes</div>
+          <div className="cflow-theme-picker__grid">
+            {THEMES.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className={`cflow-theme-swatch ${theme === item.id ? "is-active" : ""}`}
+                onClick={() => animateThemeChange(item.id)}
+                aria-label={`Use ${item.name} theme`}
+                aria-pressed={theme === item.id}
+              >
+                <span className="cflow-theme-swatch__dot" style={{ background: item.color }} />
+                <span className="cflow-theme-swatch__name">{item.name}</span>
+              </button>
+            ))}
           </div>
         </div>
       )}
