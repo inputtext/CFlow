@@ -45,7 +45,7 @@
   box-shadow: 4px 4px 0 var(--cflow-palette-border) !important;
 }
 
-/* Reading mode — a non-interactive warm light layer over the entire app. */
+/* Reading mode — a compact bulb beside the C·FLOW wordmark. */
 .cflow-reading-control {
   position: fixed !important;
   top: 20px !important;
@@ -56,9 +56,9 @@
 }
 
 .cflow-reading-button {
-  width: 34px !important;
+  width: 28px !important;
   height: 34px !important;
-  padding: 6px !important;
+  padding: 5px 3px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -70,8 +70,8 @@
 }
 
 .cflow-reading-button svg {
-  width: 20px !important;
-  height: 20px !important;
+  width: 18px !important;
+  height: 18px !important;
   fill: none !important;
   stroke: currentColor !important;
   stroke-width: 1.8 !important;
