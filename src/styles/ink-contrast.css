@@ -67,19 +67,11 @@
 .cflow-theme-ink .cflow-theme-swatch.is-active { background:#3A3E3C!important; border-color:var(--cflow-ink-light)!important; }
 .cflow-theme-ink .cflow-theme-palette-button { background:var(--cflow-ink-paper)!important; color:var(--cflow-ink-dark)!important; border-color:#111416!important; box-shadow:2px 2px 0 #111416!important; }
 
-/* INK THEME SWATCH LABELS — keep every theme name readable on graphite. */
-.cflow-theme-ink .cflow-theme-picker .cflow-theme-swatch__name {
-  color:#F4F0E8!important;
-  -webkit-text-fill-color:#F4F0E8!important;
-  text-shadow:none!important;
-  opacity:1!important;
-}
-.cflow-theme-ink .cflow-theme-picker .cflow-theme-picker__title {
-  color:#F4F0E8!important;
-  -webkit-text-fill-color:#F4F0E8!important;
-  opacity:1!important;
-}
+/* Theme control stays in the same header position as the light mode. */
+.cflow-theme-ink .cflow-theme-control { top:24px!important; left:calc(50% + 155px)!important; right:auto!important; bottom:auto!important; }
+.cflow-theme-ink .cflow-theme-picker { top:72px!important; left:calc(50% + 120px)!important; right:auto!important; bottom:auto!important; }
 
-/* Theme control now lives in the header for every palette. */
-.cflow-theme-ink .cflow-theme-control { top:18px!important; right:24px!important; left:auto!important; bottom:auto!important; }
-.cflow-theme-ink .cflow-theme-picker { top:64px!important; right:24px!important; left:auto!important; bottom:auto!important; }
+@media (max-width: 1100px) {
+  .cflow-theme-ink .cflow-theme-control { left:auto!important; right:24px!important; }
+  .cflow-theme-ink .cflow-theme-picker { left:auto!important; right:24px!important; }
+}
