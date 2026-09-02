@@ -7,13 +7,13 @@ import './styles/theme-refinement.css'
 import './styles/home-themes.css'
 import './styles/ink-contrast.css'
 import './styles/theme-control.css'
+import './landing/landing-product.css'
 
 import App from './App.jsx'
 import ThemeToggle from './components/ThemeToggle.jsx'
 import ClerkGate from './components/ClerkGate.jsx'
 import AnalysisUsageGuard from './components/AnalysisUsageGuard.jsx'
 import LandingPage from './landing/LandingPage.jsx'
-import { initLandingSmoothScroll } from './animations/landingSmoothScroll.js'
 
 import { ClerkProvider } from '@clerk/react'
 
@@ -46,7 +46,6 @@ if (isLanding) {
     root.style.height = 'auto'
     root.style.minHeight = '100%'
   }
-  initLandingSmoothScroll()
 }
 
 document.addEventListener('click', (event) => {
