@@ -84,18 +84,19 @@
   border-color:#111416!important;
 }
 
-/* Continue row stays light in Ink, with black controls/text on the light surface. */
+/* Ink bottom action row stays the same graphite as the home page.
+   Only the Continue control itself remains a light surface. */
 #root.cflow-theme-ink > div:not(:has(.cflow-flow-shell)) :is([class*="border-t-2"][class*="bg-[#FFF9F0"], [class*="border-t-2"][class*="bg-white"]){
-  background:#F1EEE8!important;
-  color:#111416!important;
+  background:#202326!important;
+  color:#BFC1BF!important;
   border-color:#111416!important;
 }
 #root.cflow-theme-ink > div:not(:has(.cflow-flow-shell)) :is([class*="border-t-2"][class*="bg-[#FFF9F0"], [class*="border-t-2"][class*="bg-white"]) :is(p,span,div){
-  color:#111416!important;
-  -webkit-text-fill-color:#111416!important;
+  color:#BFC1BF!important;
+  -webkit-text-fill-color:#BFC1BF!important;
 }
 
-/* Continue button: white/light surface -> black text. */
+/* Continue button only: light surface -> black text in Ink. */
 #root.cflow-theme-ink > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"]{
   background:#F1EEE8!important;
   color:#111416!important;
