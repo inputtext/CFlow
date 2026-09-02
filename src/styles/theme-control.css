@@ -45,6 +45,62 @@
   box-shadow: 4px 4px 0 var(--cflow-palette-border) !important;
 }
 
+/* Reading mode — a non-interactive warm light layer over the entire app. */
+.cflow-reading-control {
+  position: fixed !important;
+  top: 20px !important;
+  left: 176px !important;
+  right: auto !important;
+  bottom: auto !important;
+  z-index: 1202 !important;
+}
+
+.cflow-reading-button {
+  width: 34px !important;
+  height: 34px !important;
+  padding: 6px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 2px solid var(--cflow-palette-border) !important;
+  background: var(--cflow-palette-bg) !important;
+  box-shadow: 3px 3px 0 var(--cflow-palette-border) !important;
+  color: var(--cflow-palette-ink) !important;
+  transition: transform .22s ease, box-shadow .22s ease, background-color .35s ease !important;
+}
+
+.cflow-reading-button svg {
+  width: 20px !important;
+  height: 20px !important;
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 1.8 !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+}
+
+.cflow-reading-button:hover {
+  transform: translate(-1px, -1px) !important;
+  box-shadow: 4px 4px 0 var(--cflow-palette-border) !important;
+}
+
+.cflow-reading-button.is-active {
+  background: #FFE3A3 !important;
+  color: #171717 !important;
+  box-shadow: 3px 3px 0 #171717 !important;
+}
+
+/* Pointer-events stay off so the warmth cannot block editors, flow controls, or buttons. */
+.cflow-reading-mode::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  pointer-events: none;
+  background: rgba(255, 191, 105, 0.14);
+  mix-blend-mode: multiply;
+}
+
 /* Open the picker directly beneath the header control. */
 .cflow-theme-picker {
   position: fixed !important;
@@ -66,14 +122,20 @@
     left: auto !important;
     right: 24px !important;
   }
+
+  .cflow-reading-control {
+    left: 166px !important;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cflow-theme-palette-button {
+  .cflow-theme-palette-button,
+  .cflow-reading-button {
     transition: none !important;
   }
 
-  .cflow-theme-palette-button:hover {
+  .cflow-theme-palette-button:hover,
+  .cflow-reading-button:hover {
     transform: none !important;
   }
 }
