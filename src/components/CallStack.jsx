@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 
 const EMPTY_STACK = [];
+const AUTO_HIDE_MS = 3000;
 
 function normalizeFrames(detail) {
   if (!Array.isArray(detail)) return EMPTY_STACK;
@@ -47,10 +48,26 @@ function CallStack() {
   const listRef = useRef(null);
   const previousIdsRef = useRef([]);
   const signatureRef = useRef("");
+  const autoHideTimerRef = useRef(null);
 
   useEffect(() => {
     let observer;
     let retryTimer;
+
+    const clearAutoHide = () => {
+      if (autoHideTimerRef.current) {
+        window.clearTimeout(autoHideTimerRef.current);
+        autoHideTimerRef.current = null;
+      }
+    };
+
+    const scheduleAutoHide = () => {
+      clearAutoHide();
+      autoHideTimerRef.current = window.setTimeout(() => {
+        setOpen(false);
+        autoHideTimerRef.current = null;
+      }, AUTO_HIDE_MS);
+    };
 
     const applyFrames = (nextFrames, autoOpen = false) => {
       if (!nextFrames.length) return;
@@ -60,14 +77,18 @@ function CallStack() {
       signatureRef.current = signature;
       setFrames(nextFrames);
 
-      if (autoOpen) setOpen(true);
+      if (autoOpen) {
+        // Every runtime update gets its own fresh 3-second spotlight.
+        // Re-opening the panel also retriggers the GSAP entrance animation.
+        setOpen(false);
+        window.requestAnimationFrame(() => setOpen(true));
+        scheduleAutoHide();
+      }
     };
 
     const syncFromMemory = () => {
       const nextFrames = readMemoryFrames();
       if (nextFrames.length) {
-        // Every real memory-state change is a runtime event. Reveal the stack
-        // automatically so the user never has to hunt for it during stepping.
         applyFrames(nextFrames, true);
       }
     };
@@ -103,6 +124,7 @@ function CallStack() {
     return () => {
       if (observer) observer.disconnect();
       if (retryTimer) window.clearTimeout(retryTimer);
+      clearAutoHide();
       window.removeEventListener("cflow:callstack", handleStackEvent);
       window.removeEventListener("cflow:memory", syncFromMemory);
     };
@@ -123,7 +145,7 @@ function CallStack() {
       gsap.to(panelRef.current, {
         x: 34,
         opacity: 0,
-        duration: 0.25,
+        duration: 0.32,
         ease: "power2.in",
       });
     }
