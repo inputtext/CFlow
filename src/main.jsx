@@ -12,6 +12,7 @@ import App from './App.jsx'
 import ThemeToggle from './components/ThemeToggle.jsx'
 import ClerkGate from './components/ClerkGate.jsx'
 import AnalysisUsageGuard from './components/AnalysisUsageGuard.jsx'
+import LandingPage from './landing/LandingPage.jsx'
 
 import { ClerkProvider } from '@clerk/react'
 
@@ -21,23 +22,27 @@ if (!PUBLISHABLE_KEY) {
   throw new Error('Missing VITE_CLERK_PUBLISHABLE_KEY')
 }
 
-// The workspace logo returns to the C·FLOW language-selection home.
+const isLanding = window.location.pathname === '/'
+
+function Workspace() {
+  return (
+    <ClerkGate>
+      <AnalysisUsageGuard>
+        <App />
+      </AnalysisUsageGuard>
+    </ClerkGate>
+  )
+}
+
 document.addEventListener('click', (event) => {
   const logo = event.target.closest('header h1')
-  if (!logo) return
+  if (!logo || isLanding) return
   window.location.assign('/')
 })
 
 createRoot(document.getElementById('root')).render(
-  <>
-    <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
-      <ClerkGate>
-        <AnalysisUsageGuard>
-          <App />
-        </AnalysisUsageGuard>
-      </ClerkGate>
-    </ClerkProvider>
-
-    <ThemeToggle />
-  </>
+  <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+    {isLanding ? <LandingPage /> : <Workspace />}
+    {!isLanding && <ThemeToggle />}
+  </ClerkProvider>
 )
