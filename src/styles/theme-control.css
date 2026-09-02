@@ -1,4 +1,14 @@
-/* C·FLOW THEME CONTROL — clear label instead of the old dotted palette mark. */
+/* C·FLOW THEME CONTROL — compact header placement between line count and language. */
+.cflow-theme-control {
+  position: fixed !important;
+  top: 24px !important;
+  left: calc(50% + 155px) !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  z-index: 1200 !important;
+}
+
 .cflow-theme-palette-button {
   width: 72px !important;
   height: 34px !important;
@@ -33,6 +43,29 @@
 .cflow-theme-palette-button:hover {
   transform: translate(-1px, -1px) !important;
   box-shadow: 4px 4px 0 var(--cflow-palette-border) !important;
+}
+
+/* Open the picker directly beneath the header control. */
+.cflow-theme-picker {
+  position: fixed !important;
+  top: 72px !important;
+  left: calc(50% + 120px) !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  z-index: 1201 !important;
+}
+
+@media (max-width: 1100px) {
+  .cflow-theme-control {
+    left: auto !important;
+    right: 24px !important;
+  }
+
+  .cflow-theme-picker {
+    left: auto !important;
+    right: 24px !important;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
