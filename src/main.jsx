@@ -21,6 +21,13 @@ if (!PUBLISHABLE_KEY) {
   throw new Error('Missing VITE_CLERK_PUBLISHABLE_KEY')
 }
 
+// The workspace logo returns to the C·FLOW language-selection home.
+document.addEventListener('click', (event) => {
+  const logo = event.target.closest('header h1')
+  if (!logo) return
+  window.location.assign('/')
+})
+
 createRoot(document.getElementById('root')).render(
   <>
     <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
