@@ -63,3 +63,18 @@
 .cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) [class*="shadow-[4px_4px_0_#171717"],
 .cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) [class*="shadow-[6px_6px_0_#171717"],
 .cflow-theme-ink #root > div:not(:has(.cflow-flow-shell)) [class*="shadow-[8px_8px_0_#171717"]{box-shadow:4px 4px 0 #111416!important}
+
+/* Restore the original Continue control: white surface with dark text.
+   This targets only the Continue button and leaves every other home control
+   and every other theme untouched. */
+#root > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"]{
+  background:#FFFFFF!important;
+  color:#171717!important;
+  -webkit-text-fill-color:#171717!important;
+  border-color:#171717!important;
+  box-shadow:4px 4px 0 #171717!important;
+}
+#root > div:not(:has(.cflow-flow-shell)) button[class*="bg-[#171717"] :is(span){
+  color:#171717!important;
+  -webkit-text-fill-color:#171717!important;
+}
