@@ -6,6 +6,7 @@ import './styles/theme-palettes.css'
 import './styles/theme-refinement.css'
 import './styles/home-themes.css'
 import './styles/ink-contrast.css'
+import './styles/theme-control.css'
 
 import App from './App.jsx'
 import ThemeToggle from './components/ThemeToggle.jsx'
