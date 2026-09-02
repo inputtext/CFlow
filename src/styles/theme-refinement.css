@@ -1,12 +1,13 @@
 /* C·FLOW THEME REFINEMENT
    Visual polish only. No graph geometry, execution state, or layout rules. */
 
-.cflow-theme-control{display:flex;align-items:center;gap:6px}
-.cflow-theme-palette-button{width:34px;height:34px;padding:7px;display:grid;grid-template-columns:repeat(2,1fr);gap:3px;border:2px solid var(--cflow-palette-border);background:var(--cflow-palette-bg);box-shadow:3px 3px 0 var(--cflow-palette-border);color:var(--cflow-palette-ink);transition:transform .22s ease,box-shadow .22s ease,background-color .4s ease}
+.cflow-theme-control{display:flex;align-items:center;gap:6px;position:fixed!important;top:18px!important;right:24px!important;left:auto!important;bottom:auto!important;z-index:1200}
+.cflow-theme-palette-button{width:auto;min-width:78px;height:34px;padding:0 12px;display:flex;align-items:center;justify-content:center;border:2px solid var(--cflow-palette-border);background:var(--cflow-palette-bg);box-shadow:3px 3px 0 var(--cflow-palette-border);color:var(--cflow-palette-ink);transition:transform .22s ease,box-shadow .22s ease,background-color .4s ease}
 .cflow-theme-palette-button:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--cflow-palette-border)}
+.cflow-theme-palette-label{font:700 9px/1 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;letter-spacing:.18em}
 .cflow-theme-palette-button span:not(.sr-only){display:block;width:4px;height:4px;border-radius:50%;background:currentColor;opacity:.82}
 
-.cflow-theme-picker{overflow:hidden;border-radius:12px!important;box-shadow:9px 9px 0 color-mix(in srgb,var(--cflow-palette-border) 28%,transparent),0 18px 45px color-mix(in srgb,var(--cflow-palette-border) 16%,transparent)!important;backdrop-filter:blur(8px);background:color-mix(in srgb,var(--cflow-palette-bg) 94%,white)!important}
+.cflow-theme-picker{position:fixed!important;top:64px!important;right:24px!important;left:auto!important;bottom:auto!important;overflow:hidden;border-radius:12px!important;box-shadow:9px 9px 0 color-mix(in srgb,var(--cflow-palette-border) 28%,transparent),0 18px 45px color-mix(in srgb,var(--cflow-palette-border) 16%,transparent)!important;backdrop-filter:blur(8px);background:color-mix(in srgb,var(--cflow-palette-bg) 94%,white)!important}
 .cflow-theme-picker::before{content:"";display:block;height:3px;margin:-16px -16px 15px;background:var(--cflow-accent,var(--cflow-palette-border));opacity:.65}
 .cflow-theme-picker__title{font-size:11px!important;letter-spacing:.24em!important;margin-bottom:15px!important}
 .cflow-theme-picker__grid{gap:10px!important}
@@ -46,55 +47,14 @@
 
 /* Home screen theme surface + typography. The home screen has no
    .cflow-flow-shell, so these rules cannot affect the flowchart. */
-.cflow-theme-stone main:not(:has(.cflow-flow-shell)),
-.cflow-theme-moss main:not(:has(.cflow-flow-shell)),
-.cflow-theme-mist main:not(:has(.cflow-flow-shell)),
-.cflow-theme-clay main:not(:has(.cflow-flow-shell)),
-.cflow-theme-dusk main:not(:has(.cflow-flow-shell)),
-.cflow-theme-sakura main:not(:has(.cflow-flow-shell)),
-.cflow-theme-ink main:not(:has(.cflow-flow-shell)){background:var(--cflow-palette-bg)!important;color:var(--cflow-palette-ink)!important}
-
-.cflow-theme-stone main:not(:has(.cflow-flow-shell)) :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,em,code),
-.cflow-theme-moss main:not(:has(.cflow-flow-shell)) :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,em,code),
-.cflow-theme-mist main:not(:has(.cflow-flow-shell)) :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,em,code),
-.cflow-theme-clay main:not(:has(.cflow-flow-shell)) :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,em,code),
-.cflow-theme-dusk main:not(:has(.cflow-flow-shell)) :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,em,code),
-.cflow-theme-sakura main:not(:has(.cflow-flow-shell)) :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,em,code),
-.cflow-theme-ink main:not(:has(.cflow-flow-shell)) :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,em,code){color:var(--cflow-palette-ink)!important;-webkit-text-fill-color:var(--cflow-palette-ink)!important;text-shadow:none!important}
-
-.cflow-theme-stone main:not(:has(.cflow-flow-shell)) :is([class*="text-[#171717]"],[class*="text-black"],[class*="text-white"],[class*="text-gray"]),
-.cflow-theme-moss main:not(:has(.cflow-flow-shell)) :is([class*="text-[#171717]"],[class*="text-black"],[class*="text-white"],[class*="text-gray"]),
-.cflow-theme-mist main:not(:has(.cflow-flow-shell)) :is([class*="text-[#171717]"],[class*="text-black"],[class*="text-white"],[class*="text-gray"]),
-.cflow-theme-clay main:not(:has(.cflow-flow-shell)) :is([class*="text-[#171717]"],[class*="text-black"],[class*="text-white"],[class*="text-gray"]),
-.cflow-theme-dusk main:not(:has(.cflow-flow-shell)) :is([class*="text-[#171717]"],[class*="text-black"],[class*="text-white"],[class*="text-gray"]),
-.cflow-theme-sakura main:not(:has(.cflow-flow-shell)) :is([class*="text-[#171717]"],[class*="text-black"],[class*="text-white"],[class*="text-gray"]),
-.cflow-theme-ink main:not(:has(.cflow-flow-shell)) :is([class*="text-[#171717]"],[class*="text-black"],[class*="text-white"],[class*="text-gray"]){color:var(--cflow-palette-ink)!important;-webkit-text-fill-color:var(--cflow-palette-ink)!important}
-
-.cflow-theme-stone main:not(:has(.cflow-flow-shell)) [class*="bg-white"],
-.cflow-theme-moss main:not(:has(.cflow-flow-shell)) [class*="bg-white"],
-.cflow-theme-mist main:not(:has(.cflow-flow-shell)) [class*="bg-white"],
-.cflow-theme-clay main:not(:has(.cflow-flow-shell)) [class*="bg-white"],
-.cflow-theme-dusk main:not(:has(.cflow-flow-shell)) [class*="bg-white"],
-.cflow-theme-sakura main:not(:has(.cflow-flow-shell)) [class*="bg-white"],
-.cflow-theme-ink main:not(:has(.cflow-flow-shell)) [class*="bg-white"]{background:color-mix(in srgb,var(--cflow-palette-bg) 82%,var(--cflow-palette-ink) 18%)!important;color:var(--cflow-palette-ink)!important;border-color:var(--cflow-palette-border)!important}
-
-.cflow-theme-stone main:not(:has(.cflow-flow-shell)) [class*="border-[#171717"],
-.cflow-theme-moss main:not(:has(.cflow-flow-shell)) [class*="border-[#171717"],
-.cflow-theme-mist main:not(:has(.cflow-flow-shell)) [class*="border-[#171717"],
-.cflow-theme-clay main:not(:has(.cflow-flow-shell)) [class*="border-[#171717"],
-.cflow-theme-dusk main:not(:has(.cflow-flow-shell)) [class*="border-[#171717"],
-.cflow-theme-sakura main:not(:has(.cflow-flow-shell)) [class*="border-[#171717"],
-.cflow-theme-ink main:not(:has(.cflow-flow-shell)) [class*="border-[#171717"]{border-color:var(--cflow-palette-border)!important}
+.cflow-theme-stone main:not(:has(.cflow-flow-shell)),.cflow-theme-moss main:not(:has(.cflow-flow-shell)),.cflow-theme-mist main:not(:has(.cflow-flow-shell)),.cflow-theme-clay main:not(:has(.cflow-flow-shell)),.cflow-theme-dusk main:not(:has(.cflow-flow-shell)),.cflow-theme-sakura main:not(:has(.cflow-flow-shell)),.cflow-theme-ink main:not(:has(.cflow-flow-shell)){background:var(--cflow-palette-bg)!important;color:var(--cflow-palette-ink)!important}
+.cflow-theme-stone main:not(:has(.cflow-flow-shell)) :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,em,code),.cflow-theme-moss main:not(:has(.cflow-flow-shell)) :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,em,code),.cflow-theme-mist main:not(:has(.cflow-flow-shell)) :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,em,code),.cflow-theme-clay main:not(:has(.cflow-flow-shell)) :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,em,code),.cflow-theme-dusk main:not(:has(.cflow-flow-shell)) :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,em,code),.cflow-theme-sakura main:not(:has(.cflow-flow-shell)) :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,em,code),.cflow-theme-ink main:not(:has(.cflow-flow-shell)) :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,em,code){color:var(--cflow-palette-ink)!important;-webkit-text-fill-color:var(--cflow-palette-ink)!important;text-shadow:none!important}
+.cflow-theme-stone main:not(:has(.cflow-flow-shell)) :is([class*="text-[#171717]"],[class*="text-black"],[class*="text-white"],[class*="text-gray"]),.cflow-theme-moss main:not(:has(.cflow-flow-shell)) :is([class*="text-[#171717]"],[class*="text-black"],[class*="text-white"],[class*="text-gray"]),.cflow-theme-mist main:not(:has(.cflow-flow-shell)) :is([class*="text-[#171717]"],[class*="text-black"],[class*="text-white"],[class*="text-gray"]),.cflow-theme-clay main:not(:has(.cflow-flow-shell)) :is([class*="text-[#171717]"],[class*="text-black"],[class*="text-white"],[class*="text-gray"]),.cflow-theme-dusk main:not(:has(.cflow-flow-shell)) :is([class*="text-[#171717]"],[class*="text-black"],[class*="text-white"],[class*="text-gray"]),.cflow-theme-sakura main:not(:has(.cflow-flow-shell)) :is([class*="text-[#171717]"],[class*="text-black"],[class*="text-white"],[class*="text-gray"]),.cflow-theme-ink main:not(:has(.cflow-flow-shell)) :is([class*="text-[#171717]"],[class*="text-black"],[class*="text-white"],[class*="text-gray"]){color:var(--cflow-palette-ink)!important;-webkit-text-fill-color:var(--cflow-palette-ink)!important}
+.cflow-theme-stone main:not(:has(.cflow-flow-shell)) [class*="bg-white"],.cflow-theme-moss main:not(:has(.cflow-flow-shell)) [class*="bg-white"],.cflow-theme-mist main:not(:has(.cflow-flow-shell)) [class*="bg-white"],.cflow-theme-clay main:not(:has(.cflow-flow-shell)) [class*="bg-white"],.cflow-theme-dusk main:not(:has(.cflow-flow-shell)) [class*="bg-white"],.cflow-theme-sakura main:not(:has(.cflow-flow-shell)) [class*="bg-white"],.cflow-theme-ink main:not(:has(.cflow-flow-shell)) [class*="bg-white"]{background:color-mix(in srgb,var(--cflow-palette-bg) 82%,var(--cflow-palette-ink) 18%)!important;color:var(--cflow-palette-ink)!important;border-color:var(--cflow-palette-border)!important}
+.cflow-theme-stone main:not(:has(.cflow-flow-shell)) [class*="border-[#171717"],.cflow-theme-moss main:not(:has(.cflow-flow-shell)) [class*="border-[#171717"],.cflow-theme-mist main:not(:has(.cflow-flow-shell)) [class*="border-[#171717"],.cflow-theme-clay main:not(:has(.cflow-flow-shell)) [class*="border-[#171717"],.cflow-theme-dusk main:not(:has(.cflow-flow-shell)) [class*="border-[#171717"],.cflow-theme-sakura main:not(:has(.cflow-flow-shell)) [class*="border-[#171717"],.cflow-theme-ink main:not(:has(.cflow-flow-shell)) [class*="border-[#171717"]{border-color:var(--cflow-palette-border)!important}
 
 /* Header is shared by home/workspace: keep its typography readable in every palette. */
-.cflow-theme-stone header :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,button),
-.cflow-theme-moss header :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,button),
-.cflow-theme-mist header :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,button),
-.cflow-theme-clay header :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,button),
-.cflow-theme-dusk header :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,button),
-.cflow-theme-sakura header :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,button),
-.cflow-theme-ink header :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,button){color:var(--cflow-palette-ink)!important;-webkit-text-fill-color:var(--cflow-palette-ink)!important}
-
+.cflow-theme-stone header :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,button),.cflow-theme-moss header :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,button),.cflow-theme-mist header :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,button),.cflow-theme-clay header :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,button),.cflow-theme-dusk header :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,button),.cflow-theme-sakura header :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,button),.cflow-theme-ink header :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,button){color:var(--cflow-palette-ink)!important;-webkit-text-fill-color:var(--cflow-palette-ink)!important}
 .cflow-theme-ink header [class*="bg-[#202326"]],.cflow-theme-ink header [class*="bg-[#171717"]]{background:#2A2D30!important;color:#F4F0E8!important}
 
 /* Keep theme picker horizontally scrollable so Ink is always reachable. */
