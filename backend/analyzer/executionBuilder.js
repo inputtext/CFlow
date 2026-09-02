@@ -36,6 +36,17 @@ function buildExecution(program) {
     return "exit";
   };
 
+  // When an enclosing loop starts its next iteration, every nested loop must
+  // start fresh as well. Otherwise an inner `for` would keep its old j value
+  // and skip its initializer on the next outer iteration.
+  const resetNestedLoops = (parent) => {
+    for (const candidate of statements) {
+      if (!candidate || !loopState.has(candidate.id)) continue;
+      if (!((candidate.type === "for") || (candidate.type === "while"))) continue;
+      if (candidate.depth > parent.depth) loopState.delete(candidate.id);
+    }
+  };
+
   push({ node: "start", line: null, type: "start", explanation: "Program execution begins." });
 
   while (current !== "exit" && guard++ < MAX_STEPS) {
@@ -54,6 +65,9 @@ function buildExecution(program) {
         loopState.set(s.id, state);
       } else {
         executeForUpdate(s.forUpdate, variables);
+        // The update marks a new iteration of this loop. Any nested loops
+        // below it must be reinitialized when their body is entered again.
+        resetNestedLoops(s);
       }
 
       const result = evaluateCondition(s.forCondition, variables);
@@ -151,6 +165,7 @@ function buildExecution(program) {
       if (s.operator === "-=") after = before - amount;
       if (s.operator === "*=") after = before * amount;
       if (s.operator === "/=") after = amount === 0 ? before : before / amount;
+      if (s.operator === "%=") after = amount === 0 ? before : before % amount;
       variables[s.variable] = after;
       push({
         node: s.id,
