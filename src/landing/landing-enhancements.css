@@ -15,7 +15,8 @@
 
 /* Balanced Problem composition: editorial copy owns the left lane; the visual owns the right lane; the state callout sits low-left. */
 .problem-signal { position:absolute; left:clamp(22px,7vw,110px); right:auto; top:76%; transform:translateY(-50%); margin-top:0; z-index:4; }
-.problem-visual { position:absolute; left:auto; right:clamp(22px,7vw,110px); top:56%; width:min(420px,32vw); transform:translateY(-50%); border:3px solid var(--lf-ink); background:rgba(255,249,240,.68); box-shadow:9px 9px 0 var(--lf-ink); padding:18px; }
+.problem-visual { position:absolute; right:auto; left:clamp(22px,7vw,110px); top:56%; width:min(420px,32vw); transform:translateY(-50%);
+     transform:translateX(180%); border:3px solid var(--lf-ink); background:rgba(255,249,240,.68); box-shadow:9px 9px 0 var(--lf-ink); padding:18px; }
 .problem-visual__bar { display:flex; justify-content:space-between; font:900 .58rem/1 monospace; opacity:.6; margin-bottom:18px; }
 .problem-visual__code { font:700 clamp(.72rem,1vw,.95rem)/1.9 monospace; }.problem-visual__code span{display:block}.problem-visual__code span:nth-child(2){padding-left:28px}.problem-visual__code span:nth-child(3){padding-left:52px}.problem-visual__path { height:2px; background:var(--lf-ink); margin:18px 0; transform-origin:left; animation:lf-path-pulse 2.2s ease-in-out infinite }.problem-visual__tokens{display:flex;gap:7px;flex-wrap:wrap}.problem-visual__tokens i{font-style:normal;border:2px solid var(--lf-ink);padding:5px 7px;font:900 .58rem/1 monospace;background:var(--lf-blue)}.problem-visual__tokens i:nth-child(2){background:var(--lf-pink)}.problem-visual__tokens i:nth-child(3){background:var(--lf-mint)}
 
