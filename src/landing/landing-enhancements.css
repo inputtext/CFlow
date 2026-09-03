@@ -13,8 +13,8 @@
 .scroll-navigator a.is-active { opacity:1; transform:translateX(0); }
 .scroll-navigator a.is-active span { text-decoration:underline; text-underline-offset:3px; }
 
-/* Keep the Problem signal in its original left-side position, directly above the visual. */
-.problem-signal { margin-top:25px; }
+/* Match the reference screenshot: move only the Problem signal to the upper-right visual lane. */
+.problem-signal { position:absolute; right:clamp(22px,7vw,110px); left:auto; top:25%; transform:none; margin-top:0; z-index:4; }
 
 .problem-visual { position:absolute; right:clamp(22px,7vw,110px); top:50%; width:min(360px,30vw); transform:translateY(-50%); border:3px solid var(--lf-ink); background:rgba(255,249,240,.68); box-shadow:9px 9px 0 var(--lf-ink); padding:18px; }
 .problem-visual__bar { display:flex; justify-content:space-between; font:900 .58rem/1 monospace; opacity:.6; margin-bottom:18px; }
@@ -35,6 +35,6 @@
 
 @keyframes lf-transfer{0%,12%{transform:translateX(0);opacity:0}20%{opacity:1}72%{transform:translateX(calc(100% - 12px));opacity:1}86%,100%{transform:translateX(calc(100% - 12px));opacity:0}}@keyframes lf-path-pulse{0%,100%{transform:scaleX(.25);opacity:.3}50%{transform:scaleX(1);opacity:1}}@keyframes lf-core-breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}@keyframes lf-pulse{0%,100%{opacity:.35;transform:scale(.85)}50%{opacity:1;transform:scale(1.2)}}
 
-@media(max-width:900px){.scroll-navigator{display:none}.problem-visual,.engine-lottie-frame{position:relative;right:auto;top:auto;transform:none;width:min(100%,520px);margin:45px 0 0}.problem-visual{grid-column:1/-1}.scene--engine>.display{max-width:100%}.capability-system{grid-template-columns:1fr}.capability-system__core{margin:auto}.hero-telemetry{position:relative;left:auto;bottom:auto;margin-top:25px}}
+@media(max-width:900px){.scroll-navigator{display:none}.problem-visual,.engine-lottie-frame{position:relative;right:auto;top:auto;transform:none;width:min(100%,520px);margin:45px 0 0}.problem-visual{grid-column:1/-1}.scene--engine>.display{max-width:100%}.capability-system{grid-template-columns:1fr}.capability-system__core{margin:auto}.hero-telemetry{position:relative;left:auto;bottom:auto;margin-top:25px}.problem-signal{position:relative;left:auto;right:auto;top:auto;transform:none;margin-top:45px}}
 @media(max-width:560px){.preview-metrics{grid-template-columns:1fr}.preview-metrics span{border-right:0;border-bottom:2px solid var(--lf-ink)}.preview-metrics span:last-child{border-bottom:0}}
 @media(prefers-reduced-motion:reduce){.exec-transfer__dot,.problem-visual__path,.capability-system__core{animation:none}.scroll-navigator a{transition:none}}
