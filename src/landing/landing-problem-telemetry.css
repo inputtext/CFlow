@@ -3,6 +3,7 @@
   right: clamp(22px, 7vw, 110px);
   top: 48%;
   width: min(360px, 30vw);
+  box-sizing: border-box;
   border: 3px solid var(--lf-ink);
   background: rgba(255,249,240,.82);
   box-shadow: 8px 8px 0 var(--lf-ink);
