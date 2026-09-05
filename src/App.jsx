@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { executionSteps as fallbackExecutionSteps, initialState as fallbackInitialState } from "./core/mockEngine";
 import { animateVariableUpdate } from "./animations/animateVariableUpdate";
+import { getExecutionState } from "./core/executionState";
 import { animateConditionEvaluation } from "./animations/animateConditionEvaluation";
 import FlowGraph from "./components/FlowGraph";
 import { playLoopSound } from "./animations/executionSound";
@@ -124,10 +125,12 @@ function App() {
       ? activeExecutionSteps[currentStep - 1]
       : null;
 
-  const variables =
-    step?.variables && Object.keys(step.variables).length > 0
-      ? step.variables
-      : fallbackInitialState;
+  const executionState = getExecutionState(
+    step,
+    fallbackInitialState
+  );
+
+  const variables = executionState.variables;
 
   /* ============================================================
      CODE LINES
@@ -164,17 +167,22 @@ function App() {
   ============================================================ */
 
   const currentFlowNode =
-    getFlowNode(step);
+    executionState.activeNode;
+
+  const previousExecutionState = getExecutionState(
+    previousStep,
+    fallbackInitialState
+  );
 
   const previousFlowNode =
-    getFlowNode(previousStep);
+    previousExecutionState.activeNode;
 
   /* ============================================================
      CONDITION RESULT
   ============================================================ */
 
   const conditionResult =
-    step?.type === "condition" &&
+    executionState.type === "condition" &&
     typeof step?.result === "boolean"
       ? step.result
       : null;
