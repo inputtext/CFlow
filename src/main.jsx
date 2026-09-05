@@ -7,11 +7,41 @@ import './styles/theme-refinement.css'
 import './styles/home-themes.css'
 import './styles/ink-contrast.css'
 import './styles/theme-control.css'
+import './landing/landing-product.css'
+import './landing/landing-execution.css'
+import './landing/landing-capabilities.css'
+import './landing/landing-consistency.css'
+import './landing/landing-hero-editor.css'
+import './landing/landing-atmosphere.css'
+import './landing/landing-interactions.css'
+import './landing/landing-problem-telemetry.css'
+import './landing/landing-hero-demo.css'
+import './landing/landing-mini-playground.css'
+import './landing/landing-capability-cards.css'
+import './landing/landing-preview-trace.css'
+import './landing/landing-keyboard-shortcuts.css'
+import './landing/landing-qa-polish.css'
+import './animations/landingProductMotion.js'
+import './animations/landingExecutionMotion.js'
+import './animations/landingPreviewUpgrade.js'
+import './animations/landingCapabilitiesMotion.js'
+import './animations/landingClosingMotion.js'
+import './animations/landingHeroEditor.js'
+import './animations/landingAtmosphere.js'
+import './animations/landingInteractions.js'
+import './animations/landingMicroLotties.js'
+import './animations/landingProblemTelemetry.js'
+import './animations/landingHeroDemo.js'
+import './animations/landingMiniPlayground.js'
+import './animations/landingCapabilityCards.js'
+import './animations/landingPreviewTrace.js'
+import './animations/landingKeyboardShortcuts.js'
 
 import App from './App.jsx'
 import ThemeToggle from './components/ThemeToggle.jsx'
 import ClerkGate from './components/ClerkGate.jsx'
 import AnalysisUsageGuard from './components/AnalysisUsageGuard.jsx'
+import LandingPage from './landing/LandingPage.jsx'
 
 import { ClerkProvider } from '@clerk/react'
 
@@ -21,23 +51,40 @@ if (!PUBLISHABLE_KEY) {
   throw new Error('Missing VITE_CLERK_PUBLISHABLE_KEY')
 }
 
-// The workspace logo returns to the C·FLOW language-selection home.
+const isLanding = window.location.pathname === '/'
+
+function Workspace() {
+  return (
+    <ClerkGate>
+      <AnalysisUsageGuard>
+        <App />
+      </AnalysisUsageGuard>
+    </ClerkGate>
+  )
+}
+
+// The existing workspace intentionally owns the viewport scroll. The landing
+// page is a document-scrolling experience, so switch the global shell only
+// when the landing route is active. This keeps the existing app untouched.
+if (isLanding) {
+  document.documentElement.style.overflow = 'auto'
+  document.body.style.overflow = 'auto'
+  const root = document.getElementById('root')
+  if (root) {
+    root.style.height = 'auto'
+    root.style.minHeight = '100%'
+  }
+}
+
 document.addEventListener('click', (event) => {
   const logo = event.target.closest('header h1')
-  if (!logo) return
+  if (!logo || isLanding) return
   window.location.assign('/')
 })
 
 createRoot(document.getElementById('root')).render(
-  <>
-    <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
-      <ClerkGate>
-        <AnalysisUsageGuard>
-          <App />
-        </AnalysisUsageGuard>
-      </ClerkGate>
-    </ClerkProvider>
-
-    <ThemeToggle />
-  </>
+  <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+    {isLanding ? <LandingPage /> : <Workspace />}
+    {!isLanding && <ThemeToggle />}
+  </ClerkProvider>
 )

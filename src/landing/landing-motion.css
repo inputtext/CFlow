@@ -1,0 +1,16 @@
+.landing-motion-layer { position: absolute; right: clamp(20px, 7vw, 110px); bottom: clamp(20px, 5vw, 70px); width: min(330px, 32vw); height: 250px; pointer-events: none; z-index: 1; }
+.engine-lottie { position: absolute; right: 5%; top: 46%; width: min(330px, 32vw); height: 330px; transform: translateY(-50%); border: 2px solid var(--lf-ink); background: rgba(255,249,240,.5); box-shadow: 8px 8px 0 var(--lf-ink); overflow: hidden; }
+.engine-lottie__label { position: absolute; z-index: 2; left: 12px; top: 12px; padding: 6px 8px; border: 2px solid var(--lf-ink); background: var(--lf-yellow); font-size: .55rem; font-weight: 950; letter-spacing: .08em; }
+.engine-lottie canvas { width: 100% !important; height: 100% !important; }
+
+@media (max-width: 1100px) {
+  .engine-lottie { opacity: .28; right: 3%; width: 280px; height: 280px; }
+}
+
+@media (max-width: 900px) {
+  .engine-lottie { position: relative; top: auto; right: auto; transform: none; width: min(100%, 420px); height: 280px; margin: 40px auto 0; opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .engine-lottie { display: none; }
+}

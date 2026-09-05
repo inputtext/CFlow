@@ -16,88 +16,59 @@
   text-rendering: optimizeLegibility;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 html,
 body,
 #root {
   width: 100%;
-  height: 100%;
+  min-width: 0;
+  min-height: 100%;
   margin: 0;
+}
+
+html {
+  overflow-x: hidden;
 }
 
 body {
   background: var(--color-bg);
   color: var(--color-ink);
-  overflow: hidden;
+  overflow-x: hidden;
+}
+
+body:has(.landing) {
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: auto;
+}
+
+body:has(.landing) #root {
+  height: auto;
+  min-height: 100vh;
+  overflow: visible;
 }
 
 button,
 input,
-textarea {
-  font: inherit;
-}
-
-button {
-  cursor: pointer;
-}
+textarea { font: inherit; }
+button { cursor: pointer; }
 
 /* C·FLOW scrollbars */
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: #FFF9F0;
-  border-left: 2px solid #171717;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #171717;
-  border: 2px solid #FFF9F0;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #333333;
-}
-
-html,
-body,
-#root {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  overflow: hidden;
-}
-
-* {
-  box-sizing: border-box;
-}
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #FFF9F0; border-left: 2px solid #171717; }
+::-webkit-scrollbar-thumb { background: #171717; border: 2px solid #FFF9F0; }
+::-webkit-scrollbar-thumb:hover { background: #333333; }
 
 @keyframes codeMarkerIn {
-  0% {
-    opacity: 0;
-    transform: translate(-5px, -50%) scale(0.5);
-  }
-
-  70% {
-    opacity: 1;
-    transform: translate(1px, -50%) scale(1.15);
-  }
-
-  100% {
-    opacity: 1;
-    transform: translate(0, -50%) scale(1);
-  }
+  0% { opacity: 0; transform: translate(-5px, -50%) scale(0.5); }
+  70% { opacity: 1; transform: translate(1px, -50%) scale(1.15); }
+  100% { opacity: 1; transform: translate(0, -50%) scale(1); }
 }
 
 /* ------------------------------------------------------------
    EXECUTION LINE HIGHLIGHT
 ------------------------------------------------------------ */
-
 [class*="w-[54px]"] {
   overflow: visible !important;
   z-index: 20 !important;
@@ -116,15 +87,8 @@ body,
   justify-content: flex-end;
 }
 
-[class*="w-[54px]"] > div.font-bold {
-  z-index: 2;
-}
+[class*="w-[54px]"] > div.font-bold { z-index: 2; }
 
-/*
- * The execution marker is tied to the exact same 28px row used by
- * both the line numbers and textarea. It begins after the 54px
- * gutter, matching the original C·FLOW editor treatment.
- */
 [class*="w-[54px]"] > div.font-bold::after {
   content: "";
   position: absolute;
@@ -139,7 +103,6 @@ body,
   border-bottom: 1px solid rgba(145, 119, 58, 0.28);
 }
 
-/* Keep the textarea's text above the transparent execution marker. */
 main > section:first-child textarea {
   position: relative;
   z-index: 30 !important;
@@ -151,9 +114,7 @@ main > section:first-child textarea {
   padding-bottom: 24px !important;
 }
 
-.cflow-dark main > section:first-child textarea {
-  background-image: none !important;
-}
+.cflow-dark main > section:first-child textarea { background-image: none !important; }
 
 /* ------------------------------------------------------------
    DARK MODE — MEMORY CARDS
@@ -165,58 +126,35 @@ main > section:first-child textarea {
   box-shadow: 4px 4px 0 #121519 !important;
   -webkit-text-fill-color: #F1EEE8;
 }
-
-.cflow-dark [data-memory] > div:first-of-type {
-  color: #AEB4BB !important;
-  -webkit-text-fill-color: #AEB4BB;
-}
-
-.cflow-dark [data-memory][style] {
-  color: #F4F0E8 !important;
-}
-
+.cflow-dark [data-memory] > div:first-of-type { color: #AEB4BB !important; -webkit-text-fill-color: #AEB4BB; }
+.cflow-dark [data-memory][style] { color: #F4F0E8 !important; }
 .cflow-dark [data-memory] span,
-.cflow-dark [data-memory] div {
-  -webkit-text-fill-color: inherit;
-}
-
+.cflow-dark [data-memory] div { -webkit-text-fill-color: inherit; }
 .cflow-dark [data-memory]:has(.animate\[memoryUpdateIn_0\.35s_ease-out\]) {
   background: #D2B878 !important;
   color: #20242A !important;
   border-color: #17191C !important;
   box-shadow: 7px 7px 0 #111418 !important;
 }
-
-.cflow-dark [data-memory]:has(.animate\[memoryUpdateIn_0\.35s_ease-out\]) > div:first-of-type {
-  color: #5D5544 !important;
-}
-
+.cflow-dark [data-memory]:has(.animate\[memoryUpdateIn_0\.35s_ease-out\]) > div:first-of-type { color: #5D5544 !important; }
 .cflow-dark [data-memory]:has(.animate\[memoryUpdateIn_0\.35s_ease-out\]) span,
-.cflow-dark [data-memory]:has(.animate\[memoryUpdateIn_0\.35s_ease-out\]) div {
-  -webkit-text-fill-color: inherit;
-}
+.cflow-dark [data-memory]:has(.animate\[memoryUpdateIn_0\.35s_ease-out\]) div { -webkit-text-fill-color: inherit; }
 
 /* ------------------------------------------------------------
    DARK MODE — CODE EXECUTION LINE
 ------------------------------------------------------------ */
-.cflow-dark [class*="w-[54px]"] > div.font-bold {
-  color: #F6F0E5 !important;
-  -webkit-text-fill-color: #F6F0E5 !important;
-}
-
+.cflow-dark [class*="w-[54px]"] > div.font-bold { color: #F6F0E5 !important; -webkit-text-fill-color: #F6F0E5 !important; }
 .cflow-dark [class*="w-[54px]"] > div.font-bold::after {
   background: rgba(210, 184, 120, 0.72);
   border-top-color: rgba(210, 184, 120, 0.28);
   border-bottom-color: rgba(210, 184, 120, 0.28);
 }
-
 .cflow-dark main > section:first-child textarea {
   color: #F3EFE7 !important;
   -webkit-text-fill-color: #F3EFE7 !important;
   text-shadow: none !important;
   caret-color: #E8C77A !important;
 }
-
 .cflow-dark main > section:first-child textarea::selection {
   background: #6F6247 !important;
   color: #FFF9F0 !important;
