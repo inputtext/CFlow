@@ -131,8 +131,6 @@ function buildFlow(program) {
       const range = bodyRange(i);
       const after = range ? nextAtOrAbove(range.end, s.depth) : nextAtOrAbove(i, s.depth);
 
-      // If this loop is nested and there is no lexical sibling after its
-      // body, its FALSE path must return to the enclosing loop condition.
       const parent = directParentControl(i, s.depth);
       const afterId = after >= 0
         ? statements[after].id
@@ -207,7 +205,15 @@ function buildFlow(program) {
   });
 
   const last = statements[statements.length - 1];
-  if (last && last.type !== "return" && !loopTypes.has(last.type)) {
+  // Do not add a lexical EXIT edge when the final statement already has a
+  // loop back-edge. The executor intentionally prefers the first normal edge;
+  // adding EXIT here would terminate a loop after its first iteration.
+  if (
+    last &&
+    last.type !== "return" &&
+    !loopTypes.has(last.type) &&
+    !edges.some((edge) => edge.from === last.id && edge.type === "loop")
+  ) {
     addEdge(last.id, "exit", "normal", "edge_exit");
   }
 
