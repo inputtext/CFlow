@@ -110,8 +110,6 @@ function buildFlow(program) {
     return "exit";
   };
 
-  // Ordinary sequential edges only connect true lexical siblings. Control
-  // nodes are wired explicitly so there is no accidental branch fall-through.
   for (let i = 0; i < statements.length - 1; i += 1) {
     const current = statements[i];
     const next = statements[i + 1];
@@ -124,13 +122,9 @@ function buildFlow(program) {
   for (let i = 0; i < statements.length; i += 1) {
     const s = statements[i];
 
-    // --------------------------------------------------------
-    // FOR / WHILE
-    // --------------------------------------------------------
     if (loopTypes.has(s.type)) {
       const range = bodyRange(i);
       const after = range ? nextAtOrAbove(range.end, s.depth) : nextAtOrAbove(i, s.depth);
-
       const parent = directParentControl(i, s.depth);
       const afterId = after >= 0
         ? statements[after].id
@@ -151,9 +145,6 @@ function buildFlow(program) {
       continue;
     }
 
-    // --------------------------------------------------------
-    // IF / ELSE IF
-    // --------------------------------------------------------
     if (s.type === "condition" || s.type === "else_if") {
       const range = bodyRange(i);
 
@@ -205,9 +196,6 @@ function buildFlow(program) {
   });
 
   const last = statements[statements.length - 1];
-  // Do not add a lexical EXIT edge when the final statement already has a
-  // loop back-edge. The executor intentionally prefers the first normal edge;
-  // adding EXIT here would terminate a loop after its first iteration.
   if (
     last &&
     last.type !== "return" &&
