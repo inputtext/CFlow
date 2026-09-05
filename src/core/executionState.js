@@ -13,6 +13,9 @@ export function getExecutionState(step, fallbackVariables = {}) {
       variables: fallbackVariables,
       previousVariables: {},
       changedVariables: [],
+      variableLifecycle: {},
+      readVariables: [],
+      variableEvents: [],
       activeNode: null,
       line: null,
       type: null,
@@ -47,11 +50,33 @@ export function getExecutionState(step, fallbackVariables = {}) {
               )
           );
 
+  const variableLifecycle =
+    canonical.variableLifecycle ??
+    step.variableLifecycle ??
+    {};
+
+  const readVariables =
+    Array.isArray(canonical.readVariables)
+      ? canonical.readVariables
+      : Array.isArray(step.readVariables)
+        ? step.readVariables
+        : [];
+
+  const variableEvents =
+    Array.isArray(canonical.variableEvents)
+      ? canonical.variableEvents
+      : Array.isArray(step.variableEvents)
+        ? step.variableEvents
+        : [];
+
   return {
     ...step,
     variables,
     previousVariables,
     changedVariables,
+    variableLifecycle,
+    readVariables,
+    variableEvents,
     activeNode:
       canonical.activeNode ??
       step.node ??
@@ -71,4 +96,8 @@ export function hasVariableChange(executionState, name) {
   return Boolean(
     executionState?.changedVariables?.includes(name)
   );
+}
+
+export function getVariableLifecycle(executionState, name) {
+  return executionState?.variableLifecycle?.[name] ?? null;
 }
