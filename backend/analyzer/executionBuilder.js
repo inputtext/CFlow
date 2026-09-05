@@ -18,7 +18,30 @@ function buildExecution(program) {
   const loopState = new Map();
 
   const push = (data) => {
-    execution.push({ step: step++, variables: { ...variables }, ...data });
+    const snapshot = { ...variables };
+    const previousVariables = execution.length
+      ? { ...(execution[execution.length - 1].variables || {}) }
+      : {};
+
+    const changedVariables = Object.keys({
+      ...previousVariables,
+      ...snapshot,
+    }).filter((name) => !Object.is(previousVariables[name], snapshot[name]));
+
+    execution.push({
+      ...data,
+      step: step++,
+      variables: snapshot,
+      previousVariables,
+      changedVariables,
+      state: {
+        variables: snapshot,
+        changedVariables,
+        activeNode: data.node ?? null,
+        line: data.line ?? null,
+        type: data.type ?? null,
+      },
+    });
   };
 
   const next = (from, type = "normal") => {
