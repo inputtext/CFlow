@@ -4,6 +4,7 @@
 
 const buildFlow = require("./flowBuilder");
 const buildVariableLifecycle = require("./variableLifecycle");
+const buildControlFlowState = require("./controlFlowState");
 
 function buildExecution(program) {
   const statements = Array.isArray(program?.statements) ? program.statements : [];
@@ -17,6 +18,7 @@ function buildExecution(program) {
   let guard = 0;
   const MAX_STEPS = 5000;
   const loopState = new Map();
+  const loopIterations = new Map();
 
   const push = (data) => {
     const snapshot = { ...variables };
@@ -34,6 +36,7 @@ function buildExecution(program) {
       snapshot,
       data
     );
+    const controlFlow = buildControlFlowState(data);
 
     execution.push({
       ...data,
@@ -44,6 +47,7 @@ function buildExecution(program) {
       variableLifecycle: variableState.lifecycle,
       readVariables: variableState.readVariables,
       variableEvents: variableState.variableEvents,
+      controlFlow,
       state: {
         variables: snapshot,
         previousVariables,
@@ -51,6 +55,7 @@ function buildExecution(program) {
         variableLifecycle: variableState.lifecycle,
         readVariables: variableState.readVariables,
         variableEvents: variableState.variableEvents,
+        controlFlow,
         activeNode: data.node ?? null,
         line: data.line ?? null,
         type: data.type ?? null,
@@ -80,7 +85,10 @@ function buildExecution(program) {
     for (const candidate of statements) {
       if (!candidate || !loopState.has(candidate.id)) continue;
       if (!((candidate.type === "for") || (candidate.type === "while"))) continue;
-      if (candidate.depth > parent.depth) loopState.delete(candidate.id);
+      if (candidate.depth > parent.depth) {
+        loopState.delete(candidate.id);
+        loopIterations.delete(candidate.id);
+      }
     }
   };
 
@@ -108,12 +116,17 @@ function buildExecution(program) {
       }
 
       const result = evaluateCondition(s.forCondition, variables);
+      const iteration = loopIterations.get(s.id) ?? 0;
+      const nextIteration = result ? iteration + 1 : iteration;
+      if (result) loopIterations.set(s.id, nextIteration);
+
       push({
         node: s.id,
         line: s.line,
         type: "condition",
         expression: s.forCondition,
         result,
+        loopIteration: nextIteration,
         variables: { ...variables },
         explanation: `The loop condition ${s.forCondition} evaluates to ${result}.`,
       });
@@ -127,12 +140,18 @@ function buildExecution(program) {
     // ----------------------------------------------------------
     if (s.type === "while" || s.type === "condition" || s.type === "else_if") {
       const result = evaluateCondition(s.expression, variables);
+      const isLoop = s.type === "while";
+      const iteration = loopIterations.get(s.id) ?? 0;
+      const nextIteration = isLoop && result ? iteration + 1 : iteration;
+      if (isLoop && result) loopIterations.set(s.id, nextIteration);
+
       push({
         node: s.id,
         line: s.line,
         type: "condition",
         expression: s.expression,
         result,
+        ...(isLoop ? { loopIteration: nextIteration } : {}),
         variables: { ...variables },
         explanation: `The condition ${s.expression} evaluates to ${result}.`,
       });
@@ -300,7 +319,7 @@ function evaluateValue(expression, variables) {
 
   const replaced = clean.replace(/\b[A-Za-z_]\w*\b/g, (name) => Object.prototype.hasOwnProperty.call(variables, name) ? String(variables[name]) : "0");
   if (/^[0-9+\-*/().%\s]+$/.test(replaced)) {
-    try { return Function(`"use strict"; return (${replaced})`)(); } catch { return 0; }
+    try { return Function(`\"use strict\"; return (${replaced})`)(); } catch { return 0; }
   }
   return 0;
 }
