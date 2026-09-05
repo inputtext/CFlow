@@ -7,6 +7,60 @@
    continue to work through safe fallbacks.
 ============================================================ */
 
+const RESERVED_WORDS = new Set([
+  "if", "else", "for", "while", "do", "return", "switch", "case",
+  "break", "continue", "true", "false", "int", "float", "double",
+  "char", "bool", "long", "short", "unsigned", "signed", "const",
+  "void", "auto", "static", "struct", "class", "string", "cout",
+  "cin", "std", "endl",
+]);
+
+function extractIdentifiers(expression) {
+  if (!expression) return [];
+
+  return [...String(expression).matchAll(/\b[A-Za-z_]\w*\b/g)]
+    .map((match) => match[0])
+    .filter((name) => !RESERVED_WORDS.has(name));
+}
+
+function buildDataFlow(step, previousVariables, variables) {
+  const source = step.expression ?? step.value ?? step.code ?? "";
+  if (!source) return null;
+
+  const target = step.target ?? null;
+  const knownNames = new Set([
+    ...Object.keys(previousVariables),
+    ...Object.keys(variables),
+  ]);
+
+  const dependencies = [...new Set(extractIdentifiers(source))]
+    .filter((name) => knownNames.has(name) && name !== target);
+
+  const inputs = {};
+  for (const name of dependencies) {
+    if (Object.prototype.hasOwnProperty.call(previousVariables, name)) {
+      inputs[name] = previousVariables[name];
+    } else {
+      inputs[name] = variables[name];
+    }
+  }
+
+  let result;
+  if (Object.prototype.hasOwnProperty.call(step, "after")) {
+    result = step.after;
+  } else if (step.type === "condition" && Object.prototype.hasOwnProperty.call(step, "result")) {
+    result = step.result;
+  }
+
+  return {
+    target,
+    expression: String(source).replace(/;$/, "").trim(),
+    dependencies,
+    inputs,
+    result,
+  };
+}
+
 export function getExecutionState(step, fallbackVariables = {}) {
   if (!step) {
     return {
@@ -16,6 +70,7 @@ export function getExecutionState(step, fallbackVariables = {}) {
       variableLifecycle: {},
       readVariables: [],
       variableEvents: [],
+      dataFlow: null,
       activeNode: null,
       line: null,
       type: null,
@@ -69,6 +124,11 @@ export function getExecutionState(step, fallbackVariables = {}) {
         ? step.variableEvents
         : [];
 
+  const dataFlow =
+    canonical.dataFlow ??
+    step.dataFlow ??
+    buildDataFlow(step, previousVariables, variables);
+
   return {
     ...step,
     variables,
@@ -77,6 +137,11 @@ export function getExecutionState(step, fallbackVariables = {}) {
     variableLifecycle,
     readVariables,
     variableEvents,
+    dataFlow,
+    state: {
+      ...canonical,
+      dataFlow,
+    },
     activeNode:
       canonical.activeNode ??
       step.node ??
@@ -100,4 +165,8 @@ export function hasVariableChange(executionState, name) {
 
 export function getVariableLifecycle(executionState, name) {
   return executionState?.variableLifecycle?.[name] ?? null;
+}
+
+export function getDataFlow(executionState) {
+  return executionState?.dataFlow ?? null;
 }
