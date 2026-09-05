@@ -3,6 +3,7 @@
 // ============================================================
 
 const buildFlow = require("./flowBuilder");
+const buildVariableLifecycle = require("./variableLifecycle");
 
 function buildExecution(program) {
   const statements = Array.isArray(program?.statements) ? program.statements : [];
@@ -28,15 +29,28 @@ function buildExecution(program) {
       ...snapshot,
     }).filter((name) => !Object.is(previousVariables[name], snapshot[name]));
 
+    const variableState = buildVariableLifecycle(
+      previousVariables,
+      snapshot,
+      data
+    );
+
     execution.push({
       ...data,
       step: step++,
       variables: snapshot,
       previousVariables,
       changedVariables,
+      variableLifecycle: variableState.lifecycle,
+      readVariables: variableState.readVariables,
+      variableEvents: variableState.variableEvents,
       state: {
         variables: snapshot,
+        previousVariables,
         changedVariables,
+        variableLifecycle: variableState.lifecycle,
+        readVariables: variableState.readVariables,
+        variableEvents: variableState.variableEvents,
         activeNode: data.node ?? null,
         line: data.line ?? null,
         type: data.type ?? null,
