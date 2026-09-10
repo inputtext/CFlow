@@ -46,11 +46,6 @@ import LandingPage from './landing/LandingPage.jsx'
 import { ClerkProvider } from '@clerk/react'
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
-
-if (!PUBLISHABLE_KEY) {
-  throw new Error('Missing VITE_CLERK_PUBLISHABLE_KEY')
-}
-
 const isLanding = window.location.pathname === '/'
 
 function Workspace() {
@@ -60,6 +55,19 @@ function Workspace() {
         <App />
       </AnalysisUsageGuard>
     </ClerkGate>
+  )
+}
+
+function ClerkWorkspace() {
+  if (!PUBLISHABLE_KEY) {
+    throw new Error('Missing VITE_CLERK_PUBLISHABLE_KEY')
+  }
+
+  return (
+    <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+      <Workspace />
+      <ThemeToggle />
+    </ClerkProvider>
   )
 }
 
@@ -83,8 +91,5 @@ document.addEventListener('click', (event) => {
 })
 
 createRoot(document.getElementById('root')).render(
-  <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
-    {isLanding ? <LandingPage /> : <Workspace />}
-    {!isLanding && <ThemeToggle />}
-  </ClerkProvider>
+  isLanding ? <LandingPage /> : <ClerkWorkspace />
 )
