@@ -1,0 +1,67 @@
+.scene--capabilities .capability {
+  cursor: pointer;
+  position: relative;
+  transition: transform .22s ease, background-color .22s ease, box-shadow .22s ease;
+}
+
+.scene--capabilities .capability::after {
+  content: '↗';
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  opacity: 0;
+  transform: translateY(-50%) translateX(-6px);
+  transition: opacity .2s ease, transform .2s ease;
+  font-size: 1.1rem;
+}
+
+.scene--capabilities .capability:hover,
+.scene--capabilities .capability:focus-visible,
+.scene--capabilities .capability.is-selected {
+  transform: translateX(8px);
+  outline: none;
+  box-shadow: 8px 8px 0 rgba(23, 23, 23, .95);
+}
+
+.scene--capabilities .capability:hover::after,
+.scene--capabilities .capability:focus-visible::after,
+.scene--capabilities .capability.is-selected::after {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+.scene--capabilities .capability-system {
+  transition: transform .35s ease;
+}
+
+.scene--capabilities .capability-system__core {
+  min-width: 116px;
+  min-height: 116px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 4px;
+}
+
+.scene--capabilities .capability-system__core span,
+.scene--capabilities .capability-system__core b {
+  display: block;
+}
+
+.scene--capabilities .capability-system__core b {
+  font: 700 .68rem/1 monospace;
+  opacity: .62;
+}
+
+.scene--capabilities .capability-system__card code {
+  transition: opacity .2s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene--capabilities .capability,
+  .scene--capabilities .capability::after,
+  .scene--capabilities .capability-system,
+  .scene--capabilities .capability-system__card code {
+    transition: none;
+  }
+}

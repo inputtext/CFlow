@@ -1,0 +1,27 @@
+/* Micro-interactions only — does not alter section geometry or animation ownership. */
+.landing{--lf-cursor-x:-100px;--lf-cursor-y:-100px}
+.landing-cursor{position:fixed;left:var(--lf-cursor-x);top:var(--lf-cursor-y);z-index:100;width:18px;height:18px;border:1.5px solid var(--lf-ink);border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);opacity:0;transition:width .18s ease,height .18s ease,opacity .18s ease,background .18s ease;mix-blend-mode:multiply}
+.landing-cursor::after{content:"";position:absolute;left:50%;top:50%;width:3px;height:3px;background:var(--lf-ink);border-radius:50%;transform:translate(-50%,-50%)}
+.landing.is-pointer-ready .landing-cursor{opacity:.72}
+.landing.is-pointer-hover .landing-cursor{width:34px;height:34px;background:rgba(255,255,255,.18)}
+.landing .primary-button,.landing .header-link,.landing .scroll-navigator a,.landing .landing-footer a{transition:transform .18s ease,opacity .18s ease}
+.landing .primary-button:hover{transform:translate(3px,3px)}
+.landing .header-link:hover,.landing .scroll-navigator a:hover{transform:translateX(3px)}
+.landing .capability{position:relative;transition:padding-left .2s ease,background-color .2s ease}
+.landing .capability:hover{padding-left:10px;background:rgba(255,255,255,.14)}
+.landing .capability code{transition:transform .2s ease;display:inline-block}
+.landing .capability:hover code{transform:translateX(6px)}
+.landing .preview-flow__node{transition:transform .2s ease,box-shadow .2s ease,background-color .2s ease}
+.landing .preview-flow__node:hover{transform:translateY(-3px);box-shadow:7px 7px 0 var(--lf-ink);background:var(--lf-mint)}
+.landing .flow-map__node,.landing .orbit-node{transition:transform .2s ease}
+.landing .flow-map__node:hover,.landing .orbit-node:hover{transform:translateY(-2px)}
+.landing .hero-code{transition:box-shadow .25s ease}
+.landing .hero-code:hover{box-shadow:13px 13px 0 var(--lf-ink)}
+.landing .landing-marquee--atmosphere div{will-change:transform}
+.landing-micro-lottie-host{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;width:44px;height:28px;overflow:hidden;vertical-align:middle;margin-left:auto;opacity:.88;border-left:1px solid rgba(23,23,23,.28);padding-left:7px}
+.landing-micro-lottie{width:34px;height:28px;display:block;overflow:hidden}
+.landing-micro-lottie canvas{display:block!important;width:100%!important;height:100%!important}
+.preview-window__signal .landing-micro-lottie-host{width:30px;height:22px;margin:0 2px 0 0;border-left:0;padding-left:0}
+.preview-window__signal .landing-micro-lottie{width:26px;height:22px}
+@media(pointer:coarse),(max-width:900px){.landing-cursor{display:none}.landing .capability:hover{padding-left:0;background:transparent}.landing .capability:hover code{transform:none}.landing .preview-flow__node:hover{transform:none;box-shadow:5px 5px 0 var(--lf-ink)}.landing-micro-lottie-host{width:40px}}
+@media(prefers-reduced-motion:reduce){.landing-cursor,.landing .primary-button,.landing .header-link,.landing .scroll-navigator a,.landing .landing-footer a,.landing .capability,.landing .capability code,.landing .preview-flow__node,.landing .flow-map__node,.landing .orbit-node,.landing .hero-code{transition:none}.landing-micro-lottie-host{display:none}}

@@ -55,7 +55,6 @@
 
 /* Header is shared by home/workspace: keep its typography readable in every palette. */
 .cflow-theme-stone header :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,button),.cflow-theme-moss header :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,button),.cflow-theme-mist header :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,button),.cflow-theme-clay header :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,button),.cflow-theme-dusk header :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,button),.cflow-theme-sakura header :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,button),.cflow-theme-ink header :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,button){color:var(--cflow-palette-ink)!important;-webkit-text-fill-color:var(--cflow-palette-ink)!important}
-.cflow-theme-ink header [class*="bg-[#202326"]],.cflow-theme-ink header [class*="bg-[#171717"]]{background:#2A2D30!important;color:#F4F0E8!important}
 
 /* Keep theme picker horizontally scrollable so Ink is always reachable. */
 .cflow-theme-picker__grid{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;max-width:100%;padding-bottom:10px;scrollbar-width:thin;scroll-snap-type:x proximity}
